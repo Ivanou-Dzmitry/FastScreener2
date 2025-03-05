@@ -30,6 +30,9 @@ namespace FastScreener2
                 case 0:
                     ArrowSettings();
                     break;
+                case 1:
+                    FrameSettings();
+                    break;
                 case 2:
                     GuideSettings();
                     break;
@@ -43,6 +46,7 @@ namespace FastScreener2
         private void btnOK_Click(object sender, EventArgs e)
         {
             pgSettings.Refresh();
+            FS2SettingsManager.Save();
             Close();
         }
 
@@ -98,6 +102,38 @@ namespace FastScreener2
             
 
             pgSettings.SelectedObject = guideSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
+        }
+
+        //Frame
+        private Frame frameSettings;
+        private void FrameSettings()
+        {
+
+            int tempTypeInt = FS2SettingsManager.frameType;
+            string tempTypeStr = "";
+
+            switch (tempTypeInt)
+            {
+                case 1:
+                    tempTypeStr = "Free";
+                    break;
+                case 2:
+                    tempTypeStr = "Fixed";
+                    break;
+                default:
+                    break;
+            }
+
+            frameSettings = new Frame
+            {
+                frameHeight = FS2SettingsManager.frameHeight,
+                frameWidth = FS2SettingsManager.frameWidth,
+                Color = FS2SettingsManager.frameColor,
+                Type = tempTypeStr
+            };
+
+            pgSettings.SelectedObject = frameSettings;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
@@ -178,6 +214,48 @@ namespace FastScreener2
                 FS2SettingsManager.guidlineType = tempTypeInt;
                 FS2SettingsManager.SetSetting("guidline_type", tempTypeInt.ToString());
             }
+
+            //FRAME
+            if (e.ChangedItem.Label == "Frame Color")
+            {
+                FS2SettingsManager.arrowColor = frameSettings.Color;
+                FS2SettingsManager.SetSetting("frame_color", ColorTranslator.ToHtml(frameSettings.Color));
+            }
+
+
+            if (e.ChangedItem.Label == "Frame Width")
+            {
+                FS2SettingsManager.frameWidth = frameSettings.frameWidth;
+                FS2SettingsManager.SetSetting("frame_width", frameSettings.frameWidth.ToString());
+            }
+
+            if (e.ChangedItem.Label == "Frame Height")
+            {
+                FS2SettingsManager.frameHeight = frameSettings.frameHeight;
+                FS2SettingsManager.SetSetting("frame_height", frameSettings.frameHeight.ToString());
+            }
+
+            if (e.ChangedItem.Label == "Frame Type")
+            {
+                string tempTypeStr = frameSettings.Type;
+                int tempTypeInt = 0;
+
+                switch (tempTypeStr)
+                {
+                    case "Free":
+                        tempTypeInt = 1;
+                        break;
+                    case "Fixed":
+                        tempTypeInt = 2;
+                        break;
+                    default:
+                        break;
+                }
+
+                FS2SettingsManager.frameType = tempTypeInt;
+                FS2SettingsManager.SetSetting("frame_type", tempTypeInt.ToString());
+            }
+
 
             FS2SettingsManager.Save();
         }

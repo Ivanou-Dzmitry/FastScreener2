@@ -33,6 +33,7 @@ namespace FastScreener2
             [Category("Arrow Settings")]
             [Description("Set arrow color.")]
             [DisplayName("Arrow Color")]
+            [TypeConverter(typeof(ColorConverter))]
             public Color Color
             {
                 get => color;
@@ -90,6 +91,47 @@ namespace FastScreener2
             }
         }
 
+
+    public class FrameTypeConverter : StringConverter
+    {
+        private readonly List<string> validValues = new List<string> { "Free", "Fixed"};
+
+        // GetStandardValues will provide the list of allowed values
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            return new StandardValuesCollection(validValues);
+        }
+
+        // Check if StandardValues are supported
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        // ConvertFrom will ensure that only valid values are accepted
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            if (value is string str)
+            {
+                if (validValues.Contains(str))
+                {
+                    return str;  // Return the valid string
+                }
+                else
+                {
+                    // Show a message box with an error message
+                    MessageBox.Show("Invalid value. Please select from the predefined list: Free or Fixed", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    // Optionally, return a default value if invalid input is entered
+                    return "Free";  // Set a default valid value
+                }
+            }
+
+            return base.ConvertFrom(context, culture, value);  // Delegate to the base method for other types
+        }
+    }
+
+
     public class Guide : INotifyPropertyChanged
         {
             private int topindent, bottomindent, leftindent, rightindent;
@@ -114,6 +156,7 @@ namespace FastScreener2
             [Category("1. General Settings")]
             [Description("Set guides color.")]
             [DisplayName("Guides Color")]
+            [TypeConverter(typeof(ColorConverter))]
             public Color Color
             {
                 get => color;
@@ -133,7 +176,6 @@ namespace FastScreener2
                 set
                 {
                     lockind = value;
-                    UpdateIndentVisibility();
                     OnPropertyChanged(nameof(lockIndent));
                 }
             }
@@ -143,8 +185,7 @@ namespace FastScreener2
             [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
             [DisplayName("Top Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
-        [Browsable(true)]
-        public int topIndent
+            public int topIndent
             {
                 get => topindent;
                 set
@@ -165,8 +206,7 @@ namespace FastScreener2
             [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
             [DisplayName("Bottom Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
-        [Browsable(true)]
-        public int bottomIndent
+            public int bottomIndent
             {
                 get => bottomindent;
                 set
@@ -178,7 +218,7 @@ namespace FastScreener2
                     return; // Don't set the value if it's invalid
                 }
 
-                bottomindent = value;
+                    bottomindent = value;
                     OnPropertyChanged(nameof(bottomIndent));
                 }
             }
@@ -187,19 +227,18 @@ namespace FastScreener2
             [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
             [DisplayName("Left Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
-            [Browsable(true)]
             public int leftIndent
             {
                 get => leftindent;
                 set
                 {
-                if (value < 1 || value > 3840)
-                {
-                    // Show the error message on top of the form
-                    MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Don't set the value if it's invalid
-                }
-                leftindent = value;
+                    if (value < 1 || value > 3840)
+                    {
+                        // Show the error message on top of the form
+                        MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return; // Don't set the value if it's invalid
+                    }
+                    leftindent = value;
                     OnPropertyChanged(nameof(leftIndent));
                 }
             }
@@ -208,67 +247,120 @@ namespace FastScreener2
             [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
             [DisplayName("Right Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
-        [Browsable(true)]
-        public int rightIndent
+            public int rightIndent
             {
                 get => rightindent;
                 set
                 {
-                if (value < 1 || value > 3840)
-                {
-                    // Show the error message on top of the form
-                    MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Don't set the value if it's invalid
-                }
-                rightindent = value;
+                    if (value < 1 || value > 3840)
+                    {
+                        // Show the error message on top of the form
+                        MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return; // Don't set the value if it's invalid
+                    }
+                    rightindent = value;
                     OnPropertyChanged(nameof(topIndent));
                 }
             }
 
 
-        private void UpdateIndentVisibility()
-        {
-            // Here we dynamically change the Browsable attribute based on lockIndent
-            var typeDescriptor = TypeDescriptor.GetProperties(this);
-
-            foreach (PropertyDescriptor property in typeDescriptor)
-            {
-                if (property.Name == nameof(topIndent) ||
-                    property.Name == nameof(bottomIndent) ||
-                    property.Name == nameof(leftIndent) ||
-                    property.Name == nameof(rightIndent))
-                {
-                    if (lockIndent)
-                    {
-                        // Hide the indent properties if lockIndent is true
-                        TypeDescriptor.AddAttributes(property, new BrowsableAttribute(false));
-                    }
-                    else
-                    {
-                        // Show the indent properties if lockIndent is false
-                        TypeDescriptor.AddAttributes(property, new BrowsableAttribute(true));
-                    }
-                }
-            }
-
-            // To ensure PropertyGrid updates the display, you may want to refresh it
-            // pgSettings.Refresh(); // This could be useful if you're using a PropertyGrid control
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
+            public event PropertyChangedEventHandler PropertyChanged;
 
             private void OnPropertyChanged(string propertyName)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
 
-        
+    }
+
+    public class Frame
+    {
+        private int framewidth;
+        private int frameheight;
+        private Color color;
+        private string type;
+
+        [Category("Frame Settings")]
+        [Description("Frame width. Max - screenshot width, min - 16. Default 80.")]
+        [DisplayName("Frame Width")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int frameWidth
+        {
+            get => framewidth;
+            set
+            {
+                // Validation for FrameWidth
+                if (value < 16 || value > 3840)
+                {
+                    MessageBox.Show("Frame width must be between 16 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
+                framewidth = value;
+                OnPropertyChanged(nameof(frameWidth));
+            }
+        }
+
+        [Category("Frame Settings")]
+        [Description("Frame height. Max - screenshot height, min - 16. Default 80.")]
+        [DisplayName("Frame Height")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int frameHeight
+        {
+            get => frameheight;
+            set
+            {
+                // Validation for FrameHeight
+                if (value < 16 || value > 3840)
+                {
+                    MessageBox.Show("Frame height must be between 16 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
+                frameheight = value;
+                OnPropertyChanged(nameof(frameHeight));
+            }
+        }
+
+        [Category("Frame Settings")]
+        [Description("Set frame color.")]
+        [DisplayName("Frame Color")]
+        [TypeConverter(typeof(ColorConverter))]
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                OnPropertyChanged(nameof(Color));
+            }
+        }
+
+        [Category("Frame Settings")]
+        [DisplayName("Frame Type")]
+        [Description("Choose frame type. Fixed (click and draw with fixed size)  or Free (drag draw). Set W and H for Fixed type.")]
+        [TypeConverter(typeof(FrameTypeConverter))]
+        public string Type
+        {
+            get => type;
+            set
+            {
+                type = value;
+                OnPropertyChanged(nameof(Type));
+            }
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
     }
 
 
-        public class Int32OnlyConverter : TypeConverter
+
+    public class Int32OnlyConverter : TypeConverter
         {
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
@@ -319,4 +411,6 @@ namespace FastScreener2
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }
+
+
 }

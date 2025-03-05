@@ -40,24 +40,25 @@
             // 
             pgSettings.Location = new Point(124, 0);
             pgSettings.Name = "pgSettings";
-            pgSettings.Size = new Size(409, 360);
+            pgSettings.Size = new Size(409, 353);
             pgSettings.TabIndex = 0;
             // 
             // lboxSetCat
             // 
             lboxSetCat.BorderStyle = BorderStyle.None;
+            lboxSetCat.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lboxSetCat.FormattingEnabled = true;
-            lboxSetCat.ItemHeight = 15;
+            lboxSetCat.ItemHeight = 25;
             lboxSetCat.Items.AddRange(new object[] { "Arrow", "Frame", "Guides", "Numbers", "Sizes" });
             lboxSetCat.Location = new Point(0, 0);
             lboxSetCat.Name = "lboxSetCat";
-            lboxSetCat.Size = new Size(120, 360);
+            lboxSetCat.Size = new Size(120, 350);
             lboxSetCat.TabIndex = 1;
             lboxSetCat.Click += lboxSetCat_Click;
             // 
             // btnOK
             // 
-            btnOK.Location = new Point(452, 12);
+            btnOK.Location = new Point(451, 17);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(75, 23);
             btnOK.TabIndex = 2;
@@ -71,15 +72,15 @@
             panel1.Controls.Add(labelSetDebug);
             panel1.Controls.Add(btnOK);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(0, 363);
+            panel1.Location = new Point(0, 356);
             panel1.Name = "panel1";
-            panel1.Size = new Size(534, 48);
+            panel1.Size = new Size(534, 55);
             panel1.TabIndex = 3;
             // 
             // labelSetDebug
             // 
             labelSetDebug.AutoSize = true;
-            labelSetDebug.Location = new Point(131, 17);
+            labelSetDebug.Location = new Point(8, 17);
             labelSetDebug.Name = "labelSetDebug";
             labelSetDebug.Size = new Size(38, 15);
             labelSetDebug.TabIndex = 3;

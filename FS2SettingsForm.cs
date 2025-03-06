@@ -36,6 +36,9 @@ namespace FastScreener2
                 case 2:
                     GuideSettings();
                     break;
+                case 3:
+                    NumberSettings();
+                    break;
                 default:
                     break;
             }
@@ -134,6 +137,21 @@ namespace FastScreener2
             };
 
             pgSettings.SelectedObject = frameSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
+        }
+
+        private Numbers numberSettings;
+
+        private void NumberSettings()
+        {
+            numberSettings = new Numbers
+            {
+                Size = FS2SettingsManager.numberFontSize,
+                Color = FS2SettingsManager.numberColor
+
+            };
+
+            pgSettings.SelectedObject = numberSettings;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
@@ -256,6 +274,19 @@ namespace FastScreener2
                 FS2SettingsManager.SetSetting("frame_type", tempTypeInt.ToString());
             }
 
+
+            //number
+            if (e.ChangedItem.Label == "Number Font Size")
+            {
+                FS2SettingsManager.numberFontSize = numberSettings.Size;
+                FS2SettingsManager.SetSetting("number_size", numberSettings.Size.ToString());
+            }
+
+            if (e.ChangedItem.Label == "Number Color")
+            {
+                FS2SettingsManager.numberColor = numberSettings.Color;
+                FS2SettingsManager.SetSetting("number_color", ColorTranslator.ToHtml(numberSettings.Color));
+            }
 
             FS2SettingsManager.Save();
         }

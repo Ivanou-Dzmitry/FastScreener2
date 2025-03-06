@@ -46,7 +46,7 @@ namespace FastScreener2
 
             //load UI values Checked true/false
             mitArrow.Checked = FS2SettingsManager.drawArrows;
-            btnArrowType.Enabled = FS2SettingsManager.drawArrows;
+            //btnArrowType.Enabled = FS2SettingsManager.drawArrows;
             chbArrow.Checked = FS2SettingsManager.drawArrows;
             ArrowPicUpdater(FS2SettingsManager.arrowType);
 

@@ -40,19 +40,19 @@
             // 
             pgSettings.Location = new Point(124, 0);
             pgSettings.Name = "pgSettings";
-            pgSettings.Size = new Size(409, 353);
+            pgSettings.Size = new Size(409, 361);
             pgSettings.TabIndex = 0;
             // 
             // lboxSetCat
             // 
             lboxSetCat.BorderStyle = BorderStyle.None;
-            lboxSetCat.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            lboxSetCat.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lboxSetCat.FormattingEnabled = true;
-            lboxSetCat.ItemHeight = 25;
+            lboxSetCat.ItemHeight = 20;
             lboxSetCat.Items.AddRange(new object[] { "Arrow", "Frame", "Guides", "Numbers", "Sizes" });
             lboxSetCat.Location = new Point(0, 0);
             lboxSetCat.Name = "lboxSetCat";
-            lboxSetCat.Size = new Size(120, 350);
+            lboxSetCat.Size = new Size(120, 360);
             lboxSetCat.TabIndex = 1;
             lboxSetCat.Click += lboxSetCat_Click;
             // 
@@ -72,9 +72,9 @@
             panel1.Controls.Add(labelSetDebug);
             panel1.Controls.Add(btnOK);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(0, 356);
+            panel1.Location = new Point(0, 364);
             panel1.Name = "panel1";
-            panel1.Size = new Size(534, 55);
+            panel1.Size = new Size(534, 47);
             panel1.TabIndex = 3;
             // 
             // labelSetDebug

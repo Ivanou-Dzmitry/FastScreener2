@@ -34,6 +34,7 @@
             panelDragBottomR = new Panel();
             panelDragBottomL = new Panel();
             panelDragTop = new Panel();
+            btnFrame = new Button();
             btnArrowType = new Button();
             btnSettings = new Button();
             btnScreen = new Button();
@@ -68,6 +69,8 @@
             mitSettings = new ToolStripMenuItem();
             mitAbout = new ToolStripMenuItem();
             mitExit = new ToolStripMenuItem();
+            button1 = new Button();
+            button2 = new Button();
             panelBottom.SuspendLayout();
             panelDragTop.SuspendLayout();
             panelDragLeft.SuspendLayout();
@@ -78,7 +81,6 @@
             // panelBottom
             // 
             panelBottom.BackColor = Color.Transparent;
-            panelBottom.BorderStyle = BorderStyle.FixedSingle;
             panelBottom.Controls.Add(labelDebug);
             panelBottom.Controls.Add(panelDragBottomR);
             panelBottom.Controls.Add(panelDragBottomL);
@@ -91,9 +93,9 @@
             // labelDebug
             // 
             labelDebug.ForeColor = Color.DimGray;
-            labelDebug.Location = new Point(90, 0);
+            labelDebug.Location = new Point(61, 0);
             labelDebug.Name = "labelDebug";
-            labelDebug.Size = new Size(468, 32);
+            labelDebug.Size = new Size(528, 32);
             labelDebug.TabIndex = 0;
             labelDebug.Text = "label1";
             labelDebug.TextAlign = ContentAlignment.MiddleCenter;
@@ -102,9 +104,9 @@
             // 
             panelDragBottomR.BackColor = Color.DimGray;
             panelDragBottomR.Dock = DockStyle.Right;
-            panelDragBottomR.Location = new Point(558, 0);
+            panelDragBottomR.Location = new Point(590, 0);
             panelDragBottomR.Name = "panelDragBottomR";
-            panelDragBottomR.Size = new Size(90, 30);
+            panelDragBottomR.Size = new Size(60, 32);
             panelDragBottomR.TabIndex = 2;
             // 
             // panelDragBottomL
@@ -113,12 +115,15 @@
             panelDragBottomL.Dock = DockStyle.Left;
             panelDragBottomL.Location = new Point(0, 0);
             panelDragBottomL.Name = "panelDragBottomL";
-            panelDragBottomL.Size = new Size(90, 30);
+            panelDragBottomL.Size = new Size(60, 32);
             panelDragBottomL.TabIndex = 1;
             // 
             // panelDragTop
             // 
             panelDragTop.BackColor = Color.SlateGray;
+            panelDragTop.Controls.Add(button2);
+            panelDragTop.Controls.Add(button1);
+            panelDragTop.Controls.Add(btnFrame);
             panelDragTop.Controls.Add(btnArrowType);
             panelDragTop.Controls.Add(btnSettings);
             panelDragTop.Controls.Add(btnScreen);
@@ -130,6 +135,18 @@
             panelDragTop.Name = "panelDragTop";
             panelDragTop.Size = new Size(650, 32);
             panelDragTop.TabIndex = 1;
+            // 
+            // btnFrame
+            // 
+            btnFrame.Dock = DockStyle.Left;
+            btnFrame.FlatAppearance.BorderSize = 0;
+            btnFrame.FlatStyle = FlatStyle.Flat;
+            btnFrame.Image = FS2Resources.frame_unlocked_icon;
+            btnFrame.Location = new Point(96, 0);
+            btnFrame.Name = "btnFrame";
+            btnFrame.Size = new Size(32, 32);
+            btnFrame.TabIndex = 10;
+            btnFrame.UseVisualStyleBackColor = true;
             // 
             // btnArrowType
             // 
@@ -295,7 +312,6 @@
             // panelRight
             // 
             panelRight.BackColor = Color.Transparent;
-            panelRight.BorderStyle = BorderStyle.FixedSingle;
             panelRight.Controls.Add(panelDragRightT);
             panelRight.Controls.Add(panelDragRightB);
             panelRight.Dock = DockStyle.Right;
@@ -310,20 +326,21 @@
             panelDragRightT.Dock = DockStyle.Top;
             panelDragRightT.Location = new Point(0, 0);
             panelDragRightT.Name = "panelDragRightT";
-            panelDragRightT.Size = new Size(30, 60);
+            panelDragRightT.Size = new Size(32, 30);
             panelDragRightT.TabIndex = 1;
             // 
             // panelDragRightB
             // 
             panelDragRightB.BackColor = Color.DimGray;
             panelDragRightB.Dock = DockStyle.Bottom;
-            panelDragRightB.Location = new Point(0, 240);
+            panelDragRightB.Location = new Point(0, 272);
             panelDragRightB.Name = "panelDragRightB";
-            panelDragRightB.Size = new Size(30, 60);
+            panelDragRightB.Size = new Size(32, 30);
             panelDragRightB.TabIndex = 0;
             // 
             // panelScreenArea
             // 
+            panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
             panelScreenArea.Dock = DockStyle.Fill;
             panelScreenArea.Location = new Point(32, 32);
             panelScreenArea.Name = "panelScreenArea";
@@ -450,6 +467,30 @@
             mitExit.Text = "Exit";
             mitExit.Click += buttonCloseForm_Click;
             // 
+            // button1
+            // 
+            button1.Dock = DockStyle.Left;
+            button1.FlatAppearance.BorderSize = 0;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.Location = new Point(128, 0);
+            button1.Name = "button1";
+            button1.Size = new Size(32, 32);
+            button1.TabIndex = 11;
+            button1.Text = "FF";
+            button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            button2.Dock = DockStyle.Left;
+            button2.FlatAppearance.BorderSize = 0;
+            button2.FlatStyle = FlatStyle.Flat;
+            button2.Location = new Point(160, 0);
+            button2.Name = "button2";
+            button2.Size = new Size(32, 32);
+            button2.TabIndex = 12;
+            button2.Text = "FF";
+            button2.UseVisualStyleBackColor = true;
+            // 
             // FS2MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -515,5 +556,8 @@
         private Panel panelDragBottomR;
         private Panel panelDragRightB;
         private Panel panelDragRightT;
+        private Button btnFrame;
+        private Button button2;
+        private Button button1;
     }
 }

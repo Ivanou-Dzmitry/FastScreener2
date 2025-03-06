@@ -133,6 +133,26 @@ namespace FastScreener2 {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap frame_locked_icon {
+            get {
+                object obj = ResourceManager.GetObject("frame_locked_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap frame_unlocked_icon {
+            get {
+                object obj = ResourceManager.GetObject("frame_unlocked_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap guides_icon {
             get {
                 object obj = ResourceManager.GetObject("guides_icon", resourceCulture);

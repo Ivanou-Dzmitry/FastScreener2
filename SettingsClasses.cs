@@ -360,6 +360,57 @@ namespace FastScreener2
 
 
 
+    //NUMBER
+    class Numbers
+    {
+        private int size;
+        private Color color;
+
+        [Category("Numbers Settings")]
+        [Description("Set number font size. Minimum - 8. Default - 26.")]
+        [DisplayName("Number Font Size")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int Size
+        {
+            get => size;
+            set
+            {
+                if (value < 8 || value > 72)
+                {
+                    // Show the error message on top of the form
+                    MessageBox.Show("Size must be between 8 and 72.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    size = 8;
+                    return; // Don't set the value if it's invalid
+                }
+
+                size = value;
+                OnPropertyChanged(nameof(Size));
+            }
+        }
+
+        [Category("Numbers Settings")]
+        [Description("Set numbers color.")]
+        [DisplayName("Number Color")]
+        [TypeConverter(typeof(ColorConverter))]
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                OnPropertyChanged(nameof(Color));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+
     public class Int32OnlyConverter : TypeConverter
         {
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)

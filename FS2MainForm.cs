@@ -26,23 +26,42 @@ namespace FastScreener2
 
         public static int clickCount = 0;
 
-        static Point relativePoint;
+        static Point relativePoint; //first click point
         private Rectangle currentRectangle;
         private Point startPoint;
         private bool isDrawing;
         private bool isLineDrawing;
         public static int numbering = 1; //for numbers
 
+        public static FS2MainForm Instance { get; private set; }
 
         public FS2MainForm()
         {
             InitializeComponent();
 
+            Instance = this;  // Store the reference when the form is created
+
             //set transparent form
             this.BackColor = ALPHA_KEY_COLOR;
             this.TransparencyKey = ALPHA_KEY_COLOR;
 
+            Rectangle virtScreenRect = new Rectangle(int.MaxValue, int.MaxValue, int.MinValue, int.MinValue);
+
+            foreach (Screen screen in Screen.AllScreens)
+                virtScreenRect = Rectangle.Union(virtScreenRect, screen.Bounds);
+
+            //Get virtual screen size
+            FS2SettingsManager.virtScreenWidth = virtScreenRect.Width;
+            FS2SettingsManager.virtScreenHeight = virtScreenRect.Height;
+
             FS2SettingsManager.Load();
+
+            // Set client size
+            this.ClientSize = new Size((int)(FS2SettingsManager.startResW), (int)(FS2SettingsManager.startResH));
+
+/*            //set client size
+            clientWidth = this.ClientSize.Width;
+            clientHeight = this.ClientSize.Height; //set height*/
 
             //load UI values Checked true/false
             mitArrow.Checked = FS2SettingsManager.drawArrows;
@@ -65,17 +84,22 @@ namespace FastScreener2
 
             //file
             mitSaveFile.Checked = FS2SettingsManager.saveToFile;
+            chbSave.Checked = FS2SettingsManager.saveToFile;
 
             //center panel
             panelScreenArea.BackColor = Color.Transparent;
 
+            FSUtils utils = new FSUtils();
+
+
             // Attach the same event handlers to all 4 panels
-            AttachDragEvents(panelDragBottomL);
-            AttachDragEvents(panelDragBottomR);
-            AttachDragEvents(panelDragTop);
-            AttachDragEvents(panelDragLeft);
-            AttachDragEvents(panelDragRightB);
-            AttachDragEvents(panelDragRightT);
+            utils.AttachDragEvents(panelDragBottomL);
+            utils.AttachDragEvents(panelDragBottomR);
+            utils.AttachDragEvents(panelDragTop);
+            utils.AttachDragEvents(panelDragLeft);
+            utils.AttachDragEvents(panelDragRightB);
+            utils.AttachDragEvents(panelDragRightT);
+            utils.AttachDragEvents(panelDragTopR);
 
             //get scaling
             scalingFactor = GetScalingFactor(this);
@@ -106,11 +130,8 @@ namespace FastScreener2
             ScaleButtonImage(chbNumbers, scalingFactor);
             ScaleButtonImage(chbGuides, scalingFactor);
             ScaleButtonImage(chbFrame, scalingFactor);
-        }
 
-        public void UpdateDebugLabel(string text)
-        {
-            labelDebug.Text = text;
+            ShowInfo("start");
         }
 
         private void PanelSize()
@@ -135,44 +156,45 @@ namespace FastScreener2
             }
         }
 
-        private void AttachDragEvents(Panel panel)
-        {
-            panel.MouseDown += Panel_MouseDown;
-            panel.MouseMove += Panel_MouseMove;
-            panel.MouseUp += Panel_MouseUp;
-        }
 
-        // Mouse Down: Start dragging
-        private void Panel_MouseDown(object sender, MouseEventArgs e)
+        public void ShowInfo(string type)
         {
-            dragging = true;
-            // Get the click position relative to the screen
-            startPoint = ((Control)sender).PointToScreen(e.Location);
-        }
+            string leftTopPos = "LeftTopPos X:" + this.Location.X.ToString() + ", Y:" + this.Location.Y.ToString();
+            string screenArea = "Size W:" + panelScreenArea.Width.ToString() + ", H:" + panelScreenArea.Height.ToString();
 
-        // Mouse Move: Move the Form
-        private void Panel_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (dragging)
+            string name = "FastScreener 2.0";
+            string scale = "Scaling: " + scalingFactor;
+
+            string saveFile = "";
+
+            if (FS2SettingsManager.saveToFile)
             {
-                // Get the new mouse position relative to the screen
-                Point newPoint = ((Control)sender).PointToScreen(e.Location);
-
-                // Calculate how much the mouse moved
-                int offsetX = newPoint.X - startPoint.X;
-                int offsetY = newPoint.Y - startPoint.Y;
-
-                // Update the form's position
-                this.Location = new Point(this.Left + offsetX, this.Top + offsetY);
-
-                // Update startPoint for smooth movement
-                startPoint = newPoint;
-
-                labelDebug.Text = this.Location.ToString();
+                saveFile = "to file and clipboard";
             }
+            else
+            {
+                saveFile = "to clipboard";
+            }
+
+            if (type == "drag")
+            {
+                labelDebug.Text = leftTopPos + " | " + screenArea + " | " + scale;
+            }
+
+            if (type == "start")
+            {
+                labelDebug.Text = name + " | " + scale;
+            }
+
+            if (type == "capture")
+            {
+                labelDebug.Text = "Captured to " + saveFile + " | " + screenArea + " | " + scale;
+            }
+
+
         }
 
-        private void SwapPanelsIfNeeded()
+        public void SwapPanelsIfNeeded()
         {
             if (this.Left < 0)
             {
@@ -195,16 +217,6 @@ namespace FastScreener2
                 panelDragTop.Dock = DockStyle.Top;
                 panelBottom.Dock = DockStyle.Bottom;
             }
-
-        }
-
-        // Mouse Up: Stop dragging
-        private void Panel_MouseUp(object sender, MouseEventArgs e)
-        {
-            dragging = false;
-
-            // Check if form is moved into negative coordinates
-            SwapPanelsIfNeeded();
         }
 
 
@@ -213,6 +225,8 @@ namespace FastScreener2
             // bitmap size
             int bitmapWidth = panelScreenArea.Width;
             int bitmapHeight = panelScreenArea.Height;
+
+            panelScreenArea.BorderStyle = BorderStyle.None;
 
             //Creating a new Bitmap object
             Bitmap captureBitmap = new Bitmap(bitmapWidth, bitmapHeight, PixelFormat.Format32bppArgb);
@@ -233,7 +247,14 @@ namespace FastScreener2
 
             SetScaledBitmapToClipboard(captureBitmap, scalingFactor);
 
-            labelDebug.Text = panelScreenArea.Location.Y + "/" + panelScreenArea.Location.X;
+            //labelDebug.Text = panelScreenArea.Location.Y + "/" + panelScreenArea.Location.X;
+
+            panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
+
+            //claer arrows array
+            drawnArrows.Clear();
+
+            ShowInfo("capture");
         }
 
         void SetScaledBitmapToClipboard(Bitmap originalBitmap, float scalingFactor)
@@ -272,6 +293,16 @@ namespace FastScreener2
         {
             keyboardHook.KeyDown -= new KeyboardHook.KeyboardHookCallback(keyboardHook_KeyDown);
             keyboardHook.Uninstall();
+
+            mouseHook.MiddleButtonDown -= new MouseHook.MouseHookCallback(mouseHook_MMB);
+            mouseHook.MiddleButtonUp -= new MouseHook.MouseHookCallback(mouseHook_MouseUp);
+            mouseHook.MouseMove -= new MouseHook.MouseHookCallback(mouseHook_MouseMove);
+
+            mouseHook.Uninstall();
+
+            string res = panelScreenArea.Width + "," + panelScreenArea.Height;
+            FS2SettingsManager.SetSetting("res_on_close", res);
+            FS2SettingsManager.Save();
         }
 
 
@@ -506,12 +537,29 @@ namespace FastScreener2
         }
 
 
+        private void chbSave_Click(object sender, EventArgs e)
+        {
+            SaveToFileStatus();
+        }
+
+        private void mitSaveFile_Click(object sender, EventArgs e)
+        {
+            SaveToFileStatus();
+        }
+
+        private void SaveToFileStatus()
+        {
+            ToggleStatus(mitSaveFile, ref FS2SettingsManager.saveToFile, "Save to file turned ON", "Save to file turned OFF", "save_to_file", chbSave, false);
+        }
+
 
         //hook mouse
         private void mouseHook_MMB(MouseHook.MSLLHOOKSTRUCT mouse)
         {
+            Panel usedPanel = panelScreenArea;
+
             // important point
-            relativePoint = panelScreenArea.PointToClient(Cursor.Position);
+            relativePoint = usedPanel.PointToClient(Cursor.Position);
 
             //draw Frame
             if (FS2SettingsManager.drawFrame)
@@ -526,7 +574,8 @@ namespace FastScreener2
             //draw Arrow
             if (FS2SettingsManager.drawArrows && isLineDrawing)
             {
-                // DrawArrow(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), relativePoint, arrowColor);
+                DrawArrow(new PaintEventArgs(usedPanel.CreateGraphics(), usedPanel.ClientRectangle), relativePoint, FS2SettingsManager.arrowColor);
+                RenderLines(new PaintEventArgs(usedPanel.CreateGraphics(), usedPanel.ClientRectangle), FS2SettingsManager.ARROW_SIZE);
             }
 
             //draw Number
@@ -610,6 +659,13 @@ namespace FastScreener2
         {
             ((Button)sender).BackColor = Color.SlateGray;
         }
+
+        private void labelDebug_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
 
 
     }

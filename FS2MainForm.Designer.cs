@@ -34,6 +34,8 @@
             panelDragBottomR = new Panel();
             panelDragBottomL = new Panel();
             panelDragTop = new Panel();
+            button2 = new Button();
+            button1 = new Button();
             btnFrame = new Button();
             btnArrowType = new Button();
             btnSettings = new Button();
@@ -41,7 +43,9 @@
             buttonMainMenu = new Button();
             buttonMinimizeForm = new Button();
             buttonCloseForm = new Button();
+            panelDragTopR = new Panel();
             panelDragLeft = new Panel();
+            chbSave = new CheckBox();
             chbArrow = new CheckBox();
             chbFrame = new CheckBox();
             chbNumbers = new CheckBox();
@@ -69,8 +73,6 @@
             mitSettings = new ToolStripMenuItem();
             mitAbout = new ToolStripMenuItem();
             mitExit = new ToolStripMenuItem();
-            button1 = new Button();
-            button2 = new Button();
             panelBottom.SuspendLayout();
             panelDragTop.SuspendLayout();
             panelDragLeft.SuspendLayout();
@@ -85,6 +87,7 @@
             panelBottom.Controls.Add(panelDragBottomR);
             panelBottom.Controls.Add(panelDragBottomL);
             panelBottom.Dock = DockStyle.Bottom;
+            panelBottom.Font = new Font("Inter", 9F);
             panelBottom.Location = new Point(0, 334);
             panelBottom.Name = "panelBottom";
             panelBottom.Size = new Size(650, 32);
@@ -92,13 +95,16 @@
             // 
             // labelDebug
             // 
+            labelDebug.BackColor = Color.Transparent;
+            labelDebug.Font = new Font("Inter", 9F);
             labelDebug.ForeColor = Color.DimGray;
-            labelDebug.Location = new Point(61, 0);
+            labelDebug.Location = new Point(60, 8);
             labelDebug.Name = "labelDebug";
-            labelDebug.Size = new Size(528, 32);
+            labelDebug.Size = new Size(530, 16);
             labelDebug.TabIndex = 0;
             labelDebug.Text = "label1";
             labelDebug.TextAlign = ContentAlignment.MiddleCenter;
+            labelDebug.Click += labelDebug_Click;
             // 
             // panelDragBottomR
             // 
@@ -130,11 +136,36 @@
             panelDragTop.Controls.Add(buttonMainMenu);
             panelDragTop.Controls.Add(buttonMinimizeForm);
             panelDragTop.Controls.Add(buttonCloseForm);
+            panelDragTop.Controls.Add(panelDragTopR);
             panelDragTop.Dock = DockStyle.Top;
             panelDragTop.Location = new Point(0, 0);
             panelDragTop.Name = "panelDragTop";
             panelDragTop.Size = new Size(650, 32);
             panelDragTop.TabIndex = 1;
+            // 
+            // button2
+            // 
+            button2.Dock = DockStyle.Left;
+            button2.FlatAppearance.BorderSize = 0;
+            button2.FlatStyle = FlatStyle.Flat;
+            button2.Location = new Point(160, 0);
+            button2.Name = "button2";
+            button2.Size = new Size(32, 32);
+            button2.TabIndex = 12;
+            button2.Text = ">";
+            button2.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            button1.Dock = DockStyle.Left;
+            button1.FlatAppearance.BorderSize = 0;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.Location = new Point(128, 0);
+            button1.Name = "button1";
+            button1.Size = new Size(32, 32);
+            button1.TabIndex = 11;
+            button1.Text = "<";
+            button1.UseVisualStyleBackColor = true;
             // 
             // btnFrame
             // 
@@ -169,7 +200,7 @@
             btnSettings.FlatAppearance.BorderSize = 0;
             btnSettings.FlatStyle = FlatStyle.Flat;
             btnSettings.Image = FS2Resources.settings_icon;
-            btnSettings.Location = new Point(554, 0);
+            btnSettings.Location = new Point(522, 0);
             btnSettings.Name = "btnSettings";
             btnSettings.Size = new Size(32, 32);
             btnSettings.TabIndex = 9;
@@ -212,7 +243,7 @@
             buttonMinimizeForm.FlatAppearance.BorderSize = 0;
             buttonMinimizeForm.FlatStyle = FlatStyle.Flat;
             buttonMinimizeForm.Image = FS2Resources.minimize_icon;
-            buttonMinimizeForm.Location = new Point(586, 0);
+            buttonMinimizeForm.Location = new Point(554, 0);
             buttonMinimizeForm.Name = "buttonMinimizeForm";
             buttonMinimizeForm.Size = new Size(32, 32);
             buttonMinimizeForm.TabIndex = 7;
@@ -226,7 +257,7 @@
             buttonCloseForm.FlatAppearance.BorderSize = 0;
             buttonCloseForm.FlatStyle = FlatStyle.Flat;
             buttonCloseForm.Image = FS2Resources.close_icon;
-            buttonCloseForm.Location = new Point(618, 0);
+            buttonCloseForm.Location = new Point(586, 0);
             buttonCloseForm.Name = "buttonCloseForm";
             buttonCloseForm.Size = new Size(32, 32);
             buttonCloseForm.TabIndex = 8;
@@ -235,9 +266,19 @@
             buttonCloseForm.MouseEnter += buttonCloseForm_MouseEnter;
             buttonCloseForm.MouseLeave += buttonCloseForm_MouseLeave;
             // 
+            // panelDragTopR
+            // 
+            panelDragTopR.BackColor = Color.DimGray;
+            panelDragTopR.Dock = DockStyle.Right;
+            panelDragTopR.Location = new Point(618, 0);
+            panelDragTopR.Name = "panelDragTopR";
+            panelDragTopR.Size = new Size(32, 32);
+            panelDragTopR.TabIndex = 13;
+            // 
             // panelDragLeft
             // 
             panelDragLeft.BackColor = Color.DimGray;
+            panelDragLeft.Controls.Add(chbSave);
             panelDragLeft.Controls.Add(chbArrow);
             panelDragLeft.Controls.Add(chbFrame);
             panelDragLeft.Controls.Add(chbNumbers);
@@ -248,6 +289,21 @@
             panelDragLeft.Size = new Size(32, 302);
             panelDragLeft.TabIndex = 2;
             // 
+            // chbSave
+            // 
+            chbSave.Appearance = Appearance.Button;
+            chbSave.BackColor = Color.DimGray;
+            chbSave.Dock = DockStyle.Bottom;
+            chbSave.FlatAppearance.BorderSize = 0;
+            chbSave.FlatStyle = FlatStyle.Flat;
+            chbSave.Image = FS2Resources.save_icon;
+            chbSave.Location = new Point(0, 142);
+            chbSave.Name = "chbSave";
+            chbSave.Size = new Size(32, 32);
+            chbSave.TabIndex = 8;
+            chbSave.UseVisualStyleBackColor = false;
+            chbSave.Click += chbSave_Click;
+            // 
             // chbArrow
             // 
             chbArrow.Appearance = Appearance.Button;
@@ -255,7 +311,7 @@
             chbArrow.Dock = DockStyle.Bottom;
             chbArrow.FlatAppearance.BorderSize = 0;
             chbArrow.FlatStyle = FlatStyle.Flat;
-            chbArrow.Image = FS2Resources.arrow_type01_icon;
+            chbArrow.Image = FS2Resources.arrow_icon;
             chbArrow.Location = new Point(0, 174);
             chbArrow.Name = "chbArrow";
             chbArrow.Size = new Size(32, 32);
@@ -433,6 +489,7 @@
             mitSaveFile.Name = "mitSaveFile";
             mitSaveFile.Size = new Size(191, 22);
             mitSaveFile.Text = "Save to File";
+            mitSaveFile.Click += mitSaveFile_Click;
             // 
             // mitOpenFolder
             // 
@@ -466,30 +523,6 @@
             mitExit.Size = new Size(191, 22);
             mitExit.Text = "Exit";
             mitExit.Click += buttonCloseForm_Click;
-            // 
-            // button1
-            // 
-            button1.Dock = DockStyle.Left;
-            button1.FlatAppearance.BorderSize = 0;
-            button1.FlatStyle = FlatStyle.Flat;
-            button1.Location = new Point(128, 0);
-            button1.Name = "button1";
-            button1.Size = new Size(32, 32);
-            button1.TabIndex = 11;
-            button1.Text = "FF";
-            button1.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            button2.Dock = DockStyle.Left;
-            button2.FlatAppearance.BorderSize = 0;
-            button2.FlatStyle = FlatStyle.Flat;
-            button2.Location = new Point(160, 0);
-            button2.Name = "button2";
-            button2.Size = new Size(32, 32);
-            button2.TabIndex = 12;
-            button2.Text = "FF";
-            button2.UseVisualStyleBackColor = true;
             // 
             // FS2MainForm
             // 
@@ -559,5 +592,7 @@
         private Button btnFrame;
         private Button button2;
         private Button button1;
+        private Panel panelDragTopR;
+        private CheckBox chbSave;
     }
 }

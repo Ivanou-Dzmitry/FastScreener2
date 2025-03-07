@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
@@ -28,12 +29,20 @@ namespace FastScreener2
         }
 
         //screen sizes
-        public static object[,] RES_DEFAULT = { { 600, 600, 600, 960 }, { 337, 600, 700, 600 } };
-        public static object[,] RES_WORKED = new object[2, 4];
+        public static int[,] RES_DEFAULT = { { 650, 650, 650, 960 }, { 366, 650, 700, 600 } };
+        public static int[,] resWorked = new int[2, 4];
+
+        //Min size
+        public const int MIN_WIDTH = 300, MIN_HEIGHT = 200;
+
+        //all monitors
+        public static int virtScreenWidth = 0, virtScreenHeight = 0;
 
         public static int[] customGuide = new int[] { 0, 0, 0, 0 };
 
         public static int guidlineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType;
+
+        public static int startResW, startResH;
 
         //for guidlines
         public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame;
@@ -49,6 +58,8 @@ namespace FastScreener2
 
         private static string settingsFilePath = "fs2_settings.xml";
         private static Dictionary<string, string> settings = new Dictionary<string, string>();
+
+        public const int ARROW_SIZE = 6;
 
         // Load settings from XML (create file if missing)
         public static void Load()
@@ -94,7 +105,56 @@ namespace FastScreener2
             //file
             saveToFile = Convert.ToBoolean(settings["save_to_file"]);
 
-            
+            //sizes
+            for (int i = 1; i <= 4; i++)  // Loop from 1 to 4
+            {
+                string key = "res" + i;
+
+                if (settings.TryGetValue(key, out string tempValueFromConfig))  // Get value from dictionary
+                {
+                    string[] tempStringArray = tempValueFromConfig.Split(','); // Fix here
+
+                    try
+                    {
+                        resWorked[0, i - 1] = int.Parse(tempStringArray[0]); // Width
+                    }
+                    catch
+                    {
+                        resWorked[0, i - 1] = RES_DEFAULT[0, i - 1]; // Default width
+                    }
+
+                    try
+                    {
+                        resWorked[1, i - 1] = int.Parse(tempStringArray[1]); // Height
+                    }
+                    catch
+                    {
+                        resWorked[1, i - 1] = RES_DEFAULT[1, i - 1]; // Default height
+                    }
+                }
+            }
+
+
+            if (settings.TryGetValue("res_on_close", out string tempValueFromConfig2))
+            {
+                string[] tempStringArray = tempValueFromConfig2.Split(','); // Fix here
+
+                // Set client size
+                try
+                {
+                    startResW = Convert.ToInt32(tempStringArray[0]); //set width
+                    startResH = Convert.ToInt32(tempStringArray[1]); //set height
+                }
+                catch
+                {
+                    startResW = Convert.ToInt32(resWorked[0, 0]);
+                    startResH = Convert.ToInt32(resWorked[1, 0]);
+                }
+            }
+
+
+
+
         }
 
         // Save settings to XML
@@ -145,7 +205,12 @@ namespace FastScreener2
             { "bottom_indent", "10" },
             { "left_indent", "10" },
             { "right_indent", "10" },
-            { "lock_indent", "true" }
+            { "lock_indent", "true" },
+            { "res1", "650,366" },
+            { "res2", "650,650" },
+            { "res3", "650,700" },
+            { "res4", "960,600" },
+            { "res_on_close", "650,650" }
         };
 
             Save(); // Create the XML file with default values

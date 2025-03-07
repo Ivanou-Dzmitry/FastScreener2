@@ -19,6 +19,9 @@ namespace FastScreener2
             //select grid in list
             lboxSetCat.SetSelected(0, true);
             ArrowSettings();
+
+            FSUtils utils = new FSUtils();
+            utils.AttachDragEvents(pnlSetHeader);
         }
 
         private void lboxSetCat_Click(object sender, EventArgs e)
@@ -38,6 +41,9 @@ namespace FastScreener2
                     break;
                 case 3:
                     NumberSettings();
+                    break;
+                case 4:
+                    ResSettings();
                     break;
                 default:
                     break;
@@ -152,6 +158,30 @@ namespace FastScreener2
             };
 
             pgSettings.SelectedObject = numberSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
+        }
+
+        private Resolutions resSettings;
+
+        private void ResSettings()
+        {
+            resSettings = new Resolutions
+            {
+                res1Width = FS2SettingsManager.resWorked[0,0],
+                res1Height = FS2SettingsManager.resWorked[1, 0],
+
+                res2Width = FS2SettingsManager.resWorked[0, 1],
+                res2Height = FS2SettingsManager.resWorked[1, 1],
+
+                res3Width = FS2SettingsManager.resWorked[0, 2],
+                res3Height = FS2SettingsManager.resWorked[1, 2],
+
+                res4Width = FS2SettingsManager.resWorked[0, 3],
+                res4Height = FS2SettingsManager.resWorked[1, 3]
+
+            };
+
+            pgSettings.SelectedObject = resSettings;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 

@@ -410,6 +410,169 @@ namespace FastScreener2
         }
     }
 
+    //RESOLUTION
+    //NUMBER
+    class Resolutions
+    {
+        private int r1w, r1h, r2w, r2h, r3w, r3h, r4w, r4h;
+
+        [Category("Size 1")]
+        [Description("Size 1 width. Max depends on your monitor resolution. Min - 300px.")]
+        [DisplayName("1.1 Width")]
+        [TypeConverter(typeof(ResWidthConverter))]
+        public int res1Width
+        {
+            get => r1w;
+            set
+            {
+                r1w = value;
+                OnPropertyChanged(nameof(res1Width));
+            }
+        }
+
+        [Category("Size 1")]
+        [Description("Size 1 height. Max depends on your monitor resolution. Min - 200px.")]
+        [DisplayName("1.2 Height")]
+        [TypeConverter(typeof(ResHeightConverter))]
+        public int res1Height
+        {
+            get => r1h;
+            set
+            {
+                r1h = value;
+                OnPropertyChanged(nameof(res1Height));
+            }
+        }
+
+        [Category("Size 2")]
+        [Description("Size 2 width. Max depends on your monitor resolution. Min - 300px.")]
+        [DisplayName("2.1 Width")]
+        [TypeConverter(typeof(ResWidthConverter))]
+        public int res2Width
+        {
+            get => r2w;
+            set
+            {
+                r2w = value;
+                OnPropertyChanged(nameof(res2Width));
+            }
+        }
+
+        [Category("Size 2")]
+        [Description("Size 2 height. Max depends on your monitor resolution. Min - 200px.")]
+        [DisplayName("2.2 Height")]
+        [TypeConverter(typeof(ResHeightConverter))]
+        public int res2Height
+        {
+            get => r2h;
+            set
+            {
+                r2h = value;
+                OnPropertyChanged(nameof(res2Height));
+            }
+        }
+
+        [Category("Size 3")]
+        [Description("Size 3 width. Max depends on your monitor resolution. Min - 300px.")]
+        [DisplayName("3.1 Width")]
+        [TypeConverter(typeof(ResWidthConverter))]
+        public int res3Width
+        {
+            get => r3w;
+            set
+            {
+                r3w = value;
+                OnPropertyChanged(nameof(res3Width));
+            }
+        }
+
+        [Category("Size 3")]
+        [Description("Size 3 height. Max depends on your monitor resolution. Min - 200px.")]
+        [DisplayName("3.2 Height")]
+        [TypeConverter(typeof(ResHeightConverter))]
+        public int res3Height
+        {
+            get => r3h;
+            set
+            {
+                r3h = value;
+                OnPropertyChanged(nameof(res3Height));
+            }
+        }
+
+        [Category("Size 4")]
+        [Description("Size 4 width. Max depends on your monitor resolution. Min - 300px.")]
+        [DisplayName("4.1 Width")]
+        [TypeConverter(typeof(ResWidthConverter))]
+        public int res4Width
+        {
+            get => r4w;
+            set
+            {
+                r4w = value;
+                OnPropertyChanged(nameof(res4Width));
+            }
+        }
+
+        [Category("Size 4")]
+        [Description("Size 4 height. Max depends on your monitor resolution. Min - 200px.")]
+        [DisplayName("4.2 Height")]
+        [TypeConverter(typeof(ResHeightConverter))]
+        public int res4Height
+        {
+            get => r4h;
+            set
+            {
+                r4h = value;
+                OnPropertyChanged(nameof(res4Height));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+
+    public class ResWidthConverter : Int16Converter
+    {
+        public override object ConvertTo(ITypeDescriptorContext context,
+            CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType == typeof(string) && value is int && Convert.ToInt32(value) <= FS2SettingsManager.virtScreenWidth && Convert.ToInt32(value) >= FS2SettingsManager.MIN_WIDTH)
+            {
+                return ((int)value).ToString();
+            }
+            else
+            {
+                value = "Invalid value! Max is " + FS2SettingsManager.virtScreenWidth.ToString() + "px, min - " + FS2SettingsManager.MIN_WIDTH.ToString();
+            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+    }
+
+    public class ResHeightConverter : Int16Converter
+    {
+        public override object ConvertTo(ITypeDescriptorContext context,
+            CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType == typeof(string) && value is int && Convert.ToInt32(value) <= FS2SettingsManager.virtScreenHeight && Convert.ToInt32(value) >= FS2SettingsManager.MIN_HEIGHT)
+            {
+                return ((int)value).ToString();
+            }
+            else
+            {
+                value = "Invalid value! Max is " + FS2SettingsManager.virtScreenHeight.ToString() + "px, min - " + FS2SettingsManager.MIN_HEIGHT.ToString();
+            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+    }
+
 
     public class Int32OnlyConverter : TypeConverter
         {

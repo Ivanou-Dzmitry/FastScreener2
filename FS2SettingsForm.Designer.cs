@@ -1,6 +1,6 @@
 ﻿namespace FastScreener2
 {
-    partial class FS2SettingsForm
+    partial class formFS2Settings
     {
         /// <summary>
         /// Required designer variable.
@@ -53,7 +53,7 @@
             lboxSetCat.BorderStyle = BorderStyle.None;
             lboxSetCat.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lboxSetCat.ItemHeight = 17;
-            lboxSetCat.Items.AddRange(new object[] { "Arrow", "Frame", "Guides", "Numbers", "Sizes" });
+            lboxSetCat.Items.AddRange(new object[] { "Arrow", "Bar", "Frame", "Guides", "Numbers", "Sizes" });
             lboxSetCat.Location = new Point(0, 32);
             lboxSetCat.Name = "lboxSetCat";
             lboxSetCat.Size = new Size(120, 323);
@@ -125,7 +125,7 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += btnOK_Click;
             // 
-            // FS2SettingsForm
+            // formFS2Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -135,8 +135,8 @@
             Controls.Add(lboxSetCat);
             Controls.Add(pgSettings);
             FormBorderStyle = FormBorderStyle.None;
-            Name = "FS2SettingsForm";
-            StartPosition = FormStartPosition.CenterScreen;
+            Name = "formFS2Settings";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Settings";
             TopMost = true;
             pnlBottom.ResumeLayout(false);

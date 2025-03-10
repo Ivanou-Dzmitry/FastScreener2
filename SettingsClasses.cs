@@ -410,8 +410,34 @@ namespace FastScreener2
         }
     }
 
+    //BAR
+    class Bars
+    {        
+        private Color color;
+
+        [Category("Bar Settings")]
+        [Description("Set bar color.")]
+        [DisplayName("Bar Color")]
+        [TypeConverter(typeof(ColorConverter))]
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                OnPropertyChanged(nameof(Color));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
     //RESOLUTION
-    //NUMBER
     class Resolutions
     {
         private int r1w, r1h, r2w, r2h, r3w, r3h, r4w, r4h;

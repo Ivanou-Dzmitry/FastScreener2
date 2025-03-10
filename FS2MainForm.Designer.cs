@@ -44,6 +44,7 @@
             buttonMinimizeForm = new Button();
             buttonCloseForm = new Button();
             panelDragTopR = new Panel();
+            panelDragTopL = new Panel();
             panelDragLeft = new Panel();
             chbSave = new CheckBox();
             chbArrow = new CheckBox();
@@ -51,9 +52,10 @@
             chbNumbers = new CheckBox();
             chbGuides = new CheckBox();
             panelRight = new Panel();
-            panelDragRightT = new Panel();
-            panelDragRightB = new Panel();
+            rangeTrackBar = new VerticalRangeTrackBar();
             panelScreenArea = new Panel();
+            pnlBarTop = new Panel();
+            pnlBarBottom = new Panel();
             contextMenuMain = new ContextMenuStrip(components);
             mitSize01 = new ToolStripMenuItem();
             mitSize02 = new ToolStripMenuItem();
@@ -71,12 +73,14 @@
             mitOpenFolder = new ToolStripMenuItem();
             toolStripMenuItem4 = new ToolStripSeparator();
             mitSettings = new ToolStripMenuItem();
-            mitAbout = new ToolStripMenuItem();
+            mitHelp = new ToolStripMenuItem();
             mitExit = new ToolStripMenuItem();
+            toolTipFS = new ToolTip(components);
             panelBottom.SuspendLayout();
             panelDragTop.SuspendLayout();
             panelDragLeft.SuspendLayout();
             panelRight.SuspendLayout();
+            panelScreenArea.SuspendLayout();
             contextMenuMain.SuspendLayout();
             SuspendLayout();
             // 
@@ -96,19 +100,22 @@
             // labelDebug
             // 
             labelDebug.BackColor = Color.Transparent;
+            labelDebug.Dock = DockStyle.Fill;
             labelDebug.Font = new Font("Inter", 9F);
             labelDebug.ForeColor = Color.DimGray;
-            labelDebug.Location = new Point(60, 8);
+            labelDebug.Location = new Point(60, 0);
+            labelDebug.MaximumSize = new Size(0, 60);
+            labelDebug.MinimumSize = new Size(240, 35);
             labelDebug.Name = "labelDebug";
-            labelDebug.Size = new Size(530, 16);
+            labelDebug.Size = new Size(530, 35);
             labelDebug.TabIndex = 0;
-            labelDebug.Text = "label1";
-            labelDebug.TextAlign = ContentAlignment.MiddleCenter;
+            labelDebug.Text = "Info Label, Info Label, Info Label, Info Label,Info Label";
+            labelDebug.TextAlign = ContentAlignment.TopCenter;
             labelDebug.Click += labelDebug_Click;
             // 
             // panelDragBottomR
             // 
-            panelDragBottomR.BackColor = Color.DimGray;
+            panelDragBottomR.BackColor = Color.SlateGray;
             panelDragBottomR.Dock = DockStyle.Right;
             panelDragBottomR.Location = new Point(590, 0);
             panelDragBottomR.Name = "panelDragBottomR";
@@ -117,7 +124,7 @@
             // 
             // panelDragBottomL
             // 
-            panelDragBottomL.BackColor = Color.DimGray;
+            panelDragBottomL.BackColor = Color.SlateGray;
             panelDragBottomL.Dock = DockStyle.Left;
             panelDragBottomL.Location = new Point(0, 0);
             panelDragBottomL.Name = "panelDragBottomL";
@@ -137,6 +144,7 @@
             panelDragTop.Controls.Add(buttonMinimizeForm);
             panelDragTop.Controls.Add(buttonCloseForm);
             panelDragTop.Controls.Add(panelDragTopR);
+            panelDragTop.Controls.Add(panelDragTopL);
             panelDragTop.Dock = DockStyle.Top;
             panelDragTop.Location = new Point(0, 0);
             panelDragTop.Name = "panelDragTop";
@@ -145,57 +153,64 @@
             // 
             // button2
             // 
+            button2.BackColor = Color.DimGray;
             button2.Dock = DockStyle.Left;
             button2.FlatAppearance.BorderSize = 0;
             button2.FlatStyle = FlatStyle.Flat;
-            button2.Location = new Point(160, 0);
+            button2.Location = new Point(192, 0);
             button2.Name = "button2";
             button2.Size = new Size(32, 32);
             button2.TabIndex = 12;
             button2.Text = ">";
-            button2.UseVisualStyleBackColor = true;
+            toolTipFS.SetToolTip(button2, "Next resulution");
+            button2.UseVisualStyleBackColor = false;
             // 
             // button1
             // 
+            button1.BackColor = Color.DimGray;
             button1.Dock = DockStyle.Left;
             button1.FlatAppearance.BorderSize = 0;
             button1.FlatStyle = FlatStyle.Flat;
-            button1.Location = new Point(128, 0);
+            button1.Location = new Point(160, 0);
             button1.Name = "button1";
             button1.Size = new Size(32, 32);
             button1.TabIndex = 11;
             button1.Text = "<";
-            button1.UseVisualStyleBackColor = true;
+            toolTipFS.SetToolTip(button1, "Previous resolution");
+            button1.UseVisualStyleBackColor = false;
             // 
             // btnFrame
             // 
+            btnFrame.BackColor = Color.DimGray;
             btnFrame.Dock = DockStyle.Left;
             btnFrame.FlatAppearance.BorderSize = 0;
             btnFrame.FlatStyle = FlatStyle.Flat;
             btnFrame.Image = FS2Resources.frame_unlocked_icon;
-            btnFrame.Location = new Point(96, 0);
+            btnFrame.Location = new Point(128, 0);
             btnFrame.Name = "btnFrame";
             btnFrame.Size = new Size(32, 32);
             btnFrame.TabIndex = 10;
-            btnFrame.UseVisualStyleBackColor = true;
+            toolTipFS.SetToolTip(btnFrame, "Frame type");
+            btnFrame.UseVisualStyleBackColor = false;
             // 
             // btnArrowType
             // 
-            btnArrowType.BackColor = Color.SlateGray;
+            btnArrowType.BackColor = Color.DimGray;
             btnArrowType.Dock = DockStyle.Left;
             btnArrowType.FlatAppearance.BorderSize = 0;
             btnArrowType.FlatStyle = FlatStyle.Flat;
             btnArrowType.Image = FS2Resources.arrow_type01_icon;
-            btnArrowType.Location = new Point(64, 0);
+            btnArrowType.Location = new Point(96, 0);
             btnArrowType.Name = "btnArrowType";
             btnArrowType.Size = new Size(32, 32);
             btnArrowType.TabIndex = 3;
+            toolTipFS.SetToolTip(btnArrowType, "Arrow direction");
             btnArrowType.UseVisualStyleBackColor = false;
             btnArrowType.Click += btnArrowType_Click;
             // 
             // btnSettings
             // 
-            btnSettings.BackColor = Color.SlateGray;
+            btnSettings.BackColor = Color.DimGray;
             btnSettings.Dock = DockStyle.Right;
             btnSettings.FlatAppearance.BorderSize = 0;
             btnSettings.FlatStyle = FlatStyle.Flat;
@@ -205,40 +220,43 @@
             btnSettings.Size = new Size(32, 32);
             btnSettings.TabIndex = 9;
             btnSettings.Text = "_";
+            toolTipFS.SetToolTip(btnSettings, "Settings");
             btnSettings.UseVisualStyleBackColor = false;
             btnSettings.Click += btnSettings_Click;
             // 
             // btnScreen
             // 
-            btnScreen.BackColor = Color.SlateGray;
+            btnScreen.BackColor = Color.DimGray;
             btnScreen.Dock = DockStyle.Left;
             btnScreen.FlatAppearance.BorderSize = 0;
             btnScreen.FlatStyle = FlatStyle.Flat;
             btnScreen.Image = FS2Resources.screen_icon;
-            btnScreen.Location = new Point(32, 0);
+            btnScreen.Location = new Point(64, 0);
             btnScreen.Name = "btnScreen";
             btnScreen.Size = new Size(32, 32);
             btnScreen.TabIndex = 2;
+            toolTipFS.SetToolTip(btnScreen, "Screenshot");
             btnScreen.UseVisualStyleBackColor = false;
             btnScreen.Click += btnScreen_Click;
             // 
             // buttonMainMenu
             // 
-            buttonMainMenu.BackColor = Color.SlateGray;
+            buttonMainMenu.BackColor = Color.DimGray;
             buttonMainMenu.Dock = DockStyle.Left;
             buttonMainMenu.FlatAppearance.BorderSize = 0;
             buttonMainMenu.FlatStyle = FlatStyle.Flat;
             buttonMainMenu.Image = FS2Resources.menu_icon;
-            buttonMainMenu.Location = new Point(0, 0);
+            buttonMainMenu.Location = new Point(32, 0);
             buttonMainMenu.Name = "buttonMainMenu";
             buttonMainMenu.Size = new Size(32, 32);
             buttonMainMenu.TabIndex = 1;
+            toolTipFS.SetToolTip(buttonMainMenu, "Main menu");
             buttonMainMenu.UseVisualStyleBackColor = false;
             buttonMainMenu.Click += buttonMainMenu_Click;
             // 
             // buttonMinimizeForm
             // 
-            buttonMinimizeForm.BackColor = Color.SlateGray;
+            buttonMinimizeForm.BackColor = Color.DimGray;
             buttonMinimizeForm.Dock = DockStyle.Right;
             buttonMinimizeForm.FlatAppearance.BorderSize = 0;
             buttonMinimizeForm.FlatStyle = FlatStyle.Flat;
@@ -247,12 +265,13 @@
             buttonMinimizeForm.Name = "buttonMinimizeForm";
             buttonMinimizeForm.Size = new Size(32, 32);
             buttonMinimizeForm.TabIndex = 7;
+            toolTipFS.SetToolTip(buttonMinimizeForm, "Minimize");
             buttonMinimizeForm.UseVisualStyleBackColor = false;
             buttonMinimizeForm.Click += buttonMinimizeForm_Click;
             // 
             // buttonCloseForm
             // 
-            buttonCloseForm.BackColor = Color.SlateGray;
+            buttonCloseForm.BackColor = Color.DimGray;
             buttonCloseForm.Dock = DockStyle.Right;
             buttonCloseForm.FlatAppearance.BorderSize = 0;
             buttonCloseForm.FlatStyle = FlatStyle.Flat;
@@ -261,6 +280,7 @@
             buttonCloseForm.Name = "buttonCloseForm";
             buttonCloseForm.Size = new Size(32, 32);
             buttonCloseForm.TabIndex = 8;
+            toolTipFS.SetToolTip(buttonCloseForm, "Close");
             buttonCloseForm.UseVisualStyleBackColor = false;
             buttonCloseForm.Click += buttonCloseForm_Click;
             buttonCloseForm.MouseEnter += buttonCloseForm_MouseEnter;
@@ -268,16 +288,25 @@
             // 
             // panelDragTopR
             // 
-            panelDragTopR.BackColor = Color.DimGray;
+            panelDragTopR.BackColor = Color.SlateGray;
             panelDragTopR.Dock = DockStyle.Right;
             panelDragTopR.Location = new Point(618, 0);
             panelDragTopR.Name = "panelDragTopR";
             panelDragTopR.Size = new Size(32, 32);
             panelDragTopR.TabIndex = 13;
             // 
+            // panelDragTopL
+            // 
+            panelDragTopL.BackColor = Color.SlateGray;
+            panelDragTopL.Dock = DockStyle.Left;
+            panelDragTopL.Location = new Point(0, 0);
+            panelDragTopL.Name = "panelDragTopL";
+            panelDragTopL.Size = new Size(32, 32);
+            panelDragTopL.TabIndex = 14;
+            // 
             // panelDragLeft
             // 
-            panelDragLeft.BackColor = Color.DimGray;
+            panelDragLeft.BackColor = Color.SlateGray;
             panelDragLeft.Controls.Add(chbSave);
             panelDragLeft.Controls.Add(chbArrow);
             panelDragLeft.Controls.Add(chbFrame);
@@ -301,6 +330,7 @@
             chbSave.Name = "chbSave";
             chbSave.Size = new Size(32, 32);
             chbSave.TabIndex = 8;
+            toolTipFS.SetToolTip(chbSave, "Save to file toggle");
             chbSave.UseVisualStyleBackColor = false;
             chbSave.Click += chbSave_Click;
             // 
@@ -316,6 +346,7 @@
             chbArrow.Name = "chbArrow";
             chbArrow.Size = new Size(32, 32);
             chbArrow.TabIndex = 7;
+            toolTipFS.SetToolTip(chbArrow, "Arrow toggle");
             chbArrow.UseVisualStyleBackColor = false;
             chbArrow.Click += chbArrow_Click;
             // 
@@ -331,6 +362,7 @@
             chbFrame.Name = "chbFrame";
             chbFrame.Size = new Size(32, 32);
             chbFrame.TabIndex = 6;
+            toolTipFS.SetToolTip(chbFrame, "Frame toggle");
             chbFrame.UseVisualStyleBackColor = false;
             chbFrame.Click += chbFrame_Click;
             // 
@@ -346,6 +378,7 @@
             chbNumbers.Name = "chbNumbers";
             chbNumbers.Size = new Size(32, 32);
             chbNumbers.TabIndex = 5;
+            toolTipFS.SetToolTip(chbNumbers, "Numbers toggle");
             chbNumbers.UseVisualStyleBackColor = false;
             chbNumbers.Click += chbNumbers_Click;
             // 
@@ -361,6 +394,7 @@
             chbGuides.Name = "chbGuides";
             chbGuides.Size = new Size(32, 32);
             chbGuides.TabIndex = 4;
+            toolTipFS.SetToolTip(chbGuides, "Guides toggle");
             chbGuides.UseVisualStyleBackColor = false;
             chbGuides.CheckedChanged += chbGuides_CheckedChanged;
             chbGuides.Click += chbGuides_Click;
@@ -368,44 +402,65 @@
             // panelRight
             // 
             panelRight.BackColor = Color.Transparent;
-            panelRight.Controls.Add(panelDragRightT);
-            panelRight.Controls.Add(panelDragRightB);
+            panelRight.Controls.Add(rangeTrackBar);
             panelRight.Dock = DockStyle.Right;
             panelRight.Location = new Point(618, 32);
             panelRight.Name = "panelRight";
             panelRight.Size = new Size(32, 302);
             panelRight.TabIndex = 3;
             // 
-            // panelDragRightT
+            // rangeTrackBar
             // 
-            panelDragRightT.BackColor = Color.DimGray;
-            panelDragRightT.Dock = DockStyle.Top;
-            panelDragRightT.Location = new Point(0, 0);
-            panelDragRightT.Name = "panelDragRightT";
-            panelDragRightT.Size = new Size(32, 30);
-            panelDragRightT.TabIndex = 1;
-            // 
-            // panelDragRightB
-            // 
-            panelDragRightB.BackColor = Color.DimGray;
-            panelDragRightB.Dock = DockStyle.Bottom;
-            panelDragRightB.Location = new Point(0, 272);
-            panelDragRightB.Name = "panelDragRightB";
-            panelDragRightB.Size = new Size(32, 30);
-            panelDragRightB.TabIndex = 0;
+            rangeTrackBar.BackColor = Color.DimGray;
+            rangeTrackBar.Dock = DockStyle.Fill;
+            rangeTrackBar.Location = new Point(0, 0);
+            rangeTrackBar.LowerValue = 0;
+            rangeTrackBar.Maximum = 100;
+            rangeTrackBar.Minimum = 0;
+            rangeTrackBar.Name = "rangeTrackBar";
+            rangeTrackBar.RangeColor = Color.Gray;
+            rangeTrackBar.Size = new Size(32, 302);
+            rangeTrackBar.TabIndex = 0;
+            rangeTrackBar.Text = "verticalRangeTrackBar1";
+            rangeTrackBar.ThumbBorderColor = Color.Black;
+            rangeTrackBar.ThumbColor = Color.White;
+            toolTipFS.SetToolTip(rangeTrackBar, "Frame size");
+            rangeTrackBar.TrackColor = Color.Orange;
+            rangeTrackBar.UpperValue = 100;
+            rangeTrackBar.MouseMove += rangeTrackBar_MouseMove_1;
             // 
             // panelScreenArea
             // 
             panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
+            panelScreenArea.Controls.Add(pnlBarTop);
+            panelScreenArea.Controls.Add(pnlBarBottom);
             panelScreenArea.Dock = DockStyle.Fill;
             panelScreenArea.Location = new Point(32, 32);
             panelScreenArea.Name = "panelScreenArea";
             panelScreenArea.Size = new Size(586, 302);
             panelScreenArea.TabIndex = 4;
             // 
+            // pnlBarTop
+            // 
+            pnlBarTop.BackColor = Color.Black;
+            pnlBarTop.Dock = DockStyle.Top;
+            pnlBarTop.Location = new Point(0, 0);
+            pnlBarTop.Name = "pnlBarTop";
+            pnlBarTop.Size = new Size(584, 0);
+            pnlBarTop.TabIndex = 1;
+            // 
+            // pnlBarBottom
+            // 
+            pnlBarBottom.BackColor = Color.Black;
+            pnlBarBottom.Dock = DockStyle.Bottom;
+            pnlBarBottom.Location = new Point(0, 300);
+            pnlBarBottom.Name = "pnlBarBottom";
+            pnlBarBottom.Size = new Size(584, 0);
+            pnlBarBottom.TabIndex = 0;
+            // 
             // contextMenuMain
             // 
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitAbout, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
             contextMenuMain.Size = new Size(192, 336);
             // 
@@ -510,11 +565,12 @@
             mitSettings.Text = "Settings";
             mitSettings.Click += mitSettings_Click;
             // 
-            // mitAbout
+            // mitHelp
             // 
-            mitAbout.Name = "mitAbout";
-            mitAbout.Size = new Size(191, 22);
-            mitAbout.Text = "About";
+            mitHelp.Name = "mitHelp";
+            mitHelp.Size = new Size(191, 22);
+            mitHelp.Text = "Help";
+            mitHelp.Click += mitHelp_Click;
             // 
             // mitExit
             // 
@@ -544,6 +600,7 @@
             panelDragTop.ResumeLayout(false);
             panelDragLeft.ResumeLayout(false);
             panelRight.ResumeLayout(false);
+            panelScreenArea.ResumeLayout(false);
             contextMenuMain.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -569,7 +626,7 @@
         private Button btnScreen;
         private Button btnArrowType;
         private ToolStripSeparator toolStripMenuItem2;
-        private ToolStripMenuItem mitAbout;
+        private ToolStripMenuItem mitHelp;
         private ToolStripMenuItem mitExit;
         private ToolStripMenuItem mitSettings;
         private ToolStripMenuItem mitArrow;
@@ -587,12 +644,15 @@
         private CheckBox chbArrow;
         private Panel panelDragBottomL;
         private Panel panelDragBottomR;
-        private Panel panelDragRightB;
-        private Panel panelDragRightT;
         private Button btnFrame;
         private Button button2;
         private Button button1;
         private Panel panelDragTopR;
         private CheckBox chbSave;
+        private VerticalRangeTrackBar rangeTrackBar;
+        private Panel panelDragTopL;
+        private Panel pnlBarTop;
+        private Panel pnlBarBottom;
+        private ToolTip toolTipFS;
     }
 }

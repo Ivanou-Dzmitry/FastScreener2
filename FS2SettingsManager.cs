@@ -54,6 +54,7 @@ namespace FastScreener2
         public static Color arrowColor = Color.Aqua;
         public static Color numberColor = Color.Yellow;
         public static Color frameColor = Color.Gray;
+        public static Color barColor;
 
 
         private static string settingsFilePath = "fs2_settings.xml";
@@ -74,10 +75,25 @@ namespace FastScreener2
                               .ToDictionary(x => x.Attribute("Key").Value, x => x.Attribute("Value").Value);
 
             //load arrow
-            arrowColor = ColorTranslator.FromHtml(settings["arrow_color"]); // Retrieve the value
-            arrowLenght = int.Parse(settings["arrow_lenght"]);
-            drawArrows = Convert.ToBoolean(settings["draw_arrows"]);
-            arrowType = int.Parse(settings["arrow_type"]);
+            try
+            {
+                arrowColor = ColorTranslator.FromHtml(settings["arrow_color"]); // Retrieve the value
+                arrowLenght = int.Parse(settings["arrow_lenght"]);
+                drawArrows = Convert.ToBoolean(settings["draw_arrows"]);
+                arrowType = int.Parse(settings["arrow_type"]);
+            }
+            catch
+            {
+                arrowColor = Color.Cyan; // Retrieve the value
+                arrowLenght = 50;
+                drawArrows = false;
+                arrowType = 1;
+
+                EnsureSettingExists("arrow_color", "#00FFFF");
+                EnsureSettingExists("arrow_lenght", "50");
+                EnsureSettingExists("draw_arrows", "false");
+                EnsureSettingExists("arrow_type", "1");
+            }
 
             //load guidlines
             guideColor = ColorTranslator.FromHtml(settings["guidlines_color"]);
@@ -134,7 +150,7 @@ namespace FastScreener2
                 }
             }
 
-
+            //res on close
             if (settings.TryGetValue("res_on_close", out string tempValueFromConfig2))
             {
                 string[] tempStringArray = tempValueFromConfig2.Split(','); // Fix here
@@ -147,13 +163,23 @@ namespace FastScreener2
                 }
                 catch
                 {
-                    startResW = Convert.ToInt32(resWorked[0, 0]);
+                    startResW = Convert.ToInt32(resWorked[0, 0]);                    
                     startResH = Convert.ToInt32(resWorked[1, 0]);
+                    EnsureSettingExists("res_on_close", "650,366");
                 }
             }
 
-
-
+            //number
+            try
+            {
+                barColor = ColorTranslator.FromHtml(settings["bar_color"]);
+            }
+            catch
+            {
+                barColor = Color.DarkGray;                
+                EnsureSettingExists("bar_color", "#313131");
+            }
+                
 
         }
 
@@ -210,14 +236,44 @@ namespace FastScreener2
             { "res2", "650,650" },
             { "res3", "650,700" },
             { "res4", "960,600" },
-            { "res_on_close", "650,650" }
+            { "res_on_close", "650,366" },
+            { "bar_color", "#313131" }
         };
 
             Save(); // Create the XML file with default values
         }
 
 
+        private static void EnsureSettingExists(string key, string defaultValue)
+        {
+            if (!settings.ContainsKey(key))
+            {
+                settings[key] = defaultValue; // Update in dictionary
 
+                XDocument doc = XDocument.Load(settingsFilePath);
+                XElement root = doc.Root;
+
+                // Check if the key exists in XML before adding
+                XElement existingSetting = root.Elements("Setting")
+                                               .FirstOrDefault(x => x.Attribute("Key")?.Value == key);
+
+                if (existingSetting == null)
+                {
+                    // Add new setting if missing
+                    root.Add(new XElement("Setting",
+                                new XAttribute("Key", key),
+                                new XAttribute("Value", defaultValue)));
+                }
+                else
+                {
+                    // Update existing setting if incorrect
+                    existingSetting.SetAttributeValue("Value", defaultValue);
+                }
+
+                // Save the updated settings file
+                doc.Save(settingsFilePath);
+            }
+        }
 
     }
 }

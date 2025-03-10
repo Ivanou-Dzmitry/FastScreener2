@@ -10,8 +10,7 @@ namespace FastScreener2
         private Color ALPHA_KEY_COLOR = Color.FromArgb(255, 1, 0, 1);
 
         // Variables for dragging
-        private bool dragging = false;
-        private Point formStartLocation; // Store form position when dragging starts
+        // private Point formStartLocation; // Store form position when dragging starts
 
         //for scaling
         public static float scalingFactor;
@@ -56,12 +55,11 @@ namespace FastScreener2
 
             FS2SettingsManager.Load();
 
-            // Set client size
-            this.ClientSize = new Size((int)(FS2SettingsManager.startResW), (int)(FS2SettingsManager.startResH));
+            FormResizer(FS2SettingsManager.startResW, FS2SettingsManager.startResH);
 
-/*            //set client size
-            clientWidth = this.ClientSize.Width;
-            clientHeight = this.ClientSize.Height; //set height*/
+            /*            //set client size
+                        clientWidth = this.ClientSize.Width;
+                        clientHeight = this.ClientSize.Height; //set height*/
 
             //load UI values Checked true/false
             mitArrow.Checked = FS2SettingsManager.drawArrows;
@@ -97,9 +95,10 @@ namespace FastScreener2
             utils.AttachDragEvents(panelDragBottomR);
             utils.AttachDragEvents(panelDragTop);
             utils.AttachDragEvents(panelDragLeft);
-            utils.AttachDragEvents(panelDragRightB);
-            utils.AttachDragEvents(panelDragRightT);
+            // utils.AttachDragEvents(panelDragRightB);
+            //utils.AttachDragEvents(panelDragRightT);
             utils.AttachDragEvents(panelDragTopR);
+            utils.AttachDragEvents(panelDragTopL);
 
             //get scaling
             scalingFactor = GetScalingFactor(this);
@@ -134,6 +133,15 @@ namespace FastScreener2
             ShowInfo("start");
         }
 
+        public void FormResizer(int Width, int Height)
+        {
+            Width = Width + frameSize * 2;
+            Height = Height + frameSize * 2;
+
+            // Set client size
+            this.ClientSize = new Size((int)(Width), (int)(Height));
+        }
+
         private void PanelSize()
         {
             panelBottom.Height = frameSize;
@@ -159,11 +167,19 @@ namespace FastScreener2
 
         public void ShowInfo(string type)
         {
-            string leftTopPos = "LeftTopPos X:" + this.Location.X.ToString() + ", Y:" + this.Location.Y.ToString();
+            string leftTopPos = "Pos X:" + this.Location.X.ToString() + ", Y:" + this.Location.Y.ToString();
             string screenArea = "Size W:" + panelScreenArea.Width.ToString() + ", H:" + panelScreenArea.Height.ToString();
 
             string name = "FastScreener 2.0";
             string scale = "Scaling: " + scalingFactor;
+
+            string frameSize = "";
+
+            if (rangeTrackBar != null)
+            {
+                frameSize = "Frame bottom: "+ pnlBarBottom.Height + ", top: " + pnlBarTop.Height;
+            }
+
 
             string saveFile = "";
 
@@ -191,7 +207,11 @@ namespace FastScreener2
                 labelDebug.Text = "Captured to " + saveFile + " | " + screenArea + " | " + scale;
             }
 
-
+            if (type == "frame")
+            {
+                labelDebug.Text = screenArea + " | " + frameSize;
+                ResizeFrame();
+            }
         }
 
         public void SwapPanelsIfNeeded()
@@ -402,7 +422,7 @@ namespace FastScreener2
         {
             // Create a new instance of the Form2 class
             //FormSet toolForm = new FormSet();
-            FS2SettingsForm settingsForm = new FS2SettingsForm();
+            formFS2Settings settingsForm = new formFS2Settings();
 
             settingsForm.ShowDialog();
         }
@@ -645,7 +665,7 @@ namespace FastScreener2
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            FS2SettingsForm settingsForm = new FS2SettingsForm();
+            formFS2Settings settingsForm = new formFS2Settings();
 
             settingsForm.ShowDialog();
         }
@@ -657,7 +677,7 @@ namespace FastScreener2
 
         private void buttonCloseForm_MouseLeave(object sender, EventArgs e)
         {
-            ((Button)sender).BackColor = Color.SlateGray;
+            ((Button)sender).BackColor = Color.DimGray;
         }
 
         private void labelDebug_Click(object sender, EventArgs e)
@@ -665,6 +685,53 @@ namespace FastScreener2
 
         }
 
+        private void mitHelp_Click(object sender, EventArgs e)
+        {
+            formFSHelp helpForm = new formFSHelp();
+            helpForm.ShowDialog();
+        }
+
+        private void rangeTrackBar_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)  // Only when dragging
+            {
+                ShowInfo("frame");
+            }
+
+            MessageBox.Show("dd");
+        }
+
+        private void rangeTrackBar_MouseMove_1(object sender, MouseEventArgs e)
+        {
+            ShowInfo("frame");
+        }
+
+
+        private void RangeTrackBar_ThumbMoved(object sender, EventArgs e)
+        {
+            ShowInfo("frame");  // Now it works!            
+        }
+
+
+        public void ResizeFrame()
+        {
+            if (rangeTrackBar != null && panelScreenArea != null)
+            {
+                int totalHeight = panelScreenArea.Height; // Get total height of the panel
+
+                int bottomHeight = (int)(totalHeight * (rangeTrackBar.LowerValue / 100.0));
+                int topHeight = (int)(totalHeight * ((100 - rangeTrackBar.UpperValue) / 100.0));
+
+                pnlBarBottom.Height = bottomHeight;
+                pnlBarTop.Height = topHeight;
+
+                // Set visibility based on height
+                pnlBarBottom.BackColor = bottomHeight == 0 ? Color.Transparent : FS2SettingsManager.barColor;
+                pnlBarTop.BackColor = topHeight == 0 ? Color.Transparent : FS2SettingsManager.barColor;
+
+
+            }
+        }
 
 
 

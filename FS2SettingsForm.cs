@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace FastScreener2
 {
-    public partial class FS2SettingsForm : Form
+    public partial class formFS2Settings : Form
     {
-        public FS2SettingsForm()
+        public formFS2Settings()
         {
             InitializeComponent();
 
@@ -34,15 +34,18 @@ namespace FastScreener2
                     ArrowSettings();
                     break;
                 case 1:
-                    FrameSettings();
+                    BarSettings();
                     break;
                 case 2:
-                    GuideSettings();
+                    FrameSettings();
                     break;
                 case 3:
-                    NumberSettings();
+                    GuideSettings();
                     break;
                 case 4:
+                    NumberSettings();
+                    break;
+                case 5:
                     ResSettings();
                     break;
                 default:
@@ -185,6 +188,19 @@ namespace FastScreener2
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
+        private Bars barsSettings;
+
+        private void BarSettings()
+        {
+            barsSettings = new Bars
+            {
+                Color = FS2SettingsManager.barColor
+            };
+
+            pgSettings.SelectedObject = barsSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
+        }
+
         // --- Save Changes Automatically ---
         private void PgSettings_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
@@ -316,6 +332,13 @@ namespace FastScreener2
             {
                 FS2SettingsManager.numberColor = numberSettings.Color;
                 FS2SettingsManager.SetSetting("number_color", ColorTranslator.ToHtml(numberSettings.Color));
+            }
+
+            //bar
+            if (e.ChangedItem.Label == "Bar Color")
+            {
+                FS2SettingsManager.numberColor = barsSettings.Color;
+                FS2SettingsManager.SetSetting("bar_color", ColorTranslator.ToHtml(barsSettings.Color));
             }
 
             FS2SettingsManager.Save();

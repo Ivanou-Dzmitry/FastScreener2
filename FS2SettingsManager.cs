@@ -40,7 +40,7 @@ namespace FastScreener2
 
         public static int[] customGuide = new int[] { 0, 0, 0, 0 };
 
-        public static int guidlineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType;
+        public static int guidlineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType, frameStrokeWidth;
 
         public static int startResW, startResH;
 
@@ -112,11 +112,32 @@ namespace FastScreener2
             numberFontSize = int.Parse(settings["number_size"]);
 
             //frame
-            frameColor = ColorTranslator.FromHtml(settings["frame_color"]);
-            drawFrame = Convert.ToBoolean(settings["draw_frame"]);
-            frameWidth = int.Parse(settings["frame_width"]);
-            frameHeight = int.Parse(settings["frame_height"]);
-            frameType = int.Parse(settings["frame_type"]);
+            try
+            {
+                frameColor = ColorTranslator.FromHtml(settings["frame_color"]);
+                drawFrame = Convert.ToBoolean(settings["draw_frame"]);
+                frameWidth = int.Parse(settings["frame_width"]);
+                frameHeight = int.Parse(settings["frame_height"]);
+                frameType = int.Parse(settings["frame_type"]);
+                frameStrokeWidth = int.Parse(settings["frame_stroke_width"]);
+            }
+            catch
+            {
+                frameColor = Color.OrangeRed;
+                drawFrame = false;
+                frameWidth = 80;
+                frameHeight = 80;
+                frameType = 1;
+                frameStrokeWidth = 1;
+
+                EnsureSettingExists("frame_color", "#00FFFF");
+                EnsureSettingExists("draw_frame", "false");
+                EnsureSettingExists("frame_width", "80");
+                EnsureSettingExists("frame_height", "80");
+                EnsureSettingExists("frame_type", "1");
+                EnsureSettingExists("frame_stroke_width", "1");
+            }
+
 
             //file
             saveToFile = Convert.ToBoolean(settings["save_to_file"]);
@@ -237,7 +258,8 @@ namespace FastScreener2
             { "res3", "650,700" },
             { "res4", "960,600" },
             { "res_on_close", "650,366" },
-            { "bar_color", "#313131" }
+            { "bar_color", "#313131" },
+            { "frame_stroke_width", "1" }            
         };
 
             Save(); // Create the XML file with default values

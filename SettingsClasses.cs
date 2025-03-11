@@ -277,6 +277,7 @@ namespace FastScreener2
     {
         private int framewidth;
         private int frameheight;
+        private int strokewidth;
         private Color color;
         private string type;
 
@@ -319,6 +320,27 @@ namespace FastScreener2
                 OnPropertyChanged(nameof(frameHeight));
             }
         }
+
+        [Category("Frame Settings")]
+        [Description("Frame stroke width (in px). Max - 10, min - 1. Default 1.")]
+        [DisplayName("Frame Stroke Width")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int strokeWidth
+        {
+            get => strokewidth;
+            set
+            {
+                // Validation for FrameWidth
+                if (value < 1 || value > 10)
+                {
+                    MessageBox.Show("Frame stroke width must be between 1 and 10.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
+                strokewidth = value;
+                OnPropertyChanged(nameof(strokeWidth));
+            }
+        }
+
 
         [Category("Frame Settings")]
         [Description("Set frame color.")]

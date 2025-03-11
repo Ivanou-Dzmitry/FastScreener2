@@ -142,6 +142,7 @@ namespace FastScreener2
                 frameHeight = FS2SettingsManager.frameHeight,
                 frameWidth = FS2SettingsManager.frameWidth,
                 Color = FS2SettingsManager.frameColor,
+                strokeWidth = FS2SettingsManager.frameStrokeWidth,
                 Type = tempTypeStr
             };
 

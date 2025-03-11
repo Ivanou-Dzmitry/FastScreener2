@@ -177,7 +177,7 @@ namespace FastScreener2
 
             if (rangeTrackBar != null)
             {
-                frameSize = "Frame bottom: "+ pnlBarBottom.Height + ", top: " + pnlBarTop.Height;
+                frameSize = "Bar bottom: "+ pnlBarBottom.Height + ", top: " + pnlBarTop.Height;
             }
 
 
@@ -728,8 +728,6 @@ namespace FastScreener2
                 // Set visibility based on height
                 pnlBarBottom.BackColor = bottomHeight == 0 ? Color.Transparent : FS2SettingsManager.barColor;
                 pnlBarTop.BackColor = topHeight == 0 ? Color.Transparent : FS2SettingsManager.barColor;
-
-
             }
         }
 

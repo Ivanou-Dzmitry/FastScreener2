@@ -34,6 +34,8 @@
             panelDragBottomR = new Panel();
             panelDragBottomL = new Panel();
             panelDragTop = new Panel();
+            txtbNumber = new TextBox();
+            txtbName = new TextBox();
             button2 = new Button();
             button1 = new Button();
             btnFrame = new Button();
@@ -134,6 +136,8 @@
             // panelDragTop
             // 
             panelDragTop.BackColor = Color.SlateGray;
+            panelDragTop.Controls.Add(txtbNumber);
+            panelDragTop.Controls.Add(txtbName);
             panelDragTop.Controls.Add(button2);
             panelDragTop.Controls.Add(button1);
             panelDragTop.Controls.Add(btnFrame);
@@ -150,6 +154,32 @@
             panelDragTop.Name = "panelDragTop";
             panelDragTop.Size = new Size(650, 32);
             panelDragTop.TabIndex = 1;
+            // 
+            // txtbNumber
+            // 
+            txtbNumber.BorderStyle = BorderStyle.FixedSingle;
+            txtbNumber.Dock = DockStyle.Left;
+            txtbNumber.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            txtbNumber.Location = new Point(462, 0);
+            txtbNumber.MaxLength = 4;
+            txtbNumber.Name = "txtbNumber";
+            txtbNumber.PlaceholderText = "Num";
+            txtbNumber.Size = new Size(33, 25);
+            txtbNumber.TabIndex = 16;
+            txtbNumber.WordWrap = false;
+            // 
+            // txtbName
+            // 
+            txtbName.BorderStyle = BorderStyle.FixedSingle;
+            txtbName.Dock = DockStyle.Left;
+            txtbName.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            txtbName.Location = new Point(224, 0);
+            txtbName.MaxLength = 32;
+            txtbName.Name = "txtbName";
+            txtbName.PlaceholderText = "File name (32 symbols)";
+            txtbName.Size = new Size(238, 25);
+            txtbName.TabIndex = 15;
+            txtbName.WordWrap = false;
             // 
             // button2
             // 
@@ -598,6 +628,7 @@
             Shown += FS2MainForm_Shown;
             panelBottom.ResumeLayout(false);
             panelDragTop.ResumeLayout(false);
+            panelDragTop.PerformLayout();
             panelDragLeft.ResumeLayout(false);
             panelRight.ResumeLayout(false);
             panelScreenArea.ResumeLayout(false);
@@ -654,5 +685,7 @@
         private Panel pnlBarTop;
         private Panel pnlBarBottom;
         private ToolTip toolTipFS;
+        private TextBox txtbName;
+        private TextBox txtbNumber;
     }
 }

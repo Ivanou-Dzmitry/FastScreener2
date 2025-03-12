@@ -1,6 +1,9 @@
+using System.Data.SqlTypes;
 using System.Drawing.Imaging;
 using System.Resources;
 using static FastScreener2.FSUtils;
+using static FastScreener2.FS2SettingsManager;
+using System.Diagnostics;
 
 namespace FastScreener2
 {
@@ -23,14 +26,19 @@ namespace FastScreener2
 
         private int frameSize = 32;
 
-        public static int clickCount = 0;
+        public static int clickInArrowCount = 0;
+        public static int clickInFrameCount = 0;
 
         static Point relativePoint; //first click point
-        private Rectangle currentRectangle;
+        public static Rectangle currentRectangle;
         private Point startPoint;
         private bool isDrawing;
         private bool isLineDrawing;
         public static int numbering = 1; //for numbers
+
+
+        //for file
+        private string stringURL = "";
 
         public static FS2MainForm Instance { get; private set; }
 
@@ -70,6 +78,7 @@ namespace FastScreener2
             //frame
             mitFrame.Checked = FS2SettingsManager.drawFrame;
             chbFrame.Checked = FS2SettingsManager.drawFrame;
+            FramePicUpdater(FS2SettingsManager.frameType);
 
             //guides
             mitGuidlines.Checked = FS2SettingsManager.drawGuides;
@@ -131,6 +140,9 @@ namespace FastScreener2
             ScaleButtonImage(chbFrame, scalingFactor);
 
             ShowInfo("start");
+
+
+            MenuItemUpdate();
         }
 
         public void FormResizer(int Width, int Height)
@@ -177,7 +189,7 @@ namespace FastScreener2
 
             if (rangeTrackBar != null)
             {
-                frameSize = "Bar bottom: "+ pnlBarBottom.Height + ", top: " + pnlBarTop.Height;
+                frameSize = "Bar bottom: " + pnlBarBottom.Height + ", top: " + pnlBarTop.Height;
             }
 
 
@@ -210,7 +222,7 @@ namespace FastScreener2
             if (type == "frame")
             {
                 labelDebug.Text = screenArea + " | " + frameSize;
-                ResizeFrame();
+                ResizeBar();
             }
         }
 
@@ -248,6 +260,18 @@ namespace FastScreener2
 
             panelScreenArea.BorderStyle = BorderStyle.None;
 
+            bool guideIsOn = false;
+
+            //paint rect
+            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
+
+
+            if (drawGuides)
+            {
+                guideIsOn = true;
+                RenderGuides(paintRect, panelScreenArea, ALPHA_KEY_COLOR);
+            }
+
             //Creating a new Bitmap object
             Bitmap captureBitmap = new Bitmap(bitmapWidth, bitmapHeight, PixelFormat.Format32bppArgb);
 
@@ -265,16 +289,81 @@ namespace FastScreener2
             captureGraphics.CopyFromScreen(posX, posY, 0, 0, captureRectangle.Size);
             captureGraphics.Dispose();
 
+
+            //Saving the Image File (I am here Saving it in My E drive).
+            if (saveToFile == true)
+            {
+                string appExeDir = Directory.GetCurrentDirectory();
+
+                //check directory for files
+                bool exists = Directory.Exists(appExeDir + "\\" + SUBPATH);
+
+                // create if not exists
+                if (!exists)
+                    Directory.CreateDirectory(appExeDir + "\\" + SUBPATH);
+
+                //datatime for random_name
+                string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
+
+                string fileName = "";
+
+                if (txtbName.Text != "")
+                {
+                    fileName = txtbName.Text + txtbNumber.Text + ".png";
+                }
+                else
+                {
+                    fileName = currentTime + "_screenshot.png";
+                }
+
+                //full path to file
+                stringURL = appExeDir + "\\" + SUBPATH + "\\" + fileName;
+
+                try
+                {
+                    captureBitmap.Save(stringURL, ImageFormat.Png);
+                }
+                catch
+                {
+                    MessageBox.Show("Can't save screenshot to file! Path: " + stringURL, "FastScreener Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+            }
+
+
+
             SetScaledBitmapToClipboard(captureBitmap, scalingFactor);
 
             //labelDebug.Text = panelScreenArea.Location.Y + "/" + panelScreenArea.Location.X;
 
             panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
 
+            //dispose objects
+            captureBitmap.Dispose();
+            captureGraphics.Dispose();
+
+            //rectangle data clear
+            panelScreenArea.Invalidate();
+            drawnRectangles.Clear();
+            currentRectangle = new Rectangle(startPoint, new Size(0, 0));
+
             //claer arrows array
             drawnArrows.Clear();
 
+            //text clear
+            drawnTexts.Clear();
+
             ShowInfo("capture");
+
+            //return nubering to start
+            numbering = 1;
+
+            //turn on grid again
+            if (guideIsOn == true)
+            {
+                this.Refresh();
+                RenderGuides(paintRect, panelScreenArea, guideColor);
+            }
         }
 
         void SetScaledBitmapToClipboard(Bitmap originalBitmap, float scalingFactor)
@@ -356,9 +445,9 @@ namespace FastScreener2
 
         private void btnArrowType_Click(object sender, EventArgs e)
         {
-            clickCount++;
+            clickInArrowCount++;
 
-            ArrowPicUpdater(clickCount);
+            ArrowPicUpdater(clickInArrowCount);
 
             ScaleButtonImage(btnArrowType, scalingFactor);
         }
@@ -366,9 +455,9 @@ namespace FastScreener2
         private void ArrowPicUpdater(int number)
         {
 
-            if (clickCount > 4)
+            if (clickInArrowCount > 4)
             {
-                clickCount = 1;
+                clickInArrowCount = 1;
                 number = 1;
             }
 
@@ -376,25 +465,25 @@ namespace FastScreener2
             {
                 case 1:
                     btnArrowType.Image = FS2Resources.arrow_type01_icon;
-                    FS2SettingsManager.arrowType = 1; clickCount = 1;
+                    FS2SettingsManager.arrowType = 1; clickInArrowCount = 1;
                     FS2SettingsManager.SetSetting("arrow_type", "1");
                     FS2SettingsManager.Save();
                     break;
                 case 2:
                     btnArrowType.Image = FS2Resources.arrow_type02_icon;
-                    FS2SettingsManager.arrowType = 2; clickCount = 2;
+                    FS2SettingsManager.arrowType = 2; clickInArrowCount = 2;
                     FS2SettingsManager.SetSetting("arrow_type", "2");
                     FS2SettingsManager.Save();
                     break;
                 case 3:
                     btnArrowType.Image = FS2Resources.arrow_type03_icon;
-                    FS2SettingsManager.arrowType = 3; clickCount = 3;
+                    FS2SettingsManager.arrowType = 3; clickInArrowCount = 3;
                     FS2SettingsManager.SetSetting("arrow_type", "3");
                     FS2SettingsManager.Save();
                     break;
                 case 4:
                     btnArrowType.Image = FS2Resources.arrow_type04_icon;
-                    FS2SettingsManager.arrowType = 4; clickCount = 4;
+                    FS2SettingsManager.arrowType = 4; clickInArrowCount = 4;
                     FS2SettingsManager.SetSetting("arrow_type", "4");
                     FS2SettingsManager.Save();
                     break;
@@ -403,6 +492,44 @@ namespace FastScreener2
                     break;
             }
         }
+
+
+        private void btnFrame_Click(object sender, EventArgs e)
+        {
+            clickInFrameCount++;
+            FramePicUpdater(clickInFrameCount);
+            ScaleButtonImage(btnFrameType, scalingFactor);
+        }
+
+        private void FramePicUpdater(int number)
+        {
+            if (clickInFrameCount > 2)
+            {
+                clickInFrameCount = 1;
+                number = 1;
+            }
+
+            switch (number)
+            {
+                case 1:
+                    btnFrameType.Image = FS2Resources.frame_unlocked_icon;
+                    FS2SettingsManager.frameType = 1; clickInFrameCount = 1;
+                    FS2SettingsManager.SetSetting("frame_type", "1");
+                    FS2SettingsManager.Save();
+                    break;
+                case 2:
+                    btnFrameType.Image = FS2Resources.frame_locked_icon;
+                    FS2SettingsManager.frameType = 2; clickInFrameCount = 2;
+                    FS2SettingsManager.SetSetting("frame_type", "2");
+                    FS2SettingsManager.Save();
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
+
 
         //for DPI
         private void ScaleButtonImage(Control targetControl, float scalingFactor)
@@ -425,6 +552,14 @@ namespace FastScreener2
             formFS2Settings settingsForm = new formFS2Settings();
 
             settingsForm.ShowDialog();
+
+            MenuItemUpdate();
+
+            if (drawGuides == true)
+            {
+                this.Refresh();
+                //DrawGrid(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), gridColor);
+            }
         }
 
         private void ToggleStatus(
@@ -523,6 +658,20 @@ namespace FastScreener2
         private void chbGuides_Click(object sender, EventArgs e)
         {
             DrawGuideStatus();
+
+            //paint rect
+            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
+
+            if (drawGuides == false)
+            {
+                //this.Refresh();
+                RenderGuides(paintRect, panelScreenArea, ALPHA_KEY_COLOR);
+            }
+            else
+            {
+                RenderGuides(paintRect, panelScreenArea, guideColor);
+            }
+                
         }
 
         private void DrawGuideStatus()
@@ -573,48 +722,78 @@ namespace FastScreener2
         }
 
 
-        //hook mouse
+        //hook mouse MMB
         private void mouseHook_MMB(MouseHook.MSLLHOOKSTRUCT mouse)
         {
             Panel usedPanel = panelScreenArea;
+
+            //paint rect
+            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
 
             // important point
             relativePoint = usedPanel.PointToClient(Cursor.Position);
 
             //draw Frame
-            if (FS2SettingsManager.drawFrame)
+            if (FS2SettingsManager.drawFrame && FS2SettingsManager.frameType == 1)
             {
                 startPoint = new Point(relativePoint.X, relativePoint.Y);
                 currentRectangle = new Rectangle(startPoint, new Size(0, 0));
                 isDrawing = true;
             }
 
+            if (FS2SettingsManager.drawFrame && FS2SettingsManager.frameType == 2)
+            {
+
+                int width = FS2SettingsManager.frameWidth;
+                int height = FS2SettingsManager.frameHeight;
+
+                startPoint = new Point(relativePoint.X - width / 2, relativePoint.Y - height / 2);
+                currentRectangle = new Rectangle(startPoint, new Size(width, height));
+                isDrawing = true;
+
+                drawnRectangles.Add(currentRectangle);
+            }
+
             isLineDrawing = true;
+
 
             //draw Arrow
             if (FS2SettingsManager.drawArrows && isLineDrawing)
             {
-                DrawArrow(new PaintEventArgs(usedPanel.CreateGraphics(), usedPanel.ClientRectangle), relativePoint, FS2SettingsManager.arrowColor);
-                RenderLines(new PaintEventArgs(usedPanel.CreateGraphics(), usedPanel.ClientRectangle), FS2SettingsManager.ARROW_SIZE);
+                SetArrow(relativePoint, FS2SettingsManager.arrowColor);
+                RenderArrows(paintRect);
             }
 
             //draw Number
             if (FS2SettingsManager.drawNumber)
             {
-                // DrawNumber(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), relativePoint, numberColor, numbering.ToString());
+                AddNumber(numbering.ToString(), relativePoint);
+                RenderNumbers(paintRect);
                 numbering++;
             }
+
         }
 
         // Mouse Middle Button Up (End drawing)
         private void mouseHook_MouseUp(MouseHook.MSLLHOOKSTRUCT mouse)
         {
+
+            //paint rect
+            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
+
+
             isDrawing = false;
             isLineDrawing = false;
 
-            // Calculate the final rectangle
-            int width = relativePoint.X - startPoint.X;
-            int height = relativePoint.Y - startPoint.Y;
+            int width = 0;
+            int height = 0;
+
+            // Calculate the final rectangle - Free type
+            if (FS2SettingsManager.frameType == 1)
+            {
+                width = relativePoint.X - startPoint.X;
+                height = relativePoint.Y - startPoint.Y;
+            }
 
             // Create and add the rectangle
             Rectangle newRectangle = new Rectangle(
@@ -624,16 +803,25 @@ namespace FastScreener2
                     Math.Abs(height)
                 );
 
-            if (FS2SettingsManager.drawFrame)
+
+
+            if (drawnArrows.Count > 0)
             {
-                //drawnRectangles.Add(newRectangle);
-                //DrawFrame(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), relativePoint, frameColor);
+                RenderArrows(paintRect);
             }
 
-            //avoid draw line on mouse UP
-            if (FS2SettingsManager.drawArrows && isLineDrawing)
+
+            if (FS2SettingsManager.drawFrame)
             {
-                //DrawArrow(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), relativePoint, arrowColor);
+                drawnRectangles.Add(newRectangle);
+                RenderFrame(paintRect);
+                //DrawFrame(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), relativePoint, FS2SettingsManager.frameColor);
+            }
+
+
+            if (drawnTexts.Count > 0)
+            {
+                RenderNumbers(paintRect);
             }
 
         }
@@ -642,22 +830,40 @@ namespace FastScreener2
         {
             isLineDrawing = false;
 
+            //paint rect
+            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
+
             if (isDrawing)
             {
                 // important point
                 relativePoint = panelScreenArea.PointToClient(Cursor.Position);
 
-                int width = relativePoint.X - startPoint.X;
-                int height = relativePoint.Y - startPoint.Y;
+                int width = 0;
+                int height = 0;
 
-                currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
+                if (FS2SettingsManager.frameType == 1)
+                {
+                    width = relativePoint.X - startPoint.X;
+                    height = relativePoint.Y - startPoint.Y;
 
-                //DrawFrameCurrent(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), relativePoint, frameColor);
+                    currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
+                }
+
+
+                if (drawnArrows.Count > 0)
+                {
+                    RenderArrows(paintRect);
+                }
 
                 if (FS2SettingsManager.drawFrame)
                 {
-                    //DrawFrame(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), relativePoint, frameColor);
+                    DrawFrameCurrent(paintRect);
                     panelScreenArea.Invalidate();
+                }
+
+                if (drawnTexts.Count > 0)
+                {
+                    RenderNumbers(paintRect);
                 }
 
             }
@@ -680,26 +886,12 @@ namespace FastScreener2
             ((Button)sender).BackColor = Color.DimGray;
         }
 
-        private void labelDebug_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void mitHelp_Click(object sender, EventArgs e)
         {
             formFSHelp helpForm = new formFSHelp();
             helpForm.ShowDialog();
         }
 
-        private void rangeTrackBar_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)  // Only when dragging
-            {
-                ShowInfo("frame");
-            }
-
-            MessageBox.Show("dd");
-        }
 
         private void rangeTrackBar_MouseMove_1(object sender, MouseEventArgs e)
         {
@@ -707,13 +899,13 @@ namespace FastScreener2
         }
 
 
-        private void RangeTrackBar_ThumbMoved(object sender, EventArgs e)
-        {
-            ShowInfo("frame");  // Now it works!            
-        }
+        /*        private void RangeTrackBar_ThumbMoved(object sender, EventArgs e)
+                {
+                    ShowInfo("frame");  // Now it works!            
+                }*/
 
 
-        public void ResizeFrame()
+        public void ResizeBar()
         {
             if (rangeTrackBar != null && panelScreenArea != null)
             {
@@ -731,7 +923,59 @@ namespace FastScreener2
             }
         }
 
+        private void panelScreenArea_Paint(object sender, PaintEventArgs e)
+        {
+
+            if (drawGuides)
+            {
+                RenderGuides(e, panelScreenArea, guideColor);
+            }
+
+            //arrow
+            if (FS2SettingsManager.drawArrows && drawnArrows.Count > 0)
+            {
+                RenderArrows(e);
+            }
+
+            //frame
+            if (FS2SettingsManager.drawFrame && drawnRectangles.Count > 0)
+            {
+                RenderFrame(e);
+            }
+
+            //numbers
+            if (FS2SettingsManager.drawNumber && drawnTexts.Count > 0)
+            {
+                RenderNumbers(e);
+            }
+
+        }
+
+        private void mitOpenFolder_Click(object sender, EventArgs e)
+        {
+            string appExeDir = Directory.GetCurrentDirectory();
+
+            //check directory for files
+            bool exists = Directory.Exists(appExeDir + "\\" + SUBPATH);
+
+            // create if not exists
+            if (!exists)
+                Directory.CreateDirectory(appExeDir + "\\" + SUBPATH);
+
+            //path to open
+            string PathToDir = appExeDir + "\\" + SUBPATH;
+
+            //open dir
+            Process.Start("explorer.exe", PathToDir);
+        }
 
 
+        private void MenuItemUpdate()
+        {
+            mitSize01.Text = resWorked[0, 0].ToString() + "x" + resWorked[1, 0].ToString();
+            mitSize02.Text = resWorked[0, 1].ToString() + "x" + resWorked[1, 1].ToString();
+            mitSize03.Text = resWorked[0, 2].ToString() + "x" + resWorked[1, 2].ToString();
+            mitSize04.Text = resWorked[0, 3].ToString() + "x" + resWorked[1, 3].ToString();
+        }
     }
 }

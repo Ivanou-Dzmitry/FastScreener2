@@ -38,7 +38,7 @@
             txtbName = new TextBox();
             button2 = new Button();
             button1 = new Button();
-            btnFrame = new Button();
+            btnFrameType = new Button();
             btnArrowType = new Button();
             btnSettings = new Button();
             btnScreen = new Button();
@@ -113,7 +113,6 @@
             labelDebug.TabIndex = 0;
             labelDebug.Text = "Info Label, Info Label, Info Label, Info Label,Info Label";
             labelDebug.TextAlign = ContentAlignment.TopCenter;
-            labelDebug.Click += labelDebug_Click;
             // 
             // panelDragBottomR
             // 
@@ -140,7 +139,7 @@
             panelDragTop.Controls.Add(txtbName);
             panelDragTop.Controls.Add(button2);
             panelDragTop.Controls.Add(button1);
-            panelDragTop.Controls.Add(btnFrame);
+            panelDragTop.Controls.Add(btnFrameType);
             panelDragTop.Controls.Add(btnArrowType);
             panelDragTop.Controls.Add(btnSettings);
             panelDragTop.Controls.Add(btnScreen);
@@ -209,19 +208,20 @@
             toolTipFS.SetToolTip(button1, "Previous resolution");
             button1.UseVisualStyleBackColor = false;
             // 
-            // btnFrame
+            // btnFrameType
             // 
-            btnFrame.BackColor = Color.DimGray;
-            btnFrame.Dock = DockStyle.Left;
-            btnFrame.FlatAppearance.BorderSize = 0;
-            btnFrame.FlatStyle = FlatStyle.Flat;
-            btnFrame.Image = FS2Resources.frame_unlocked_icon;
-            btnFrame.Location = new Point(128, 0);
-            btnFrame.Name = "btnFrame";
-            btnFrame.Size = new Size(32, 32);
-            btnFrame.TabIndex = 10;
-            toolTipFS.SetToolTip(btnFrame, "Frame type");
-            btnFrame.UseVisualStyleBackColor = false;
+            btnFrameType.BackColor = Color.DimGray;
+            btnFrameType.Dock = DockStyle.Left;
+            btnFrameType.FlatAppearance.BorderSize = 0;
+            btnFrameType.FlatStyle = FlatStyle.Flat;
+            btnFrameType.Image = FS2Resources.frame_unlocked_icon;
+            btnFrameType.Location = new Point(128, 0);
+            btnFrameType.Name = "btnFrameType";
+            btnFrameType.Size = new Size(32, 32);
+            btnFrameType.TabIndex = 10;
+            toolTipFS.SetToolTip(btnFrameType, "Frame type");
+            btnFrameType.UseVisualStyleBackColor = false;
+            btnFrameType.Click += btnFrame_Click;
             // 
             // btnArrowType
             // 
@@ -452,8 +452,8 @@
             rangeTrackBar.Size = new Size(32, 302);
             rangeTrackBar.TabIndex = 0;
             rangeTrackBar.Text = "verticalRangeTrackBar1";
-            rangeTrackBar.ThumbBorderColor = Color.Black;
-            rangeTrackBar.ThumbColor = Color.White;
+            rangeTrackBar.ThumbBorderColor = Color.Transparent;
+            rangeTrackBar.ThumbColor = Color.Black;
             toolTipFS.SetToolTip(rangeTrackBar, "Frame size");
             rangeTrackBar.TrackColor = Color.Orange;
             rangeTrackBar.UpperValue = 100;
@@ -469,6 +469,7 @@
             panelScreenArea.Name = "panelScreenArea";
             panelScreenArea.Size = new Size(586, 302);
             panelScreenArea.TabIndex = 4;
+            panelScreenArea.Paint += panelScreenArea_Paint;
             // 
             // pnlBarTop
             // 
@@ -581,6 +582,7 @@
             mitOpenFolder.Name = "mitOpenFolder";
             mitOpenFolder.Size = new Size(191, 22);
             mitOpenFolder.Text = "Open Folder with Files";
+            mitOpenFolder.Click += mitOpenFolder_Click;
             // 
             // toolStripMenuItem4
             // 
@@ -675,7 +677,7 @@
         private CheckBox chbArrow;
         private Panel panelDragBottomL;
         private Panel panelDragBottomR;
-        private Button btnFrame;
+        private Button btnFrameType;
         private Button button2;
         private Button button1;
         private Panel panelDragTopR;

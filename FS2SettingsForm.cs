@@ -283,7 +283,7 @@ namespace FastScreener2
             //FRAME
             if (e.ChangedItem.Label == "Frame Color")
             {
-                FS2SettingsManager.arrowColor = frameSettings.Color;
+                FS2SettingsManager.frameColor = frameSettings.Color;
                 FS2SettingsManager.SetSetting("frame_color", ColorTranslator.ToHtml(frameSettings.Color));
             }
 
@@ -299,6 +299,14 @@ namespace FastScreener2
                 FS2SettingsManager.frameHeight = frameSettings.frameHeight;
                 FS2SettingsManager.SetSetting("frame_height", frameSettings.frameHeight.ToString());
             }
+
+            if (e.ChangedItem.Label == "Frame Stroke Width")
+            {
+                FS2SettingsManager.frameStrokeWidth = frameSettings.strokeWidth;
+                FS2SettingsManager.SetSetting("frame_stroke_width", frameSettings.strokeWidth.ToString());
+            }
+
+            
 
             if (e.ChangedItem.Label == "Frame Type")
             {

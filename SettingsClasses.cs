@@ -281,7 +281,7 @@ namespace FastScreener2
         private Color color;
         private string type;
 
-        [Category("Frame Settings")]
+        [Category("2. Fixed Frame Settings")]
         [Description("Frame width. Max - screenshot width, min - 16. Default 80.")]
         [DisplayName("Frame Width")]
         [TypeConverter(typeof(Int32OnlyConverter))]
@@ -301,7 +301,7 @@ namespace FastScreener2
             }
         }
 
-        [Category("Frame Settings")]
+        [Category("2. Fixed Frame Settings")]
         [Description("Frame height. Max - screenshot height, min - 16. Default 80.")]
         [DisplayName("Frame Height")]
         [TypeConverter(typeof(Int32OnlyConverter))]
@@ -321,7 +321,7 @@ namespace FastScreener2
             }
         }
 
-        [Category("Frame Settings")]
+        [Category("1. Base Frame Settings")]
         [Description("Frame stroke width (in px). Max - 10, min - 1. Default 1.")]
         [DisplayName("Frame Stroke Width")]
         [TypeConverter(typeof(Int32OnlyConverter))]
@@ -342,7 +342,7 @@ namespace FastScreener2
         }
 
 
-        [Category("Frame Settings")]
+        [Category("1. Base Frame Settings")]
         [Description("Set frame color.")]
         [DisplayName("Frame Color")]
         [TypeConverter(typeof(ColorConverter))]
@@ -356,7 +356,7 @@ namespace FastScreener2
             }
         }
 
-        [Category("Frame Settings")]
+        [Category("1. Base Frame Settings")]
         [DisplayName("Frame Type")]
         [Description("Choose frame type. Fixed (click and draw with fixed size)  or Free (drag draw). Set W and H for Fixed type.")]
         [TypeConverter(typeof(FrameTypeConverter))]

@@ -92,7 +92,7 @@
             // 
             // pnlSetHeader
             // 
-            pnlSetHeader.BackColor = Color.SlateGray;
+            pnlSetHeader.BackColor = Color.SteelBlue;
             pnlSetHeader.Controls.Add(labelSetHeader);
             pnlSetHeader.Controls.Add(button1);
             pnlSetHeader.Dock = DockStyle.Top;

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formFSHelp));
             pnlFSHelpHead = new Panel();
             btnCloseHelp = new Button();
             richTextBox1 = new RichTextBox();
@@ -36,7 +37,7 @@
             // 
             // pnlFSHelpHead
             // 
-            pnlFSHelpHead.BackColor = Color.SlateGray;
+            pnlFSHelpHead.BackColor = Color.DarkGreen;
             pnlFSHelpHead.Controls.Add(btnCloseHelp);
             pnlFSHelpHead.Dock = DockStyle.Top;
             pnlFSHelpHead.Location = new Point(0, 0);
@@ -59,12 +60,14 @@
             // 
             // richTextBox1
             // 
+            richTextBox1.BorderStyle = BorderStyle.FixedSingle;
             richTextBox1.Dock = DockStyle.Fill;
+            richTextBox1.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
             richTextBox1.Location = new Point(0, 32);
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(400, 418);
             richTextBox1.TabIndex = 1;
-            richTextBox1.Text = "";
+            richTextBox1.Text = resources.GetString("richTextBox1.Text");
             // 
             // formFSHelp
             // 
@@ -77,6 +80,7 @@
             Name = "formFSHelp";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Form1";
+            TopMost = true;
             pnlFSHelpHead.ResumeLayout(false);
             ResumeLayout(false);
         }

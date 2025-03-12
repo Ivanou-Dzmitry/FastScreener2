@@ -12,21 +12,6 @@ namespace FastScreener2
 {
     internal class FS2SettingsManager
     {
-        public struct Line
-        {
-            public Point startPoint { get; set; }
-            public Point endPoint { get; set; }
-            public Color lineColor { get; set; }
-            public float lineWidth { get; set; }
-
-            public Line(Point start, Point end, Color color, float width)
-            {
-                startPoint = start;
-                endPoint = end;
-                lineColor = color;
-                lineWidth = width;
-            }
-        }
 
         //screen sizes
         public static int[,] RES_DEFAULT = { { 650, 650, 650, 960 }, { 366, 650, 700, 600 } };
@@ -61,6 +46,10 @@ namespace FastScreener2
         private static Dictionary<string, string> settings = new Dictionary<string, string>();
 
         public const int ARROW_SIZE = 6;
+
+        public const int MIN_DRAWN_SIZE_FRAME = 3;
+
+        public const string SUBPATH = "screenshots";
 
         // Load settings from XML (create file if missing)
         public static void Load()

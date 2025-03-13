@@ -31,13 +31,15 @@
             pgSettings = new PropertyGrid();
             lboxSetCat = new ListBox();
             btnOK = new Button();
-            pnlBottom = new Panel();
+            pnlSetBottom = new Panel();
             labelSetDebug = new Label();
             pnlSetHeader = new Panel();
             labelSetHeader = new Label();
             button1 = new Button();
-            pnlBottom.SuspendLayout();
+            pictureBox1 = new PictureBox();
+            pnlSetBottom.SuspendLayout();
             pnlSetHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // pgSettings
@@ -70,16 +72,16 @@
             btnOK.UseVisualStyleBackColor = true;
             btnOK.Click += btnOK_Click;
             // 
-            // pnlBottom
+            // pnlSetBottom
             // 
-            pnlBottom.BackColor = Color.SlateGray;
-            pnlBottom.Controls.Add(labelSetDebug);
-            pnlBottom.Controls.Add(btnOK);
-            pnlBottom.Dock = DockStyle.Bottom;
-            pnlBottom.Location = new Point(0, 347);
-            pnlBottom.Name = "pnlBottom";
-            pnlBottom.Size = new Size(534, 64);
-            pnlBottom.TabIndex = 3;
+            pnlSetBottom.BackColor = Color.SlateGray;
+            pnlSetBottom.Controls.Add(labelSetDebug);
+            pnlSetBottom.Controls.Add(btnOK);
+            pnlSetBottom.Dock = DockStyle.Bottom;
+            pnlSetBottom.Location = new Point(0, 347);
+            pnlSetBottom.Name = "pnlSetBottom";
+            pnlSetBottom.Size = new Size(534, 64);
+            pnlSetBottom.TabIndex = 3;
             // 
             // labelSetDebug
             // 
@@ -95,6 +97,7 @@
             pnlSetHeader.BackColor = Color.SteelBlue;
             pnlSetHeader.Controls.Add(labelSetHeader);
             pnlSetHeader.Controls.Add(button1);
+            pnlSetHeader.Controls.Add(pictureBox1);
             pnlSetHeader.Dock = DockStyle.Top;
             pnlSetHeader.Location = new Point(0, 0);
             pnlSetHeader.Name = "pnlSetHeader";
@@ -105,7 +108,7 @@
             // 
             labelSetHeader.Dock = DockStyle.Left;
             labelSetHeader.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            labelSetHeader.Location = new Point(0, 0);
+            labelSetHeader.Location = new Point(32, 0);
             labelSetHeader.Name = "labelSetHeader";
             labelSetHeader.Size = new Size(128, 32);
             labelSetHeader.TabIndex = 1;
@@ -125,13 +128,24 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += btnOK_Click;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Dock = DockStyle.Left;
+            pictureBox1.Image = FS2Resources.settings_icon;
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(32, 32);
+            pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+            pictureBox1.TabIndex = 2;
+            pictureBox1.TabStop = false;
+            // 
             // formFS2Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(534, 411);
             Controls.Add(pnlSetHeader);
-            Controls.Add(pnlBottom);
+            Controls.Add(pnlSetBottom);
             Controls.Add(lboxSetCat);
             Controls.Add(pgSettings);
             FormBorderStyle = FormBorderStyle.None;
@@ -139,9 +153,10 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Settings";
             TopMost = true;
-            pnlBottom.ResumeLayout(false);
-            pnlBottom.PerformLayout();
+            pnlSetBottom.ResumeLayout(false);
+            pnlSetBottom.PerformLayout();
             pnlSetHeader.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 
@@ -150,10 +165,11 @@
         private PropertyGrid pgSettings;
         private ListBox lboxSetCat;
         private Button btnOK;
-        private Panel pnlBottom;
+        private Panel pnlSetBottom;
         private Label labelSetDebug;
         private Panel pnlSetHeader;
         private Button button1;
         private Label labelSetHeader;
+        private PictureBox pictureBox1;
     }
 }

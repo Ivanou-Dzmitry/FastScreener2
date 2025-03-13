@@ -151,11 +151,31 @@ namespace FastScreener2 {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon fs_icon {
+            get {
+                object obj = ResourceManager.GetObject("fs_icon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap guides_icon {
             get {
                 object obj = ResourceManager.GetObject("guides_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap help_icon {
+            get {
+                object obj = ResourceManager.GetObject("help_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -186,6 +206,16 @@ namespace FastScreener2 {
         internal static System.Drawing.Bitmap number_icon {
             get {
                 object obj = ResourceManager.GetObject("number_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap res_cycle_icon {
+            get {
+                object obj = ResourceManager.GetObject("res_cycle_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

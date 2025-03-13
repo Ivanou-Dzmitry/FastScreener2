@@ -22,6 +22,7 @@ namespace FastScreener2
 
             FSUtils utils = new FSUtils();
             utils.AttachDragEvents(pnlSetHeader);
+            utils.AttachDragEvents(pnlSetBottom);
         }
 
         private void lboxSetCat_Click(object sender, EventArgs e)

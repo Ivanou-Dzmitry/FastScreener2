@@ -326,6 +326,33 @@ namespace FastScreener2
             }
         }
 
+        public static void LogScreenshot(string date, int width, int height, string fileName)
+        {
+            string logFilePath = Path.Combine(Directory.GetCurrentDirectory(), "fs_log.csv");
+
+            try
+            {
+                // Check if file exists
+                bool fileExists = File.Exists(logFilePath);
+
+                using (StreamWriter sw = new StreamWriter(logFilePath, true))
+                {
+                    // If the file is new, write the header first
+                    if (!fileExists)
+                    {
+                        sw.WriteLine("Date,Width,Height,FileName");
+                    }
+
+                    // Append the log entry
+                    sw.WriteLine($"{date},{width},{height},{fileName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error writing to log file: {ex.Message}", "Logging Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
     }
 }

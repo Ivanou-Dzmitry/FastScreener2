@@ -25,5 +25,10 @@ namespace FastScreener2
         {
             Close();
         }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

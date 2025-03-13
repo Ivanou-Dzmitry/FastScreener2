@@ -28,6 +28,7 @@ namespace FastScreener2
 
         public static int clickInArrowCount = 0;
         public static int clickInFrameCount = 0;
+        public static int clickInRes = 0;
 
         static Point relativePoint; //first click point
         public static Rectangle currentRectangle;
@@ -145,14 +146,7 @@ namespace FastScreener2
             MenuItemUpdate();
         }
 
-        public void FormResizer(int Width, int Height)
-        {
-            Width = Width + frameSize * 2;
-            Height = Height + frameSize * 2;
 
-            // Set client size
-            this.ClientSize = new Size((int)(Width), (int)(Height));
-        }
 
         private void PanelSize()
         {
@@ -211,7 +205,7 @@ namespace FastScreener2
 
             if (type == "start")
             {
-                labelDebug.Text = name + " | " + scale;
+                labelDebug.Text = name + " | " + screenArea + " | " + scale;
             }
 
             if (type == "capture")
@@ -254,117 +248,80 @@ namespace FastScreener2
 
         private void CaptureScreen()
         {
-            // bitmap size
             int bitmapWidth = panelScreenArea.Width;
             int bitmapHeight = panelScreenArea.Height;
 
             panelScreenArea.BorderStyle = BorderStyle.None;
+            bool guideIsOn = drawGuides;
 
-            bool guideIsOn = false;
-
-            //paint rect
-            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
-
-
-            if (drawGuides)
+            if (guideIsOn)
             {
-                guideIsOn = true;
-                RenderGuides(paintRect, panelScreenArea, ALPHA_KEY_COLOR);
+                RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, ALPHA_KEY_COLOR);
             }
 
-            //Creating a new Bitmap object
-            Bitmap captureBitmap = new Bitmap(bitmapWidth, bitmapHeight, PixelFormat.Format32bppArgb);
+            string fileName = "";
 
-            //Creating a Rectangle object which will capture our Current Screen
-            Rectangle captureRectangle = Screen.AllScreens[0].Bounds;
-
-            //Creating a New Graphics Object
-            Graphics captureGraphics = Graphics.FromImage(captureBitmap);
-
-            //Position of screenshot
-            int posY = this.Location.Y + 32; //set size
-            int posX = this.Location.X + 32;
-
-            //Copying Image from The Screen
-            captureGraphics.CopyFromScreen(posX, posY, 0, 0, captureRectangle.Size);
-            captureGraphics.Dispose();
-
-
-            //Saving the Image File (I am here Saving it in My E drive).
-            if (saveToFile == true)
+            // Create bitmap and capture graphics
+            using (Bitmap captureBitmap = new Bitmap(bitmapWidth, bitmapHeight, PixelFormat.Format32bppArgb))
             {
-                string appExeDir = Directory.GetCurrentDirectory();
+                Rectangle captureRectangle = new Rectangle(this.Location.X + 32, this.Location.Y + 32, bitmapWidth, bitmapHeight);
 
-                //check directory for files
-                bool exists = Directory.Exists(appExeDir + "\\" + SUBPATH);
-
-                // create if not exists
-                if (!exists)
-                    Directory.CreateDirectory(appExeDir + "\\" + SUBPATH);
-
-                //datatime for random_name
-                string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
-
-                string fileName = "";
-
-                if (txtbName.Text != "")
+                using (Graphics captureGraphics = Graphics.FromImage(captureBitmap))
                 {
-                    fileName = txtbName.Text + txtbNumber.Text + ".png";
-                }
-                else
-                {
-                    fileName = currentTime + "_screenshot.png";
+                    captureGraphics.CopyFromScreen(captureRectangle.Location, Point.Empty, captureRectangle.Size);
                 }
 
-                //full path to file
-                stringURL = appExeDir + "\\" + SUBPATH + "\\" + fileName;
+                
 
-                try
+                // Save file if needed
+                if (saveToFile)
                 {
-                    captureBitmap.Save(stringURL, ImageFormat.Png);
-                }
-                catch
-                {
-                    MessageBox.Show("Can't save screenshot to file! Path: " + stringURL, "FastScreener Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string appExeDir = Directory.GetCurrentDirectory();
+                    string directoryPath = Path.Combine(appExeDir, SUBPATH);
+
+                    if (!Directory.Exists(directoryPath))
+                        Directory.CreateDirectory(directoryPath);
+
+                    string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
+                    fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}{txtbNumber.Text}.png" : $"{currentTime}_screenshot.png";
+
+                    stringURL = Path.Combine(directoryPath, fileName);
+
+                    try
+                    {
+                        captureBitmap.Save(stringURL, ImageFormat.Png);
+                    }
+                    catch
+                    {
+                        MessageBox.Show($"Can't save screenshot to file! Path: {stringURL}", "FastScreener Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
 
+                SetScaledBitmapToClipboard(captureBitmap, scalingFactor);
             }
-
-
-
-            SetScaledBitmapToClipboard(captureBitmap, scalingFactor);
-
-            //labelDebug.Text = panelScreenArea.Location.Y + "/" + panelScreenArea.Location.X;
 
             panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
 
-            //dispose objects
-            captureBitmap.Dispose();
-            captureGraphics.Dispose();
-
-            //rectangle data clear
+            // Clear objects to free memory
             panelScreenArea.Invalidate();
             drawnRectangles.Clear();
             currentRectangle = new Rectangle(startPoint, new Size(0, 0));
-
-            //claer arrows array
             drawnArrows.Clear();
-
-            //text clear
             drawnTexts.Clear();
 
             ShowInfo("capture");
 
-            //return nubering to start
-            numbering = 1;
+            numbering = 1; // Reset numbering
 
-            //turn on grid again
-            if (guideIsOn == true)
+            if (guideIsOn)
             {
                 this.Refresh();
-                RenderGuides(paintRect, panelScreenArea, guideColor);
+                RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, guideColor);
             }
+
+            LogScreenshot(DateTime.Now.ToString("yyyy-MM-dd"), bitmapWidth, bitmapHeight, fileName);
         }
+
 
         void SetScaledBitmapToClipboard(Bitmap originalBitmap, float scalingFactor)
         {
@@ -395,6 +352,11 @@ namespace FastScreener2
             if (key == KeyboardHook.VKeys.F4)
             {
                 CaptureScreen();
+            }
+
+            if (key == KeyboardHook.VKeys.F1)
+            {
+                mitHelp_Click(this, EventArgs.Empty);
             }
         }
 
@@ -526,8 +488,6 @@ namespace FastScreener2
                 default:
                     break;
             }
-
-
         }
 
 
@@ -547,8 +507,7 @@ namespace FastScreener2
 
         private void mitSettings_Click(object sender, EventArgs e)
         {
-            // Create a new instance of the Form2 class
-            //FormSet toolForm = new FormSet();
+            // Create a new instance of the Form2 class            
             formFS2Settings settingsForm = new formFS2Settings();
 
             settingsForm.ShowDialog();
@@ -558,7 +517,6 @@ namespace FastScreener2
             if (drawGuides == true)
             {
                 this.Refresh();
-                //DrawGrid(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), gridColor);
             }
         }
 
@@ -671,7 +629,7 @@ namespace FastScreener2
             {
                 RenderGuides(paintRect, panelScreenArea, guideColor);
             }
-                
+
         }
 
         private void DrawGuideStatus()
@@ -977,5 +935,57 @@ namespace FastScreener2
             mitSize03.Text = resWorked[0, 2].ToString() + "x" + resWorked[1, 2].ToString();
             mitSize04.Text = resWorked[0, 3].ToString() + "x" + resWorked[1, 3].ToString();
         }
+
+
+        private void AdjustClientSize(int widthIndex, int heightIndex)
+        {
+            // Retrieve dimensions
+            int clientW = Convert.ToInt32(resWorked[0, widthIndex]) + frameSize * 2; ;
+            int clientH = Convert.ToInt32(resWorked[1, heightIndex]) + frameSize * 2; ;
+
+            // Apply scaling factor
+            int scaledClientW = (int)(clientW * scalingFactor);
+            int scaledClientH = (int)(clientH * scalingFactor);
+
+            // Set client size
+            this.ClientSize = new Size(scaledClientW, scaledClientH);
+
+            // Refresh the form
+            this.Refresh();
+
+            ShowInfo("start");
+        }
+
+        public void FormResizer(int Width, int Height)
+        {
+            Width = Width + frameSize * 2;
+            Height = Height + frameSize * 2;
+
+            // Set client size
+            this.ClientSize = new Size((int)(Width), (int)(Height));
+        }
+
+        private void mitSize01_Click(object sender, EventArgs e) => AdjustClientSize(0, 0);
+
+        private void mitSize02_Click(object sender, EventArgs e) => AdjustClientSize(1, 1);
+
+        private void mitSize03_Click(object sender, EventArgs e) => AdjustClientSize(2, 2);
+
+        private void mitSize04_Click(object sender, EventArgs e) => AdjustClientSize(3, 3);
+
+        private void btnNextRes_Click(object sender, EventArgs e)
+        {
+            int res = clickInRes;
+            
+            if (res >3)
+            {
+                res = 0;
+                clickInRes = 0;
+            }
+
+            AdjustClientSize(res, res);
+            clickInRes++;
+        }
+
     }
 }

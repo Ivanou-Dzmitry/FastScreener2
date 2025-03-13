@@ -30,20 +30,47 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formFSHelp));
             pnlFSHelpHead = new Panel();
+            labelHelpHeader = new Label();
+            picboxHelp = new PictureBox();
             btnCloseHelp = new Button();
             richTextBox1 = new RichTextBox();
             pnlFSHelpHead.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picboxHelp).BeginInit();
             SuspendLayout();
             // 
             // pnlFSHelpHead
             // 
-            pnlFSHelpHead.BackColor = Color.DarkGreen;
+            pnlFSHelpHead.BackColor = Color.YellowGreen;
+            pnlFSHelpHead.Controls.Add(labelHelpHeader);
+            pnlFSHelpHead.Controls.Add(picboxHelp);
             pnlFSHelpHead.Controls.Add(btnCloseHelp);
             pnlFSHelpHead.Dock = DockStyle.Top;
             pnlFSHelpHead.Location = new Point(0, 0);
             pnlFSHelpHead.Name = "pnlFSHelpHead";
             pnlFSHelpHead.Size = new Size(400, 32);
             pnlFSHelpHead.TabIndex = 0;
+            // 
+            // labelHelpHeader
+            // 
+            labelHelpHeader.Dock = DockStyle.Left;
+            labelHelpHeader.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            labelHelpHeader.Location = new Point(32, 0);
+            labelHelpHeader.Name = "labelHelpHeader";
+            labelHelpHeader.Size = new Size(45, 32);
+            labelHelpHeader.TabIndex = 4;
+            labelHelpHeader.Text = "Help";
+            labelHelpHeader.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // picboxHelp
+            // 
+            picboxHelp.Dock = DockStyle.Left;
+            picboxHelp.Image = FS2Resources.help_icon;
+            picboxHelp.Location = new Point(0, 0);
+            picboxHelp.Name = "picboxHelp";
+            picboxHelp.Size = new Size(32, 32);
+            picboxHelp.SizeMode = PictureBoxSizeMode.CenterImage;
+            picboxHelp.TabIndex = 3;
+            picboxHelp.TabStop = false;
             // 
             // btnCloseHelp
             // 
@@ -60,14 +87,15 @@
             // 
             // richTextBox1
             // 
-            richTextBox1.BorderStyle = BorderStyle.FixedSingle;
-            richTextBox1.Dock = DockStyle.Fill;
+            richTextBox1.BorderStyle = BorderStyle.None;
             richTextBox1.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            richTextBox1.Location = new Point(0, 32);
+            richTextBox1.Location = new Point(6, 32);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(400, 418);
+            richTextBox1.ReadOnly = true;
+            richTextBox1.Size = new Size(387, 412);
             richTextBox1.TabIndex = 1;
             richTextBox1.Text = resources.GetString("richTextBox1.Text");
+            richTextBox1.TextChanged += richTextBox1_TextChanged;
             // 
             // formFSHelp
             // 
@@ -82,6 +110,7 @@
             Text = "Form1";
             TopMost = true;
             pnlFSHelpHead.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)picboxHelp).EndInit();
             ResumeLayout(false);
         }
 
@@ -90,5 +119,7 @@
         private Panel pnlFSHelpHead;
         private Button btnCloseHelp;
         private RichTextBox richTextBox1;
+        private PictureBox picboxHelp;
+        private Label labelHelpHeader;
     }
 }

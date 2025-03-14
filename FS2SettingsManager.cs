@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +52,8 @@ namespace FastScreener2
 
         public const string SUBPATH = "screenshots";
 
+        public static int currentRes;
+
         // Load settings from XML (create file if missing)
         public static void Load()
         {
@@ -85,20 +88,60 @@ namespace FastScreener2
             }
 
             //load guidlines
-            guideColor = ColorTranslator.FromHtml(settings["guidlines_color"]);
-            drawGuides = Convert.ToBoolean(settings["draw_guidlines"]);
-            guidlineType = int.Parse(settings["guidline_type"]);
-            customGuide[0] = int.Parse(settings["top_indent"]);
-            customGuide[1] = int.Parse(settings["bottom_indent"]);
-            customGuide[2] = int.Parse(settings["left_indent"]);
-            customGuide[3] = int.Parse(settings["right_indent"]);
+            try
+            {
+                guideColor = ColorTranslator.FromHtml(settings["guidlines_color"]);
+                drawGuides = Convert.ToBoolean(settings["draw_guidlines"]);
+                guidlineType = int.Parse(settings["guidline_type"]);
+                customGuide[0] = int.Parse(settings["top_indent"]);
+                customGuide[1] = int.Parse(settings["bottom_indent"]);
+                customGuide[2] = int.Parse(settings["left_indent"]);
+                customGuide[3] = int.Parse(settings["right_indent"]);
 
-            lockIndent = Convert.ToBoolean(settings["lock_indent"]);
+                lockIndent = Convert.ToBoolean(settings["lock_indent"]);
+            }
+            catch
+            {
+                guideColor = Color.DarkGray;
+                EnsureSettingExists("guidlines_color", "DarkGray");
 
-            //number
-            numberColor = ColorTranslator.FromHtml(settings["number_color"]);
-            drawNumber = Convert.ToBoolean(settings["draw_number"]);
-            numberFontSize = int.Parse(settings["number_size"]);
+                drawGuides = false;
+                EnsureSettingExists("draw_guidlines", "false");
+
+                guidlineType = 3;
+                EnsureSettingExists("guidline_type", "3");
+
+                customGuide[0] = 10;
+                customGuide[1] = 10;
+                customGuide[2] = 10;
+                customGuide[3] = 10;
+                EnsureSettingExists("top_indent", "10");
+                EnsureSettingExists("bottom_indent", "10");
+                EnsureSettingExists("left_indent", "10");
+                EnsureSettingExists("right_indent", "10");
+
+                lockIndent = false;
+                EnsureSettingExists("lock_indent", "false");
+            }   
+
+
+            //load number
+            try
+            {
+                numberColor = ColorTranslator.FromHtml(settings["number_color"]);
+                drawNumber = Convert.ToBoolean(settings["draw_number"]);
+                numberFontSize = int.Parse(settings["number_size"]);
+            }
+            catch
+            {
+                numberColor = Color.Orange;
+                drawNumber = false;
+                numberFontSize = 26;
+
+                EnsureSettingExists("number_color", "#FFBB00");
+                EnsureSettingExists("draw_number", "false");
+                EnsureSettingExists("number_size", "26");
+            }
 
             //frame
             try
@@ -129,16 +172,38 @@ namespace FastScreener2
 
 
             //file
-            saveToFile = Convert.ToBoolean(settings["save_to_file"]);
+            try
+            {
+                saveToFile = Convert.ToBoolean(settings["save_to_file"]);
+            }
+            catch
+            { 
+                saveToFile = false;
+                EnsureSettingExists("save_to_file", "false");
+            }
 
-            //sizes
+
+            //load sizes
+            // Load sizes
             for (int i = 1; i <= 4; i++)  // Loop from 1 to 4
             {
                 string key = "res" + i;
 
+                // Ensure the setting exists with the default value if not already present
+                string defaultValue = i switch
+                {
+                    1 => "650,366",
+                    2 => "650,650",
+                    3 => "650,650",
+                    4 => "960,600",
+                    _ => "650,366" // Default to "650,366" for any unknown index
+                };
+
+                EnsureSettingExists(key, defaultValue);  // Ensure the setting is present
+
                 if (settings.TryGetValue(key, out string tempValueFromConfig))  // Get value from dictionary
                 {
-                    string[] tempStringArray = tempValueFromConfig.Split(','); // Fix here
+                    string[] tempStringArray = tempValueFromConfig.Split(',');
 
                     try
                     {
@@ -160,6 +225,7 @@ namespace FastScreener2
                 }
             }
 
+
             //res on close
             if (settings.TryGetValue("res_on_close", out string tempValueFromConfig2))
             {
@@ -179,7 +245,7 @@ namespace FastScreener2
                 }
             }
 
-            //number
+            //bar
             try
             {
                 barColor = ColorTranslator.FromHtml(settings["bar_color"]);
@@ -189,8 +255,10 @@ namespace FastScreener2
                 barColor = Color.DarkGray;                
                 EnsureSettingExists("bar_color", "#313131");
             }
-                
 
+            SetCurResBasedOnResOnClose();
+
+            //Debug.WriteLine("CR="+currentRes);
         }
 
         // Save settings to XML
@@ -282,9 +350,38 @@ namespace FastScreener2
                 }
 
                 // Save the updated settings file
-                doc.Save(settingsFilePath);
+                doc.Save(settingsFilePath);                
             }
         }
+
+
+        public static void SetCurResBasedOnResOnClose()
+        {
+            // Get the value of res_on_close from settings
+            if (settings.TryGetValue("res_on_close", out string resOnCloseValue))
+            {
+                // Loop through the resolutions (res1 to res4)
+                for (int i = 1; i <= 4; i++)
+                {
+                    string key = "res" + i;
+
+                    if (settings.TryGetValue(key, out string resValue))
+                    {
+                        // Check if the current resolution matches the res_on_close value
+                        if (resValue == resOnCloseValue)
+                        {
+                            // If matched, set currentRes to the appropriate index (0-based)
+                            currentRes = i - 1; // i-1 because currentRes should be 0 for res1, 1 for res2, etc.
+                            return;  // Exit the loop since we've found the match
+                        }
+                    }
+                }
+            }
+
+            // If no match found, set currentRes to 0 (default resolution)
+            currentRes = 0;
+        }
+
 
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,6 +19,8 @@ namespace FastScreener2
 
             FSUtils utils = new FSUtils();
             utils.AttachDragEvents(pnlFSHelpHead);
+
+            LoadHelpText();
         }
 
 
@@ -26,9 +29,21 @@ namespace FastScreener2
             Close();
         }
 
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        private void LoadHelpText()
         {
+            // Get the current assembly
+            var assembly = Assembly.GetExecutingAssembly();
 
+            // Specify the path of the embedded resource (namespace + filename)
+            string resourceName = "FastScreener2.fs2_help.txt"; // Adjust namespace accordingly
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                // Read the content and set it to the RichTextBox
+                richTextBoxHelp.Text = reader.ReadToEnd();
+            }
         }
+
     }
 }

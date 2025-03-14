@@ -28,12 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formFSHelp));
             pnlFSHelpHead = new Panel();
             labelHelpHeader = new Label();
             picboxHelp = new PictureBox();
             btnCloseHelp = new Button();
-            richTextBox1 = new RichTextBox();
+            richTextBoxHelp = new RichTextBox();
             pnlFSHelpHead.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picboxHelp).BeginInit();
             SuspendLayout();
@@ -85,24 +84,23 @@
             btnCloseHelp.UseVisualStyleBackColor = true;
             btnCloseHelp.Click += btnCloseHelp_Click;
             // 
-            // richTextBox1
+            // richTextBoxHelp
             // 
-            richTextBox1.BorderStyle = BorderStyle.None;
-            richTextBox1.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            richTextBox1.Location = new Point(6, 32);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.ReadOnly = true;
-            richTextBox1.Size = new Size(387, 412);
-            richTextBox1.TabIndex = 1;
-            richTextBox1.Text = resources.GetString("richTextBox1.Text");
-            richTextBox1.TextChanged += richTextBox1_TextChanged;
+            richTextBoxHelp.BorderStyle = BorderStyle.None;
+            richTextBoxHelp.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            richTextBoxHelp.Location = new Point(6, 32);
+            richTextBoxHelp.Name = "richTextBoxHelp";
+            richTextBoxHelp.ReadOnly = true;
+            richTextBoxHelp.Size = new Size(387, 412);
+            richTextBoxHelp.TabIndex = 1;
+            richTextBoxHelp.Text = "";
             // 
             // formFSHelp
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(400, 450);
-            Controls.Add(richTextBox1);
+            Controls.Add(richTextBoxHelp);
             Controls.Add(pnlFSHelpHead);
             FormBorderStyle = FormBorderStyle.None;
             Name = "formFSHelp";
@@ -118,7 +116,7 @@
 
         private Panel pnlFSHelpHead;
         private Button btnCloseHelp;
-        private RichTextBox richTextBox1;
+        private RichTextBox richTextBoxHelp;
         private PictureBox picboxHelp;
         private Label labelHelpHeader;
     }

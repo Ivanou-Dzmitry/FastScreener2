@@ -4,6 +4,7 @@ using System.Resources;
 using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace FastScreener2
 {
@@ -24,7 +25,8 @@ namespace FastScreener2
         // Create the Mouse Hook
         MouseHook mouseHook = new MouseHook();
 
-        private int frameSize = 32;
+        private int frameSize = 32; //offset
+        private const int snapMargin = 8; // Distance in pixels to trigger snapping
 
         public static int clickInArrowCount = 0;
         public static int clickInFrameCount = 0;
@@ -271,7 +273,7 @@ namespace FastScreener2
                     captureGraphics.CopyFromScreen(captureRectangle.Location, Point.Empty, captureRectangle.Size);
                 }
 
-                
+
 
                 // Save file if needed
                 if (saveToFile)
@@ -518,6 +520,10 @@ namespace FastScreener2
             {
                 this.Refresh();
             }
+
+            pnlBarTop.BackColor = barColor;
+            pnlBarBottom.BackColor = barColor;
+            
         }
 
         private void ToggleStatus(
@@ -691,7 +697,7 @@ namespace FastScreener2
             // important point
             relativePoint = usedPanel.PointToClient(Cursor.Position);
 
-            //draw Frame
+            //draw free Frame
             if (FS2SettingsManager.drawFrame && FS2SettingsManager.frameType == 1)
             {
                 startPoint = new Point(relativePoint.X, relativePoint.Y);
@@ -699,6 +705,7 @@ namespace FastScreener2
                 isDrawing = true;
             }
 
+            //fixed
             if (FS2SettingsManager.drawFrame && FS2SettingsManager.frameType == 2)
             {
 
@@ -761,26 +768,33 @@ namespace FastScreener2
                     Math.Abs(height)
                 );
 
+            
 
-
-            if (drawnArrows.Count > 0)
-            {
-                RenderArrows(paintRect);
-            }
-
-
-            if (FS2SettingsManager.drawFrame)
+            if (drawFrame)
             {
                 drawnRectangles.Add(newRectangle);
-                RenderFrame(paintRect);
-                //DrawFrame(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), relativePoint, FS2SettingsManager.frameColor);
             }
 
+            panelScreenArea.Invalidate();
 
-            if (drawnTexts.Count > 0)
-            {
-                RenderNumbers(paintRect);
-            }
+            /*            if (drawnArrows.Count > 0)
+                        {
+                            RenderArrows(paintRect);
+                        }
+
+
+                        if (drawFrame)
+                        {
+                            drawnRectangles.Add(newRectangle);
+                            RenderFrame(paintRect);
+                            //DrawFrame(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), relativePoint, FS2SettingsManager.frameColor);
+                        }
+
+
+                        if (drawnTexts.Count > 0)
+                        {
+                            RenderNumbers(paintRect);
+                        }*/
 
         }
 
@@ -789,7 +803,7 @@ namespace FastScreener2
             isLineDrawing = false;
 
             //paint rect
-            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
+            //PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
 
             if (isDrawing)
             {
@@ -799,40 +813,42 @@ namespace FastScreener2
                 int width = 0;
                 int height = 0;
 
-                if (FS2SettingsManager.frameType == 1)
+                if (frameType == 1)
                 {
                     width = relativePoint.X - startPoint.X;
                     height = relativePoint.Y - startPoint.Y;
 
-                    currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
+                    currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);                    
                 }
 
+                panelScreenArea.Invalidate();
+                /*
+                                if (drawnArrows.Count > 0)
+                                {
+                                   RenderArrows(paintRect);
+                                }
 
-                if (drawnArrows.Count > 0)
-                {
-                    RenderArrows(paintRect);
-                }
+                                if (drawFrame)
+                                {
+                                    //DrawFrameCurrent(paintRect);
+                                    panelScreenArea.Invalidate();
+                                }
 
-                if (FS2SettingsManager.drawFrame)
-                {
-                    DrawFrameCurrent(paintRect);
-                    panelScreenArea.Invalidate();
-                }
-
-                if (drawnTexts.Count > 0)
-                {
-                    RenderNumbers(paintRect);
-                }
-
-            }
+                                if (drawnTexts.Count > 0)
+                                {
+                                   RenderNumbers(paintRect);
+                                }   */
+            }            
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            formFS2Settings settingsForm = new formFS2Settings();
+
+            mitSettings_Click(sender, e);
+/*            formFS2Settings settingsForm = new formFS2Settings();
 
             settingsForm.ShowDialog();
-        }
+*/        }
 
         private void buttonCloseForm_MouseEnter(object sender, EventArgs e)
         {
@@ -890,23 +906,24 @@ namespace FastScreener2
             }
 
             //arrow
-            if (FS2SettingsManager.drawArrows && drawnArrows.Count > 0)
+            if (FS2SettingsManager.drawArrows || drawnArrows.Count > 0)
             {
                 RenderArrows(e);
             }
 
             //frame
-            if (FS2SettingsManager.drawFrame && drawnRectangles.Count > 0)
+            if (drawFrame || isDrawing || drawnRectangles.Count > 0)
             {
                 RenderFrame(e);
+                DrawFrameCurrent(e);
             }
 
             //numbers
-            if (FS2SettingsManager.drawNumber && drawnTexts.Count > 0)
+            if (FS2SettingsManager.drawNumber || drawnTexts.Count > 0)
             {
-                RenderNumbers(e);
+                RenderNumbers(e);                
             }
-
+            
         }
 
         private void mitOpenFolder_Click(object sender, EventArgs e)
@@ -954,6 +971,8 @@ namespace FastScreener2
             this.Refresh();
 
             ShowInfo("start");
+
+            //Debug.WriteLine("SIZ" + scaledClientW + "/" + scaledClientH);
         }
 
         public void FormResizer(int Width, int Height)
@@ -965,27 +984,116 @@ namespace FastScreener2
             this.ClientSize = new Size((int)(Width), (int)(Height));
         }
 
-        private void mitSize01_Click(object sender, EventArgs e) => AdjustClientSize(0, 0);
+        private void mitSize01_Click(object sender, EventArgs e)
+        {
+            AdjustClientSize(0, 0);
+            currentRes = 0;
+        }
 
-        private void mitSize02_Click(object sender, EventArgs e) => AdjustClientSize(1, 1);
+        private void mitSize02_Click(object sender, EventArgs e)
+        {
+            AdjustClientSize(1, 1);
+            currentRes = 1;
+        }
 
-        private void mitSize03_Click(object sender, EventArgs e) => AdjustClientSize(2, 2);
+        private void mitSize03_Click(object sender, EventArgs e)
+        {
+            AdjustClientSize(2, 2);
+            currentRes = 2;
+        }
 
-        private void mitSize04_Click(object sender, EventArgs e) => AdjustClientSize(3, 3);
+        private void mitSize04_Click(object sender, EventArgs e)
+        {
+            AdjustClientSize(3, 3);
+            currentRes = 3;
+        }
 
         private void btnNextRes_Click(object sender, EventArgs e)
         {
-            int res = clickInRes;
-            
-            if (res >3)
+            currentRes++;
+
+            int res = currentRes;
+
+           // Debug.WriteLine("CR2=" + currentRes + "/"+ res);
+
+            if (res > 3)
             {
                 res = 0;
-                clickInRes = 0;
+                currentRes = 0;
             }
 
-            AdjustClientSize(res, res);
-            clickInRes++;
+            AdjustClientSize(res, res);            
         }
 
+        private void blurOutlineLabel1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FS2MainForm_Move(object sender, EventArgs e)
+        {
+            // Get the actual screen based on the panel's left edge
+            Screen currentScreen = GetScreenByPanelPosition(this.Left + frameSize);
+            Rectangle screenBounds = currentScreen.WorkingArea; // Get usable screen area
+
+            // Get panel's actual position inside form
+            int panelLeft = this.Left + frameSize;
+            int panelTop = this.Top + frameSize;
+            int panelRight = panelLeft + panelScreenArea.Width;
+            int panelBottom = panelTop + panelScreenArea.Height;
+
+            Debug.WriteLine($"{currentScreen.DeviceName}, -/- {panelLeft} -/- {screenBounds.Left}");
+
+            // Only snap if we are close to the screen edges, not if already unsnapped
+            if (Math.Abs(panelLeft - screenBounds.Left) <= snapMargin)
+            {
+                this.Left = screenBounds.Left - frameSize; // Snap to LEFT edge
+            }
+            else if (Math.Abs(panelRight - screenBounds.Right) <= snapMargin)
+            {
+                this.Left = screenBounds.Right - panelScreenArea.Width - frameSize; // Snap to RIGHT edge
+            }
+            else
+            {
+                // Allow more flexibility here if unsnapping
+                // Do not apply snapping logic if the form is not close enough to the edge
+                // You could allow the user to unsnap freely without being dragged back
+                if (this.Left < screenBounds.Left + snapMargin || this.Left > screenBounds.Right - snapMargin)
+                {
+                    // Allow more flexibility for moving away
+                    // No snapping behavior here
+                }
+            }
+
+            // Snap to TOP edge of the CURRENT monitor
+            if (Math.Abs(panelTop - screenBounds.Top) <= snapMargin)
+            {
+                this.Top = screenBounds.Top - frameSize; // Snap to TOP edge
+            }
+            else if (Math.Abs(panelBottom - screenBounds.Bottom) <= snapMargin)
+            {
+                this.Top = screenBounds.Bottom - panelScreenArea.Height - frameSize; // Snap to BOTTOM edge
+            }
+            else
+            {
+                // Same as above, prevent snapping when not near screen edge
+            }
+
+        }
+
+
+        private Screen GetScreenByPanelPosition(int panelLeft)
+        {
+            foreach (var screen in Screen.AllScreens)
+            {
+                // Check if the panel's left edge falls within this screen
+                if (panelLeft >= screen.Bounds.Left && panelLeft < screen.Bounds.Right)
+                {
+                    return screen; // Found the correct screen!
+                }
+            }
+
+            return Screen.PrimaryScreen; // Fallback to primary screen
+        }
     }
 }

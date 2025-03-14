@@ -10,7 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="fs2_help.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="fs_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="fs2_help.txt" />
   </ItemGroup>
 
   <ItemGroup>

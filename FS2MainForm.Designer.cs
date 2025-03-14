@@ -31,7 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FS2MainForm));
             panelBottom = new Panel();
-            labelDebug = new OutlineLabel();
+            labelDebug = new BlurOutlineLabel();
             panelDragBottomR = new Panel();
             panelDragBottomL = new Panel();
             panelDragTop = new Panel();
@@ -101,16 +101,18 @@
             // 
             // labelDebug
             // 
+            labelDebug.BlurAmount = 2;
             labelDebug.Dock = DockStyle.Fill;
+            labelDebug.Font = new Font("Inter", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
             labelDebug.ForeColor = Color.WhiteSmoke;
             labelDebug.Location = new Point(60, 0);
             labelDebug.Name = "labelDebug";
             labelDebug.OutlineColor = Color.Black;
-            labelDebug.OutlineWidth = 3F;
+            labelDebug.OutlineWidth = 2F;
             labelDebug.Size = new Size(530, 32);
             labelDebug.TabIndex = 2;
-            labelDebug.Text = "outlineLabel1";
-            labelDebug.TextAlign = ContentAlignment.MiddleCenter;
+            labelDebug.Text = "labelDebug with info";
+            labelDebug.Click += blurOutlineLabel1_Click;
             // 
             // panelDragBottomR
             // 
@@ -629,6 +631,7 @@
             Text = "FastScreener 2";
             TopMost = true;
             Shown += FS2MainForm_Shown;
+            Move += FS2MainForm_Move;
             panelBottom.ResumeLayout(false);
             panelDragTop.ResumeLayout(false);
             panelDragTop.PerformLayout();
@@ -688,6 +691,6 @@
         private ToolTip toolTipFS;
         private TextBox txtbName;
         private TextBox txtbNumber;
-        private OutlineLabel labelDebug;
+        private BlurOutlineLabel labelDebug;
     }
 }

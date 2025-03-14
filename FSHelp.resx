@@ -117,29 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="richTextBox1.Text" xml:space="preserve">
-    <value>Version: 2.0
-Author: Dzmitry Ivanou
-Contact: id.cgtalk@gmail.com
----------------------------------
-
-You can add graphics elements using middle mouse button (MMB).
-
-Available graphic elements:
-- Arrow
-- Frame
-- Number
-
-Set visual options of graphics elements, and bar in the Settings (color, size etc).
-
-The arrow can point in different directions.
-
-The frame can be of 2 types: fixed and free.
-Free is drawn with mouse movement with the MMB pressed
-Adding a fixed type is done by clicking MMB.
-
-The bar at the top and bottom allows you to hide unnecessary parts of the screenshot.
-
-Config saved to fs2_settings.xml (root folder).</value>
-  </data>
 </root>

@@ -308,7 +308,6 @@ namespace FastScreener2
             }
 
             
-
             if (e.ChangedItem.Label == "Frame Type")
             {
                 string tempTypeStr = frameSettings.Type;
@@ -331,7 +330,7 @@ namespace FastScreener2
             }
 
 
-            //number
+            //NUMBER
             if (e.ChangedItem.Label == "Number Font Size")
             {
                 FS2SettingsManager.numberFontSize = numberSettings.Size;
@@ -344,14 +343,116 @@ namespace FastScreener2
                 FS2SettingsManager.SetSetting("number_color", ColorTranslator.ToHtml(numberSettings.Color));
             }
 
-            //bar
+            //BAR
             if (e.ChangedItem.Label == "Bar Color")
             {
-                FS2SettingsManager.numberColor = barsSettings.Color;
+                FS2SettingsManager.barColor = barsSettings.Color;
                 FS2SettingsManager.SetSetting("bar_color", ColorTranslator.ToHtml(barsSettings.Color));
             }
 
+            // Update Width for res1
+            if (e.ChangedItem.Label == "1.1 Width")
+            {
+                FS2SettingsManager.resWorked[0, 0] = resSettings.res1Width;
+                UpdateResolutionSetting("res1", "Width", resSettings.res1Width);
+            }
+
+            // Update Height for res1
+            if (e.ChangedItem.Label == "1.2 Height")
+            {
+                FS2SettingsManager.resWorked[1, 0] = resSettings.res1Height;
+                UpdateResolutionSetting("res1", "Height", resSettings.res1Height);
+            }
+
+            // res2
+            if (e.ChangedItem.Label == "2.1 Width")
+            {
+                FS2SettingsManager.resWorked[0, 1] = resSettings.res2Width;
+                UpdateResolutionSetting("res2", "Width", resSettings.res2Width);
+            }
+
+            if (e.ChangedItem.Label == "2.2 Height")
+            {
+                FS2SettingsManager.resWorked[1, 1] = resSettings.res2Height;
+                UpdateResolutionSetting("res2", "Height", resSettings.res2Height);
+            }
+
+            // res3
+            if (e.ChangedItem.Label == "3.1 Width")
+            {
+                FS2SettingsManager.resWorked[0, 2] = resSettings.res3Width;
+                UpdateResolutionSetting("res3", "Width", resSettings.res3Width);
+            }
+
+            if (e.ChangedItem.Label == "3.2 Height")
+            {
+                FS2SettingsManager.resWorked[1, 2] = resSettings.res3Height;
+                UpdateResolutionSetting("res3", "Height", resSettings.res3Height);
+            }
+
+
+            // res4
+            if (e.ChangedItem.Label == "4.1 Width")
+            {
+                FS2SettingsManager.resWorked[0, 3] = resSettings.res4Width;
+                UpdateResolutionSetting("res4", "Width", resSettings.res4Width);
+            }
+
+            if (e.ChangedItem.Label == "4.2 Height")
+            {
+                FS2SettingsManager.resWorked[1, 3] = resSettings.res4Height;
+                UpdateResolutionSetting("res4", "Height", resSettings.res4Height);
+            }
+
+
+
             FS2SettingsManager.Save();
+        }
+
+
+        public void UpdateResolutionSetting(string resKey, string changedLabel, int newValue)
+        {
+            // Retrieve the current resolution setting from FS2SettingsManager
+            string currentRes = FS2SettingsManager.GetSetting(resKey);
+            string tempRes = "";
+
+            if (!string.IsNullOrEmpty(currentRes))
+            {
+                // Split the current resolution into width and height
+                string[] resParts = currentRes.Split(',');
+
+                if (resParts.Length == 2)
+                {
+                    int currentWidth = int.Parse(resParts[0]);
+                    int currentHeight = int.Parse(resParts[1]);
+
+                    // If width is being changed
+                    if (changedLabel == "Width")
+                    {
+                        tempRes = newValue.ToString() + "," + currentHeight.ToString();
+                    }
+                    // If height is being changed
+                    else if (changedLabel == "Height")
+                    {
+                        tempRes = currentWidth.ToString() + "," + newValue.ToString();
+                    }
+                }
+            }
+            else
+            {
+                // If no previous value exists, create a default resolution (for the first time setup)
+                if (changedLabel == "Width")
+                {
+                    tempRes = newValue.ToString() + ",650"; // Default height
+                }
+                else if (changedLabel == "Height")
+                {
+                    tempRes = "650," + newValue.ToString(); // Default width
+                }
+            }
+
+            // Save the updated resolution back into the settings
+            FS2SettingsManager.SetSetting(resKey, tempRes);
         }
 
 

@@ -285,26 +285,26 @@ namespace FastScreener2
         }
 
         // Create default settings file if it does not exist
-        private static void CreateDefaultSettings()
+        public static void CreateDefaultSettings()
         {
             settings = new Dictionary<string, string>
         {
-            { "guidlines_color", "#FF0000" },
-            { "arrow_color", "#00FF00" },
+            { "guidlines_color", "#D3D3D3" },
+            { "arrow_color", "#00FFFF" },
             { "arrow_lenght", "50" },
             { "arrow_type", "1" },
-            { "number_color", "#0000FF" },
-            { "frame_color", "#FFFFFF" },
-            { "guidline_type", "1" },
-            { "draw_guidlines", "true" },
-            { "draw_arrows", "true" },
-            { "draw_number", "true" },
-            { "number_size", "20" },
+            { "number_color", "#FFA500" },
+            { "frame_color", "#FFA500" },
+            { "guidline_type", "3" },
+            { "draw_guidlines", "false" },
+            { "draw_arrows", "false" },
+            { "draw_number", "false" },
+            { "number_size", "26" },
             { "draw_frame", "false" },
             { "save_to_file", "false" },
             { "frame_type", "1" },
-            { "frame_width", "100" },
-            { "frame_height", "100" },
+            { "frame_width", "80" },
+            { "frame_height", "80" },
             { "top_indent", "10" },
             { "bottom_indent", "10" },
             { "left_indent", "10" },

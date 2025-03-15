@@ -32,11 +32,11 @@
             lboxSetCat = new ListBox();
             btnOK = new Button();
             pnlSetBottom = new Panel();
-            labelSetDebug = new Label();
             pnlSetHeader = new Panel();
             labelSetHeader = new Label();
             button1 = new Button();
             pictureBox1 = new PictureBox();
+            btnReset = new Button();
             pnlSetBottom.SuspendLayout();
             pnlSetHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -75,22 +75,13 @@
             // pnlSetBottom
             // 
             pnlSetBottom.BackColor = Color.SlateGray;
-            pnlSetBottom.Controls.Add(labelSetDebug);
+            pnlSetBottom.Controls.Add(btnReset);
             pnlSetBottom.Controls.Add(btnOK);
             pnlSetBottom.Dock = DockStyle.Bottom;
             pnlSetBottom.Location = new Point(0, 347);
             pnlSetBottom.Name = "pnlSetBottom";
             pnlSetBottom.Size = new Size(534, 64);
             pnlSetBottom.TabIndex = 3;
-            // 
-            // labelSetDebug
-            // 
-            labelSetDebug.AutoSize = true;
-            labelSetDebug.Location = new Point(8, 17);
-            labelSetDebug.Name = "labelSetDebug";
-            labelSetDebug.Size = new Size(38, 15);
-            labelSetDebug.TabIndex = 3;
-            labelSetDebug.Text = "label1";
             // 
             // pnlSetHeader
             // 
@@ -139,6 +130,18 @@
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;
             // 
+            // btnReset
+            // 
+            btnReset.BackColor = Color.DimGray;
+            btnReset.FlatStyle = FlatStyle.Flat;
+            btnReset.Location = new Point(12, 16);
+            btnReset.Name = "btnReset";
+            btnReset.Size = new Size(64, 32);
+            btnReset.TabIndex = 3;
+            btnReset.Text = "Reset";
+            btnReset.UseVisualStyleBackColor = false;
+            btnReset.Click += btnReset_Click;
+            // 
             // formFS2Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -154,7 +157,6 @@
             Text = "Settings";
             TopMost = true;
             pnlSetBottom.ResumeLayout(false);
-            pnlSetBottom.PerformLayout();
             pnlSetHeader.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
@@ -166,10 +168,10 @@
         private ListBox lboxSetCat;
         private Button btnOK;
         private Panel pnlSetBottom;
-        private Label labelSetDebug;
         private Panel pnlSetHeader;
         private Button button1;
         private Label labelSetHeader;
         private PictureBox pictureBox1;
+        private Button btnReset;
     }
 }

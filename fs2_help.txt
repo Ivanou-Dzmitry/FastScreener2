@@ -15,11 +15,13 @@ Set visual options of graphics elements, and bar in the Settings (color, size et
 The arrow can point in different directions.
 
 The frame can be of 2 types: fixed and free.
-Free is drawn with mouse movement with the MMB pressed
-Adding a fixed type is done by clicking MMB.
+1. Free is drawn with mouse movement with the MMB pressed
+2. Adding a fixed type is done by clicking MMB.
 
-The bar at the top and bottom allows you to hide unnecessary parts of the screenshot.
+The bar at the top and bottom allows you to mask unnecessary parts of the screenshot. You can set color of bar.
 
 Config saved to fs2_settings.xml (root folder).
 
 The screenshot area is snapped to the corners of the screen.
+
+If the option to Save to File is enabled and the file name is specified, then when you take a screenshot again, the file will be overwritten.

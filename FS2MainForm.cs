@@ -39,6 +39,9 @@ namespace FastScreener2
         private bool isLineDrawing;
         public static int numbering = 1; //for numbers
 
+        private Button lastPressedButton; // Store the last pressed button
+
+        public static bool isReseted = false;
 
         //for file
         private string stringURL = "";
@@ -146,6 +149,9 @@ namespace FastScreener2
 
 
             MenuItemUpdate();
+
+            this.KeyPreview = true;
+            contextMenuMain.Focus();
         }
 
 
@@ -219,6 +225,17 @@ namespace FastScreener2
             {
                 labelDebug.Text = screenArea + " | " + frameSize;
                 ResizeBar();
+            }
+
+            if (type == "reset")
+            {
+                labelDebug.Text = "The settings were reset to default";
+            }
+
+            if (type == "clear")
+            {
+                labelDebug.Text = "The screenshot area has been cleared";
+
             }
         }
 
@@ -360,7 +377,110 @@ namespace FastScreener2
             {
                 mitHelp_Click(this, EventArgs.Empty);
             }
+
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Alt | Keys.D1)) // Alt + 1
+            {
+                mitSize01_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            if (keyData == (Keys.Alt | Keys.D2)) // Alt + 1
+            {
+                mitSize02_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            if (keyData == (Keys.Alt | Keys.D3)) // Alt + 1
+            {
+                mitSize03_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            if (keyData == (Keys.Alt | Keys.D4)) // Alt + 1
+            {
+                mitSize04_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+
+            //cyvle
+            if (keyData == (Keys.Control | Keys.Right))
+            {
+                btnNextRes_Click(this, EventArgs.Empty);
+                btnNextRes.BackColor = Color.WhiteSmoke;
+                lastPressedButton = btnNextRes; // Store button reference
+                return true; // Mark as handled
+            }
+
+            //arrow
+            if (keyData == (Keys.Control | Keys.Up))
+            {
+                btnArrowType_Click(this, EventArgs.Empty);
+                btnArrowType.BackColor = Color.WhiteSmoke;
+                lastPressedButton = btnArrowType; // Store button reference
+                return true; // Mark as handled
+            }
+
+            //arrow
+            if (keyData == (Keys.Control | Keys.Down))
+            {
+                btnFrame_Click(this, EventArgs.Empty);
+                btnFrameType.BackColor = Color.WhiteSmoke;
+                lastPressedButton = btnFrameType; // Store button reference
+                return true; // Mark as handled
+            }
+
+
+
+            if (keyData == (Keys.Control | Keys.Shift | Keys.A))
+            {
+                mitArrow_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            if (keyData == (Keys.Control | Keys.Shift | Keys.S))
+            {
+                mitSaveFile_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            if (keyData == (Keys.Control | Keys.Shift | Keys.F))
+            {
+                mitFrame_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            if (keyData == (Keys.Control | Keys.Shift | Keys.G))
+            {
+                mitGuidlines_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+
+            if (keyData == (Keys.Control | Keys.Shift | Keys.N))
+            {
+                mitNumber_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+
+            if (keyData == (Keys.Control | Keys.Shift | Keys.C))
+            {
+                mitClear_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // Detect when any key is released
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+
+            // Reset color when key is released
+            if (lastPressedButton != null)
+            {
+                lastPressedButton.BackColor = Color.DimGray; // Default color
+                lastPressedButton = null; // Clear stored button
+            }
+        }
+
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
@@ -523,7 +643,21 @@ namespace FastScreener2
 
             pnlBarTop.BackColor = barColor;
             pnlBarBottom.BackColor = barColor;
-            
+
+            panelScreenArea.Invalidate();
+
+            chbArrow.Checked = drawArrows;
+            chbFrame.Checked = drawFrame;
+            chbGuides.Checked = drawGuides;
+            chbNumbers.Checked = drawNumber;
+            chbSave.Checked = saveToFile;
+
+            if (isReseted)
+            {
+                ShowInfo("reset");
+                isReseted = false;
+            }
+
         }
 
         private void ToggleStatus(
@@ -742,11 +876,6 @@ namespace FastScreener2
         // Mouse Middle Button Up (End drawing)
         private void mouseHook_MouseUp(MouseHook.MSLLHOOKSTRUCT mouse)
         {
-
-            //paint rect
-            PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
-
-
             isDrawing = false;
             isLineDrawing = false;
 
@@ -768,7 +897,6 @@ namespace FastScreener2
                     Math.Abs(height)
                 );
 
-            
 
             if (drawFrame)
             {
@@ -777,33 +905,13 @@ namespace FastScreener2
 
             panelScreenArea.Invalidate();
 
-            /*            if (drawnArrows.Count > 0)
-                        {
-                            RenderArrows(paintRect);
-                        }
-
-
-                        if (drawFrame)
-                        {
-                            drawnRectangles.Add(newRectangle);
-                            RenderFrame(paintRect);
-                            //DrawFrame(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), relativePoint, FS2SettingsManager.frameColor);
-                        }
-
-
-                        if (drawnTexts.Count > 0)
-                        {
-                            RenderNumbers(paintRect);
-                        }*/
+            this.Activate();
 
         }
 
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
         {
             isLineDrawing = false;
-
-            //paint rect
-            //PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
 
             if (isDrawing)
             {
@@ -818,37 +926,23 @@ namespace FastScreener2
                     width = relativePoint.X - startPoint.X;
                     height = relativePoint.Y - startPoint.Y;
 
-                    currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);                    
+                    currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
                 }
 
                 panelScreenArea.Invalidate();
-                /*
-                                if (drawnArrows.Count > 0)
-                                {
-                                   RenderArrows(paintRect);
-                                }
 
-                                if (drawFrame)
-                                {
-                                    //DrawFrameCurrent(paintRect);
-                                    panelScreenArea.Invalidate();
-                                }
-
-                                if (drawnTexts.Count > 0)
-                                {
-                                   RenderNumbers(paintRect);
-                                }   */
-            }            
+            }
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
 
             mitSettings_Click(sender, e);
-/*            formFS2Settings settingsForm = new formFS2Settings();
+            /*            formFS2Settings settingsForm = new formFS2Settings();
 
-            settingsForm.ShowDialog();
-*/        }
+                        settingsForm.ShowDialog();
+            */
+        }
 
         private void buttonCloseForm_MouseEnter(object sender, EventArgs e)
         {
@@ -871,12 +965,6 @@ namespace FastScreener2
         {
             ShowInfo("frame");
         }
-
-
-        /*        private void RangeTrackBar_ThumbMoved(object sender, EventArgs e)
-                {
-                    ShowInfo("frame");  // Now it works!            
-                }*/
 
 
         public void ResizeBar()
@@ -921,9 +1009,9 @@ namespace FastScreener2
             //numbers
             if (FS2SettingsManager.drawNumber || drawnTexts.Count > 0)
             {
-                RenderNumbers(e);                
+                RenderNumbers(e);
             }
-            
+
         }
 
         private void mitOpenFolder_Click(object sender, EventArgs e)
@@ -1014,7 +1102,7 @@ namespace FastScreener2
 
             int res = currentRes;
 
-           // Debug.WriteLine("CR2=" + currentRes + "/"+ res);
+            // Debug.WriteLine("CR2=" + currentRes + "/"+ res);
 
             if (res > 3)
             {
@@ -1022,7 +1110,7 @@ namespace FastScreener2
                 currentRes = 0;
             }
 
-            AdjustClientSize(res, res);            
+            AdjustClientSize(res, res);
         }
 
         private void blurOutlineLabel1_Click(object sender, EventArgs e)
@@ -1094,6 +1182,27 @@ namespace FastScreener2
             }
 
             return Screen.PrimaryScreen; // Fallback to primary screen
+        }
+
+        private void mitClear_Click(object sender, EventArgs e)
+        {
+             drawnRectangles.Clear();
+             drawnArrows.Clear();
+             drawnTexts.Clear();
+
+            currentRectangle = new Rectangle(startPoint, new Size(0, 0));
+           
+            numbering = 1; // Reset numbering
+
+            // Ensure the form is in focus
+            this.Activate();
+
+            panelScreenArea.Invalidate();
+            panelScreenArea.Update();
+
+            this.Refresh();
+
+            ShowInfo("clear");
         }
     }
 }

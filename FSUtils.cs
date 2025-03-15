@@ -247,7 +247,9 @@ namespace FastScreener2
         public static void DrawFrameCurrent(PaintEventArgs e)
         {
             var framePen = new Pen(frameColor, frameStrokeWidth);
-            
+
+            framePen.DashStyle = DashStyle.Dash;
+
             if (FS2MainForm.currentRectangle.Width > 0 && FS2MainForm.currentRectangle.Height > 0)
                 e.Graphics.DrawRectangle(framePen, FS2MainForm.currentRectangle);
 
@@ -259,7 +261,7 @@ namespace FastScreener2
         public static void RenderFrame(PaintEventArgs e)
         {
             var framePen = new Pen(frameColor, frameStrokeWidth);
-
+           
             //avoid -
             int width = Math.Abs(FS2MainForm.currentRectangle.Width);
             int height = Math.Abs(FS2MainForm.currentRectangle.Height);
@@ -280,6 +282,9 @@ namespace FastScreener2
             // Create a reusable pen instance
             using (Pen guidePen = new Pen(color))
             {
+
+                guidePen.DashStyle = DashStyle.Dash; // Set the line style to dashed
+
                 int initialPointVertical, initialPointHorizontal;
 
                 if (guidlineType == 1 || guidlineType == 2)

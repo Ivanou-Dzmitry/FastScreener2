@@ -37,6 +37,7 @@
             panelDragTop = new Panel();
             txtbNumber = new TextBox();
             txtbName = new TextBox();
+            splitter1 = new Splitter();
             btnNextRes = new Button();
             btnFrameType = new Button();
             btnArrowType = new Button();
@@ -64,6 +65,7 @@
             mitSize03 = new ToolStripMenuItem();
             mitSize04 = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
+            mitClear = new ToolStripMenuItem();
             mitTakeScreen = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripSeparator();
             mitArrow = new ToolStripMenuItem();
@@ -137,6 +139,7 @@
             panelDragTop.BackColor = Color.SlateGray;
             panelDragTop.Controls.Add(txtbNumber);
             panelDragTop.Controls.Add(txtbName);
+            panelDragTop.Controls.Add(splitter1);
             panelDragTop.Controls.Add(btnNextRes);
             panelDragTop.Controls.Add(btnFrameType);
             panelDragTop.Controls.Add(btnArrowType);
@@ -158,13 +161,13 @@
             txtbNumber.BorderStyle = BorderStyle.FixedSingle;
             txtbNumber.Dock = DockStyle.Left;
             txtbNumber.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            txtbNumber.Location = new Point(430, 0);
+            txtbNumber.Location = new Point(434, 0);
             txtbNumber.MaxLength = 4;
             txtbNumber.Name = "txtbNumber";
             txtbNumber.PlaceholderText = "Num";
             txtbNumber.Size = new Size(33, 25);
-            txtbNumber.TabIndex = 16;
-            toolTipFS.SetToolTip(txtbNumber, "Nuber suffix");
+            txtbNumber.TabIndex = 7;
+            toolTipFS.SetToolTip(txtbNumber, "Nuber suffix (optional)");
             txtbNumber.WordWrap = false;
             // 
             // txtbName
@@ -172,14 +175,23 @@
             txtbName.BorderStyle = BorderStyle.FixedSingle;
             txtbName.Dock = DockStyle.Left;
             txtbName.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            txtbName.Location = new Point(192, 0);
+            txtbName.Location = new Point(196, 0);
             txtbName.MaxLength = 32;
             txtbName.Name = "txtbName";
             txtbName.PlaceholderText = "File name (32 symbols)";
             txtbName.Size = new Size(238, 25);
-            txtbName.TabIndex = 15;
+            txtbName.TabIndex = 6;
             toolTipFS.SetToolTip(txtbName, "File name");
             txtbName.WordWrap = false;
+            // 
+            // splitter1
+            // 
+            splitter1.BackColor = Color.SlateGray;
+            splitter1.Location = new Point(192, 0);
+            splitter1.Name = "splitter1";
+            splitter1.Size = new Size(4, 32);
+            splitter1.TabIndex = 4;
+            splitter1.TabStop = false;
             // 
             // btnNextRes
             // 
@@ -191,8 +203,8 @@
             btnNextRes.Location = new Point(160, 0);
             btnNextRes.Name = "btnNextRes";
             btnNextRes.Size = new Size(32, 32);
-            btnNextRes.TabIndex = 12;
-            toolTipFS.SetToolTip(btnNextRes, "Resolution cycle");
+            btnNextRes.TabIndex = 5;
+            toolTipFS.SetToolTip(btnNextRes, "Resolution cycle (Ctrl+Right arrow)");
             btnNextRes.UseVisualStyleBackColor = false;
             btnNextRes.Click += btnNextRes_Click;
             // 
@@ -206,8 +218,8 @@
             btnFrameType.Location = new Point(128, 0);
             btnFrameType.Name = "btnFrameType";
             btnFrameType.Size = new Size(32, 32);
-            btnFrameType.TabIndex = 10;
-            toolTipFS.SetToolTip(btnFrameType, "Frame type");
+            btnFrameType.TabIndex = 4;
+            toolTipFS.SetToolTip(btnFrameType, "Frame type: free or fixed  (Ctrl+Down arrow)");
             btnFrameType.UseVisualStyleBackColor = false;
             btnFrameType.Click += btnFrame_Click;
             // 
@@ -222,7 +234,7 @@
             btnArrowType.Name = "btnArrowType";
             btnArrowType.Size = new Size(32, 32);
             btnArrowType.TabIndex = 3;
-            toolTipFS.SetToolTip(btnArrowType, "Arrow direction");
+            toolTipFS.SetToolTip(btnArrowType, "Arrow direction (Ctrl+Up arrow)");
             btnArrowType.UseVisualStyleBackColor = false;
             btnArrowType.Click += btnArrowType_Click;
             // 
@@ -236,7 +248,7 @@
             btnSettings.Location = new Point(522, 0);
             btnSettings.Name = "btnSettings";
             btnSettings.Size = new Size(32, 32);
-            btnSettings.TabIndex = 9;
+            btnSettings.TabIndex = 14;
             btnSettings.Text = "_";
             toolTipFS.SetToolTip(btnSettings, "Settings");
             btnSettings.UseVisualStyleBackColor = false;
@@ -253,7 +265,7 @@
             btnScreen.Name = "btnScreen";
             btnScreen.Size = new Size(32, 32);
             btnScreen.TabIndex = 2;
-            toolTipFS.SetToolTip(btnScreen, "Screenshot");
+            toolTipFS.SetToolTip(btnScreen, "Take a screenshot (F4)");
             btnScreen.UseVisualStyleBackColor = false;
             btnScreen.Click += btnScreen_Click;
             // 
@@ -282,7 +294,7 @@
             buttonMinimizeForm.Location = new Point(554, 0);
             buttonMinimizeForm.Name = "buttonMinimizeForm";
             buttonMinimizeForm.Size = new Size(32, 32);
-            buttonMinimizeForm.TabIndex = 7;
+            buttonMinimizeForm.TabIndex = 15;
             toolTipFS.SetToolTip(buttonMinimizeForm, "Minimize");
             buttonMinimizeForm.UseVisualStyleBackColor = false;
             buttonMinimizeForm.Click += buttonMinimizeForm_Click;
@@ -297,7 +309,7 @@
             buttonCloseForm.Location = new Point(586, 0);
             buttonCloseForm.Name = "buttonCloseForm";
             buttonCloseForm.Size = new Size(32, 32);
-            buttonCloseForm.TabIndex = 8;
+            buttonCloseForm.TabIndex = 16;
             toolTipFS.SetToolTip(buttonCloseForm, "Close");
             buttonCloseForm.UseVisualStyleBackColor = false;
             buttonCloseForm.Click += buttonCloseForm_Click;
@@ -347,7 +359,7 @@
             chbSave.Location = new Point(0, 142);
             chbSave.Name = "chbSave";
             chbSave.Size = new Size(32, 32);
-            chbSave.TabIndex = 8;
+            chbSave.TabIndex = 12;
             toolTipFS.SetToolTip(chbSave, "Save to file toggle");
             chbSave.UseVisualStyleBackColor = false;
             chbSave.Click += chbSave_Click;
@@ -363,7 +375,7 @@
             chbArrow.Location = new Point(0, 174);
             chbArrow.Name = "chbArrow";
             chbArrow.Size = new Size(32, 32);
-            chbArrow.TabIndex = 7;
+            chbArrow.TabIndex = 11;
             toolTipFS.SetToolTip(chbArrow, "Arrow toggle");
             chbArrow.UseVisualStyleBackColor = false;
             chbArrow.Click += chbArrow_Click;
@@ -379,7 +391,7 @@
             chbFrame.Location = new Point(0, 206);
             chbFrame.Name = "chbFrame";
             chbFrame.Size = new Size(32, 32);
-            chbFrame.TabIndex = 6;
+            chbFrame.TabIndex = 10;
             toolTipFS.SetToolTip(chbFrame, "Frame toggle");
             chbFrame.UseVisualStyleBackColor = false;
             chbFrame.Click += chbFrame_Click;
@@ -395,7 +407,7 @@
             chbNumbers.Location = new Point(0, 238);
             chbNumbers.Name = "chbNumbers";
             chbNumbers.Size = new Size(32, 32);
-            chbNumbers.TabIndex = 5;
+            chbNumbers.TabIndex = 9;
             toolTipFS.SetToolTip(chbNumbers, "Numbers toggle");
             chbNumbers.UseVisualStyleBackColor = false;
             chbNumbers.Click += chbNumbers_Click;
@@ -411,7 +423,7 @@
             chbGuides.Location = new Point(0, 270);
             chbGuides.Name = "chbGuides";
             chbGuides.Size = new Size(32, 32);
-            chbGuides.TabIndex = 4;
+            chbGuides.TabIndex = 8;
             toolTipFS.SetToolTip(chbGuides, "Guides toggle");
             chbGuides.UseVisualStyleBackColor = false;
             chbGuides.CheckedChanged += chbGuides_CheckedChanged;
@@ -438,7 +450,7 @@
             rangeTrackBar.Name = "rangeTrackBar";
             rangeTrackBar.RangeColor = Color.Gray;
             rangeTrackBar.Size = new Size(32, 302);
-            rangeTrackBar.TabIndex = 0;
+            rangeTrackBar.TabIndex = 13;
             rangeTrackBar.Text = "verticalRangeTrackBar1";
             rangeTrackBar.ThumbBorderColor = Color.Transparent;
             rangeTrackBar.ThumbColor = Color.Black;
@@ -479,9 +491,9 @@
             // 
             // contextMenuMain
             // 
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitClear, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(198, 336);
+            contextMenuMain.Size = new Size(198, 358);
             // 
             // mitSize01
             // 
@@ -519,6 +531,15 @@
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
             toolStripMenuItem1.Size = new Size(194, 6);
+            // 
+            // mitClear
+            // 
+            mitClear.Name = "mitClear";
+            mitClear.ShortcutKeys = Keys.Control | Keys.Shift | Keys.C;
+            mitClear.Size = new Size(197, 22);
+            mitClear.Text = "Clear";
+            mitClear.ToolTipText = "Clear screenshot area";
+            mitClear.Click += mitClear_Click;
             // 
             // mitTakeScreen
             // 
@@ -626,6 +647,7 @@
             Controls.Add(panelBottom);
             FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
             Name = "FS2MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "FastScreener 2";
@@ -692,5 +714,7 @@
         private TextBox txtbName;
         private TextBox txtbNumber;
         private BlurOutlineLabel labelDebug;
+        private ToolStripMenuItem mitClear;
+        private Splitter splitter1;
     }
 }

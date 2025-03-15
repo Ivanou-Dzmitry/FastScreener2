@@ -63,7 +63,7 @@ namespace FastScreener2
         {
             base.OnPaint(e);
             Graphics g = e.Graphics;
-            int trackWidth = Width / 3;
+            int trackWidth = Width / 5;
             int top = 10, bottom = Height - 10;
             int lowerY = GetThumbY(LowerValue);
             int upperY = GetThumbY(UpperValue);

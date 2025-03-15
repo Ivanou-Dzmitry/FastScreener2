@@ -53,7 +53,6 @@ namespace FastScreener2
                     break;
             }
 
-            labelSetDebug.Text = selCat.ToString(); 
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -112,7 +111,7 @@ namespace FastScreener2
                 Type = tempTypeStr
             };
 
-            
+
 
             pgSettings.SelectedObject = guideSettings;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
@@ -172,7 +171,7 @@ namespace FastScreener2
         {
             resSettings = new Resolutions
             {
-                res1Width = FS2SettingsManager.resWorked[0,0],
+                res1Width = FS2SettingsManager.resWorked[0, 0],
                 res1Height = FS2SettingsManager.resWorked[1, 0],
 
                 res2Width = FS2SettingsManager.resWorked[0, 1],
@@ -212,7 +211,7 @@ namespace FastScreener2
                 FS2SettingsManager.arrowLenght = arrowSettings.Length;
                 FS2SettingsManager.SetSetting("arrow_lenght", arrowSettings.Length.ToString());
             }
-            
+
             if (e.ChangedItem.Label == "Arrow Color")
             {
                 FS2SettingsManager.arrowColor = arrowSettings.Color;
@@ -220,12 +219,12 @@ namespace FastScreener2
             }
 
             //GUIDES 
-            if(e.ChangedItem.Label == "Top Indent")
+            if (e.ChangedItem.Label == "Top Indent")
             {
                 FS2SettingsManager.customGuide[0] = guideSettings.topIndent;
                 FS2SettingsManager.SetSetting("top_indent", guideSettings.topIndent.ToString());
             }
-            
+
             if (e.ChangedItem.Label == "Bottom Indent")
             {
                 FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
@@ -307,7 +306,7 @@ namespace FastScreener2
                 FS2SettingsManager.SetSetting("frame_stroke_width", frameSettings.strokeWidth.ToString());
             }
 
-            
+
             if (e.ChangedItem.Label == "Frame Type")
             {
                 string tempTypeStr = frameSettings.Type;
@@ -455,7 +454,23 @@ namespace FastScreener2
             FS2SettingsManager.SetSetting(resKey, tempRes);
         }
 
+        private void btnReset_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to reset settings to default?",
+                "Confirm Reset",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Warning
+            );
 
+            if (result == DialogResult.OK)
+            {
+                FS2SettingsManager.CreateDefaultSettings();
+                FS2SettingsManager.Load();
+                FS2MainForm.isReseted = true; //call reset text
+                Close();                
+            }
 
+        }
     }
 }

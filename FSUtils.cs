@@ -46,12 +46,42 @@ namespace FastScreener2
         //for DPI
         public static Image ScaleImage(Image originalImage, float scaleFactor)
         {
-            int newWidth = (int)(originalImage.Width * scaleFactor);
-            int newHeight = (int)(originalImage.Height * scaleFactor);
+            if (originalImage == null) return null;
 
-            Bitmap resizedImage = new Bitmap(originalImage, new Size(newWidth, newHeight));
+            // Store original dimensions for possible reset
+            int originalWidth = originalImage.Width;
+            int originalHeight = originalImage.Height;
+
+            // Calculate the new width and height based on the scale factor
+            int newWidth = (int)(originalWidth * scaleFactor);
+            int newHeight = (int)(originalHeight * scaleFactor);
+
+            // If scale factor is 1, reset to original size
+            if (scaleFactor == 1)
+            {
+                newWidth = originalWidth;
+                newHeight = originalHeight;
+            }
+
+            // Ensure the new width and height are not less than 1 (to avoid creating a zero-sized image)
+            newWidth = Math.Max(1, newWidth);
+            newHeight = Math.Max(1, newHeight);
+
+            Bitmap resizedImage = new Bitmap(newWidth, newHeight);
+            using (Graphics g = Graphics.FromImage(resizedImage))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.CompositingQuality = CompositingQuality.HighQuality;
+
+                g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+            }
+
             return resizedImage;
         }
+
+
 
         public void AttachDragEvents(Panel panel)
         {

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formFSHelp));
             pnlFSHelpHead = new Panel();
             labelHelpHeader = new Label();
             picboxHelp = new PictureBox();
@@ -45,17 +46,19 @@
             pnlFSHelpHead.Controls.Add(btnCloseHelp);
             pnlFSHelpHead.Dock = DockStyle.Top;
             pnlFSHelpHead.Location = new Point(0, 0);
+            pnlFSHelpHead.Margin = new Padding(4, 5, 4, 5);
             pnlFSHelpHead.Name = "pnlFSHelpHead";
-            pnlFSHelpHead.Size = new Size(400, 32);
+            pnlFSHelpHead.Size = new Size(571, 53);
             pnlFSHelpHead.TabIndex = 0;
             // 
             // labelHelpHeader
             // 
             labelHelpHeader.Dock = DockStyle.Left;
             labelHelpHeader.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            labelHelpHeader.Location = new Point(32, 0);
+            labelHelpHeader.Location = new Point(46, 0);
+            labelHelpHeader.Margin = new Padding(4, 0, 4, 0);
             labelHelpHeader.Name = "labelHelpHeader";
-            labelHelpHeader.Size = new Size(45, 32);
+            labelHelpHeader.Size = new Size(64, 53);
             labelHelpHeader.TabIndex = 4;
             labelHelpHeader.Text = "Help";
             labelHelpHeader.TextAlign = ContentAlignment.MiddleLeft;
@@ -65,8 +68,9 @@
             picboxHelp.Dock = DockStyle.Left;
             picboxHelp.Image = FS2Resources.help_icon;
             picboxHelp.Location = new Point(0, 0);
+            picboxHelp.Margin = new Padding(4, 5, 4, 5);
             picboxHelp.Name = "picboxHelp";
-            picboxHelp.Size = new Size(32, 32);
+            picboxHelp.Size = new Size(46, 53);
             picboxHelp.SizeMode = PictureBoxSizeMode.CenterImage;
             picboxHelp.TabIndex = 3;
             picboxHelp.TabStop = false;
@@ -77,9 +81,10 @@
             btnCloseHelp.FlatAppearance.BorderSize = 0;
             btnCloseHelp.FlatStyle = FlatStyle.Flat;
             btnCloseHelp.Image = FS2Resources.close_icon;
-            btnCloseHelp.Location = new Point(368, 0);
+            btnCloseHelp.Location = new Point(525, 0);
+            btnCloseHelp.Margin = new Padding(4, 5, 4, 5);
             btnCloseHelp.Name = "btnCloseHelp";
-            btnCloseHelp.Size = new Size(32, 32);
+            btnCloseHelp.Size = new Size(46, 53);
             btnCloseHelp.TabIndex = 1;
             btnCloseHelp.UseVisualStyleBackColor = true;
             btnCloseHelp.Click += btnCloseHelp_Click;
@@ -88,24 +93,27 @@
             // 
             richTextBoxHelp.BorderStyle = BorderStyle.None;
             richTextBoxHelp.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            richTextBoxHelp.Location = new Point(6, 32);
+            richTextBoxHelp.Location = new Point(9, 53);
+            richTextBoxHelp.Margin = new Padding(4, 5, 4, 5);
             richTextBoxHelp.Name = "richTextBoxHelp";
             richTextBoxHelp.ReadOnly = true;
-            richTextBoxHelp.Size = new Size(387, 412);
+            richTextBoxHelp.Size = new Size(553, 687);
             richTextBoxHelp.TabIndex = 1;
             richTextBoxHelp.Text = "";
             // 
             // formFSHelp
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(400, 450);
+            AutoScaleDimensions = new SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(571, 750);
             Controls.Add(richTextBoxHelp);
             Controls.Add(pnlFSHelpHead);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 5, 4, 5);
             Name = "formFSHelp";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Form1";
+            Text = "Help";
             TopMost = true;
             pnlFSHelpHead.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picboxHelp).EndInit();

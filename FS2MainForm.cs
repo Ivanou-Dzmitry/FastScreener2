@@ -5,6 +5,7 @@ using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace FastScreener2
 {
@@ -48,6 +49,13 @@ namespace FastScreener2
 
         public static FS2MainForm Instance { get; private set; }
 
+        private const int WM_DPICHANGED = 0x02E0;
+        public int dpiChange = 0;
+        private int previousDpi = 96;
+
+        [DllImport("user32.dll")]
+        private static extern int GetDpiForWindow(IntPtr hwnd);
+
         public FS2MainForm()
         {
             InitializeComponent();
@@ -68,6 +76,12 @@ namespace FastScreener2
             FS2SettingsManager.virtScreenHeight = virtScreenRect.Height;
 
             FS2SettingsManager.Load();
+
+            //get scaling
+            scalingFactor = GetScalingFactor(this);
+
+            //frame upd
+            frameSize = Convert.ToInt32(frameSize * scalingFactor);
 
             FormResizer(FS2SettingsManager.startResW, FS2SettingsManager.startResH);
 
@@ -115,8 +129,7 @@ namespace FastScreener2
             utils.AttachDragEvents(panelDragTopR);
             utils.AttachDragEvents(panelDragTopL);
 
-            //get scaling
-            scalingFactor = GetScalingFactor(this);
+
 
             // Capture the events
             mouseHook.MiddleButtonDown += new MouseHook.MouseHookCallback(mouseHook_MMB);
@@ -137,16 +150,9 @@ namespace FastScreener2
 
             PanelSize();
 
-            //scale buttons
-            ScaleButtonImage(btnScreen, scalingFactor);
-            ScaleButtonImage(buttonMainMenu, scalingFactor);
-            ScaleButtonImage(btnArrowType, scalingFactor);
-            ScaleButtonImage(chbNumbers, scalingFactor);
-            ScaleButtonImage(chbGuides, scalingFactor);
-            ScaleButtonImage(chbFrame, scalingFactor);
+            ButtonScaler();
 
             ShowInfo("start");
-
 
             MenuItemUpdate();
 
@@ -154,7 +160,23 @@ namespace FastScreener2
             contextMenuMain.Focus();
         }
 
-
+        private void ButtonScaler()
+        {
+            //scale buttons
+            ScaleButtonImage(btnScreen, scalingFactor);
+            ScaleButtonImage(buttonMainMenu, scalingFactor);
+            ScaleButtonImage(btnArrowType, scalingFactor);
+            ScaleButtonImage(btnFrameType, scalingFactor);
+            ScaleButtonImage(btnNextRes, scalingFactor);
+            ScaleButtonImage(chbNumbers, scalingFactor);
+            ScaleButtonImage(chbGuides, scalingFactor);
+            ScaleButtonImage(chbFrame, scalingFactor);
+            ScaleButtonImage(chbArrow, scalingFactor);
+            ScaleButtonImage(chbSave, scalingFactor);
+            ScaleButtonImage(btnSettings, scalingFactor);
+            ScaleButtonImage(buttonMinimizeForm, scalingFactor);
+            ScaleButtonImage(buttonCloseForm, scalingFactor);
+        }
 
         private void PanelSize()
         {
@@ -166,23 +188,74 @@ namespace FastScreener2
 
             buttonCloseForm.Width = frameSize;
             buttonCloseForm.Height = frameSize;
+
+            panelDragTopR.Width = frameSize;
+            panelDragTopR.Height = frameSize;
+
+            panelDragTopL.Width = frameSize;
+            panelDragTopL.Height = frameSize;
+
+            panelDragBottomL.Width = frameSize * 2;
+            panelDragBottomL.Height = frameSize;
+
+            panelDragBottomR.Width = frameSize * 2;
+            panelDragBottomR.Height = frameSize;
+        }
+
+
+        //on dpi change
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_DPICHANGED)
+            {
+                int newDpi = (int)(m.WParam.ToInt64() & 0xFFFF);
+
+                // Compare the new DPI with the previous DPI
+                if (newDpi > previousDpi)
+                {
+                    dpiChange = 1;  // DPI increased
+                }
+                else if (newDpi < previousDpi)
+                {
+                    dpiChange = -1;  // DPI decreased
+                }
+
+                // Update the previous DPI to the new DPI value
+                previousDpi = newDpi;
+
+                scalingFactor = GetScalingFactor(this);
+            }
+
+            base.WndProc(ref m);
         }
 
 
         public float GetScalingFactor(Form form)
         {
-            using (Graphics g = form.CreateGraphics())
-            {
-                float dpiX = g.DpiX;
-                return dpiX / 96f; // Assuming default DPI is 96
-            }
+            int dpi = GetDpiForWindow(form.Handle);
+            return dpi / 96f; // Base DPI is 96
         }
-
 
         public void ShowInfo(string type)
         {
             string leftTopPos = "Pos X:" + this.Location.X.ToString() + ", Y:" + this.Location.Y.ToString();
-            string screenArea = "Size W:" + panelScreenArea.Width.ToString() + ", H:" + panelScreenArea.Height.ToString();
+
+            string screenArea = "";
+
+            string panelW = panelScreenArea.Width.ToString();
+            string panelH = panelScreenArea.Height.ToString();
+
+            string panelWS = (panelScreenArea.Width / scalingFactor).ToString();
+            string panelHS = (panelScreenArea.Height / scalingFactor).ToString();
+
+            if (scalingFactor == 1)
+            {
+                screenArea = "Size W:" + panelW + ", H:" + panelH;
+            }
+            else
+            {
+                screenArea = $"Size W: {panelW} ({panelWS}), H: {panelH} ({panelHS})";
+            }
 
             string name = "FastScreener 2.0";
             string scale = "Scaling: " + scalingFactor;
@@ -493,7 +566,11 @@ namespace FastScreener2
 
             mouseHook.Uninstall();
 
-            string res = panelScreenArea.Width + "," + panelScreenArea.Height;
+            //scaling
+            int scaledW = Convert.ToInt32(panelScreenArea.Width / scalingFactor);
+            int scaledH = Convert.ToInt32(panelScreenArea.Height / scalingFactor);
+
+            string res = scaledW + "," + scaledH;
             FS2SettingsManager.SetSetting("res_on_close", res);
             FS2SettingsManager.Save();
         }
@@ -1045,12 +1122,12 @@ namespace FastScreener2
         private void AdjustClientSize(int widthIndex, int heightIndex)
         {
             // Retrieve dimensions
-            int clientW = Convert.ToInt32(resWorked[0, widthIndex]) + frameSize * 2; ;
-            int clientH = Convert.ToInt32(resWorked[1, heightIndex]) + frameSize * 2; ;
+            int clientW = Convert.ToInt32(resWorked[0, widthIndex]);
+            int clientH = Convert.ToInt32(resWorked[1, heightIndex]);
 
             // Apply scaling factor
-            int scaledClientW = (int)(clientW * scalingFactor);
-            int scaledClientH = (int)(clientH * scalingFactor);
+            int scaledClientW = (int)(clientW * scalingFactor) + frameSize * 2;
+            int scaledClientH = (int)(clientH * scalingFactor) + frameSize * 2;
 
             // Set client size
             this.ClientSize = new Size(scaledClientW, scaledClientH);
@@ -1059,17 +1136,16 @@ namespace FastScreener2
             this.Refresh();
 
             ShowInfo("start");
-
-            //Debug.WriteLine("SIZ" + scaledClientW + "/" + scaledClientH);
         }
 
         public void FormResizer(int Width, int Height)
         {
-            Width = Width + frameSize * 2;
-            Height = Height + frameSize * 2;
+            // Apply scaling factor
+            int scaledClientW = Convert.ToInt32(Width * scalingFactor) + frameSize * 2;
+            int scaledClientH = Convert.ToInt32(Height * scalingFactor) + frameSize * 2;
 
             // Set client size
-            this.ClientSize = new Size((int)(Width), (int)(Height));
+            this.ClientSize = new Size((int)(scaledClientW), (int)(scaledClientH));
         }
 
         private void mitSize01_Click(object sender, EventArgs e)
@@ -1130,7 +1206,7 @@ namespace FastScreener2
             int panelRight = panelLeft + panelScreenArea.Width;
             int panelBottom = panelTop + panelScreenArea.Height;
 
-            Debug.WriteLine($"{currentScreen.DeviceName}, -/- {panelLeft} -/- {screenBounds.Left}");
+            //Debug.WriteLine($"{currentScreen.DeviceName}, -/- {panelLeft} -/- {screenBounds.Left}");
 
             // Only snap if we are close to the screen edges, not if already unsnapped
             if (Math.Abs(panelLeft - screenBounds.Left) <= snapMargin)
@@ -1186,12 +1262,12 @@ namespace FastScreener2
 
         private void mitClear_Click(object sender, EventArgs e)
         {
-             drawnRectangles.Clear();
-             drawnArrows.Clear();
-             drawnTexts.Clear();
+            drawnRectangles.Clear();
+            drawnArrows.Clear();
+            drawnTexts.Clear();
 
             currentRectangle = new Rectangle(startPoint, new Size(0, 0));
-           
+
             numbering = 1; // Reset numbering
 
             // Ensure the form is in focus
@@ -1203,6 +1279,16 @@ namespace FastScreener2
             this.Refresh();
 
             ShowInfo("clear");
+        }
+
+        private void buttonCloseForm_DpiChangedAfterParent(object sender, EventArgs e)
+        {
+            Debug.WriteLine($"DPI changed: 11");
+        }
+
+        private void buttonCloseForm_DpiChangedBeforeParent(object sender, EventArgs e)
+        {
+            Debug.WriteLine($"DPI changed: 12");
         }
     }
 }

@@ -7,6 +7,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>fs_icon.ico</ApplicationIcon>
+	<DebugType>none</DebugType>
+	<Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +29,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>FS2Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="SVGres.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SVGres.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +41,14 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>FS2Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="SVGres.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SVGres.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Svg" Version="3.3.0" />
   </ItemGroup>
 
 </Project>

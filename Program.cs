@@ -16,21 +16,31 @@ namespace FastScreener2
         [STAThread]
         static void Main()
         {
-            try
-            {
-                SetProcessDpiAwareness(2);  // Per-Monitor DPI Awareness
-            }
-            catch
-            {
-                SetProcessDPIAware();  // Fallback for older Windows versions
-            }
+            bool createdNew;
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new FS2MainForm());
+            using (Mutex mutex = new Mutex(true, "FastScreener2_UniqueAppName", out createdNew))
+            {
+                if (!createdNew)
+                {
+                    MessageBox.Show("FastScreener is already running!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return; // Exit if another instance is already running
+                }
+
+                try
+                {
+                    SetProcessDpiAwareness(2);  // Per-Monitor DPI Awareness
+                }
+                catch
+                {
+                    SetProcessDPIAware();  // Fallback for older Windows versions
+                }
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                ApplicationConfiguration.Initialize(); // Optional config
+                Application.Run(new FS2MainForm());
+            }
         }
+
     }
 }

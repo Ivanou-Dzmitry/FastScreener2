@@ -1,11 +1,10 @@
-using System.Data.SqlTypes;
+
 using System.Drawing.Imaging;
-using System.Resources;
 using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+
 
 namespace FastScreener2
 {
@@ -50,15 +49,21 @@ namespace FastScreener2
         public static FS2MainForm Instance { get; private set; }
 
         private const int WM_DPICHANGED = 0x02E0;
-        public int dpiChange = 0;
-        private int previousDpi = 96;
+        private Dictionary<Button, Image> originalImages = new Dictionary<Button, Image>();
+
+        //public int dpiChange = 0;
+        //private int previousDpi = 96;
 
         [DllImport("user32.dll")]
         private static extern int GetDpiForWindow(IntPtr hwnd);
 
+
+
         public FS2MainForm()
         {
             InitializeComponent();
+
+            this.AutoScaleMode = AutoScaleMode.Dpi;
 
             Instance = this;  // Store the reference when the form is created
 
@@ -150,7 +155,9 @@ namespace FastScreener2
 
             PanelSize();
 
-            ButtonScaler();
+            //ButtonScaler();
+
+            NameFieldPos();
 
             ShowInfo("start");
 
@@ -158,9 +165,73 @@ namespace FastScreener2
 
             this.KeyPreview = true;
             contextMenuMain.Focus();
+
+            //buttons
+            SetControlImage(btnSettings, "settings_icon");
+            SetControlImage(buttonMinimizeForm, "minimize_icon");
+            SetControlImage(buttonCloseForm, "close_icon");
+            SetControlImage(btnNextRes, "res_cycle_icon");
+            SetControlImage(btnScreen, "screen_icon");
+            SetControlImage(buttonMainMenu, "menu_icon");
+
+            //checkboxes
+            SetControlImage(chbSave, "save_icon");
+            SetControlImage(chbNumbers, "number_icon");
+            SetControlImage(chbFrame, "frame_icon");
+            SetControlImage(chbArrow, "arrow_icon");
+            SetControlImage(chbGuides, "guides_icon");
         }
 
-        private void ButtonScaler()
+        private void SetControlImage(Control control, string resourceName)
+        {
+            // Determine the size of the icon based on scaling factor
+            int iconSize = scalingFactor switch
+            {
+                1 => 16,
+                1.5f => 32,
+                2 => 48,
+                _ => 16 // Default to 16px if scalingFactor is unexpected
+            };
+
+            Debug.WriteLine($"Icon size: {iconSize}"); // Debugging line to check size
+
+            byte[] svgData = (byte[])SVGres.ResourceManager.GetObject(resourceName);
+            
+            if (svgData == null)
+                return;
+
+            // Load and render the SVG into a Bitmap
+            Bitmap finalImage = SvgHelper.LoadSvgFromResources(svgData, iconSize, iconSize);
+
+            if (finalImage != null)
+            {
+                // Assign the generated Bitmap to the appropriate control
+                if (control is Button button)
+                {
+                    button.Image = finalImage;
+                    button.ImageAlign = ContentAlignment.MiddleCenter;
+                }
+                else if (control is CheckBox checkBox)
+                {
+                    checkBox.Image = finalImage;
+                    checkBox.ImageAlign = ContentAlignment.MiddleCenter;
+                }
+            }
+        }
+
+
+
+        private void NameFieldPos()
+        {
+            int panelHeight = panelDragTop.Height / 2;
+            int fieldHeight = txtbName.Height / 2;
+
+            txtbName.Top = panelHeight - fieldHeight;
+
+            txtbName.Left = splitter1.Left + splitter1.Width;
+        }
+
+/*        private void ButtonScaler()
         {
             //scale buttons
             ScaleButtonImage(btnScreen, scalingFactor);
@@ -176,7 +247,7 @@ namespace FastScreener2
             ScaleButtonImage(btnSettings, scalingFactor);
             ScaleButtonImage(buttonMinimizeForm, scalingFactor);
             ScaleButtonImage(buttonCloseForm, scalingFactor);
-        }
+        }*/
 
         private void PanelSize()
         {
@@ -208,26 +279,34 @@ namespace FastScreener2
         {
             if (m.Msg == WM_DPICHANGED)
             {
-                int newDpi = (int)(m.WParam.ToInt64() & 0xFFFF);
+                //int newDpi = (int)(m.WParam.ToInt64() & 0xFFFF);
 
-                // Compare the new DPI with the previous DPI
-                if (newDpi > previousDpi)
-                {
-                    dpiChange = 1;  // DPI increased
-                }
-                else if (newDpi < previousDpi)
-                {
-                    dpiChange = -1;  // DPI decreased
-                }
+                // Ask the user whether to restart
+                /*             DialogResult result = MessageBox.Show(
+                                 "DPI settings have changed. A restart is recommended for proper scaling.\nDo you want to restart now?",
+                                 "DPI Change Detected",
+                                 MessageBoxButtons.YesNo,
+                                 MessageBoxIcon.Question
+                             );
 
-                // Update the previous DPI to the new DPI value
-                previousDpi = newDpi;
+                             if (result == DialogResult.Yes)
+                             {
+                                 RestartApplication();
+                             }*/
+                RestartApplication();
 
-                scalingFactor = GetScalingFactor(this);
+                //scalingFactor = GetScalingFactor(this);
             }
 
             base.WndProc(ref m);
         }
+
+        private void RestartApplication()
+        {
+            Process.Start(Application.ExecutablePath); // Start a new instance
+            Application.Exit(); // Close the current instance
+        }
+
 
 
         public float GetScalingFactor(Form form)
@@ -356,14 +435,12 @@ namespace FastScreener2
             // Create bitmap and capture graphics
             using (Bitmap captureBitmap = new Bitmap(bitmapWidth, bitmapHeight, PixelFormat.Format32bppArgb))
             {
-                Rectangle captureRectangle = new Rectangle(this.Location.X + 32, this.Location.Y + 32, bitmapWidth, bitmapHeight);
+                Rectangle captureRectangle = new Rectangle(this.Location.X + frameSize, this.Location.Y + frameSize, bitmapWidth, bitmapHeight);
 
                 using (Graphics captureGraphics = Graphics.FromImage(captureBitmap))
                 {
                     captureGraphics.CopyFromScreen(captureRectangle.Location, Point.Empty, captureRectangle.Size);
                 }
-
-
 
                 // Save file if needed
                 if (saveToFile)
@@ -375,13 +452,29 @@ namespace FastScreener2
                         Directory.CreateDirectory(directoryPath);
 
                     string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
-                    fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}{txtbNumber.Text}.png" : $"{currentTime}_screenshot.png";
+                    fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.png" : $"{currentTime}_screenshot.png";
 
                     stringURL = Path.Combine(directoryPath, fileName);
 
                     try
                     {
-                        captureBitmap.Save(stringURL, ImageFormat.Png);
+                        // Scale down the image
+                        int newWidth = (int)(captureBitmap.Width / scalingFactor);
+                        int newHeight = (int)(captureBitmap.Height / scalingFactor);
+
+                        using (Bitmap scaledBitmap = new Bitmap(newWidth, newHeight))
+                        using (Graphics g = Graphics.FromImage(scaledBitmap))
+                        {
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                            g.Clear(Color.Transparent);
+
+                            g.DrawImage(captureBitmap, 0, 0, newWidth, newHeight);
+
+                            // Save the scaled image
+                            scaledBitmap.Save(stringURL, ImageFormat.Png);
+                        }
                     }
                     catch
                     {
@@ -610,7 +703,7 @@ namespace FastScreener2
 
             ArrowPicUpdater(clickInArrowCount);
 
-            ScaleButtonImage(btnArrowType, scalingFactor);
+            //ScaleButtonImage(btnArrowType, scalingFactor);
         }
 
         private void ArrowPicUpdater(int number)
@@ -627,24 +720,28 @@ namespace FastScreener2
                 case 1:
                     btnArrowType.Image = FS2Resources.arrow_type01_icon;
                     FS2SettingsManager.arrowType = 1; clickInArrowCount = 1;
+                    SetControlImage(btnArrowType, "arrow_type01_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "1");
                     FS2SettingsManager.Save();
                     break;
                 case 2:
                     btnArrowType.Image = FS2Resources.arrow_type02_icon;
                     FS2SettingsManager.arrowType = 2; clickInArrowCount = 2;
+                    SetControlImage(btnArrowType, "arrow_type02_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "2");
                     FS2SettingsManager.Save();
                     break;
                 case 3:
                     btnArrowType.Image = FS2Resources.arrow_type03_icon;
                     FS2SettingsManager.arrowType = 3; clickInArrowCount = 3;
+                    SetControlImage(btnArrowType, "arrow_type03_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "3");
                     FS2SettingsManager.Save();
                     break;
                 case 4:
                     btnArrowType.Image = FS2Resources.arrow_type04_icon;
                     FS2SettingsManager.arrowType = 4; clickInArrowCount = 4;
+                    SetControlImage(btnArrowType, "arrow_type04_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "4");
                     FS2SettingsManager.Save();
                     break;
@@ -659,7 +756,7 @@ namespace FastScreener2
         {
             clickInFrameCount++;
             FramePicUpdater(clickInFrameCount);
-            ScaleButtonImage(btnFrameType, scalingFactor);
+            //ScaleButtonImage(btnFrameType, scalingFactor);
         }
 
         private void FramePicUpdater(int number)
@@ -674,15 +771,17 @@ namespace FastScreener2
             {
                 case 1:
                     btnFrameType.Image = FS2Resources.frame_unlocked_icon;
-                    FS2SettingsManager.frameType = 1; clickInFrameCount = 1;
-                    FS2SettingsManager.SetSetting("frame_type", "1");
-                    FS2SettingsManager.Save();
+                    frameType = 1; clickInFrameCount = 1;
+                    SetControlImage(btnFrameType, "frame_unlocked_icon");
+                    SetSetting("frame_type", "1");
+                    Save();
                     break;
                 case 2:
                     btnFrameType.Image = FS2Resources.frame_locked_icon;
-                    FS2SettingsManager.frameType = 2; clickInFrameCount = 2;
-                    FS2SettingsManager.SetSetting("frame_type", "2");
-                    FS2SettingsManager.Save();
+                    SetControlImage(btnFrameType, "frame_locked_icon");
+                    frameType = 2; clickInFrameCount = 2;
+                    SetSetting("frame_type", "2");
+                    Save();
                     break;
                 default:
                     break;
@@ -691,7 +790,7 @@ namespace FastScreener2
 
 
         //for DPI
-        private void ScaleButtonImage(Control targetControl, float scalingFactor)
+/*        private void ScaleButtonImage(Control targetControl, float scalingFactor)
         {
             if (targetControl is Button button && button.Image != null)
             {
@@ -702,7 +801,7 @@ namespace FastScreener2
             {
                 chb.Image = FSUtils.ScaleImage(chb.Image, scalingFactor);
             }
-        }
+        }*/
 
         private void mitSettings_Click(object sender, EventArgs e)
         {
@@ -812,11 +911,6 @@ namespace FastScreener2
         private void mitFrame_Click(object sender, EventArgs e)
         {
             DrawFrameStatus();
-        }
-
-        private void chbFrame_CheckedChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void DrawFrameStatus()
@@ -1013,12 +1107,7 @@ namespace FastScreener2
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-
             mitSettings_Click(sender, e);
-            /*            formFS2Settings settingsForm = new formFS2Settings();
-
-                        settingsForm.ShowDialog();
-            */
         }
 
         private void buttonCloseForm_MouseEnter(object sender, EventArgs e)
@@ -1178,7 +1267,7 @@ namespace FastScreener2
 
             int res = currentRes;
 
-            // Debug.WriteLine("CR2=" + currentRes + "/"+ res);
+            //Debug.WriteLine("CR2=" + currentRes + "/"+ res);
 
             if (res > 3)
             {
@@ -1187,11 +1276,6 @@ namespace FastScreener2
             }
 
             AdjustClientSize(res, res);
-        }
-
-        private void blurOutlineLabel1_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void FS2MainForm_Move(object sender, EventArgs e)
@@ -1281,14 +1365,6 @@ namespace FastScreener2
             ShowInfo("clear");
         }
 
-        private void buttonCloseForm_DpiChangedAfterParent(object sender, EventArgs e)
-        {
-            Debug.WriteLine($"DPI changed: 11");
-        }
 
-        private void buttonCloseForm_DpiChangedBeforeParent(object sender, EventArgs e)
-        {
-            Debug.WriteLine($"DPI changed: 12");
-        }
     }
 }

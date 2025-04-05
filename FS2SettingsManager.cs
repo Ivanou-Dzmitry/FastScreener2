@@ -19,7 +19,7 @@ namespace FastScreener2
         public static int[,] resWorked = new int[2, 4];
 
         //Min size
-        public const int MIN_WIDTH = 300, MIN_HEIGHT = 200;
+        public const int MIN_WIDTH = 550, MIN_HEIGHT = 200;
 
         //all monitors
         public static int virtScreenWidth = 0, virtScreenHeight = 0;
@@ -257,8 +257,6 @@ namespace FastScreener2
             }
 
             SetCurResBasedOnResOnClose();
-
-            //Debug.WriteLine("CR="+currentRes);
         }
 
         // Save settings to XML

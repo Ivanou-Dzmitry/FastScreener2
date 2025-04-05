@@ -1,17 +1,59 @@
 ﻿using System.ComponentModel;
-using System.Globalization;  
-using System.Drawing; // If Color is from System.Drawing namespace
+using System.Diagnostics;
+using System.Globalization;
+using static FastScreener2.FSUtils;
+using static FastScreener2.FS2SettingsManager;
+using System.Numerics;
+using System.Drawing;
 
 namespace FastScreener2
 {
+   
+    public class SafeColorConverter : ColorConverter
+    {
+        [ThreadStatic]
+        private static bool _showingMessage;
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            try
+            {
+                return base.ConvertFrom(context, culture, value);
+            }
+            catch
+            {
+                if (!_showingMessage)
+                {
+                    _showingMessage = true;
+
+                    MessageBox.Show("Invalid color input. Reverting to previous value.",
+                                    "Invalid Color",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+
+                    _showingMessage = false;
+                }
+
+                if (context?.Instance != null)
+                {
+                    var property = context.PropertyDescriptor;
+                    var currentValue = property?.GetValue(context.Instance);
+                    return currentValue ?? Color.Cyan;
+                }
+
+                return Color.Cyan;
+            }
+        }
+    }
+
     //ARROW
-        public class Arrow : INotifyPropertyChanged
+    public class Arrow : INotifyPropertyChanged
         {
             private int length;
             private Color color;
 
             [Category("Arrow Settings")]
-            [Description("Set arrow length. The maximum length is equal to the hypotenuse. Minimum - 8. Default - 50.")]
+            [Description("Set arrow length. The maximum length is equal to the hypotenuse of max resolution. Minimum - 8. Default - 50.")]
             [DisplayName("Arrow Length")]
             [TypeConverter(typeof(Int32OnlyConverter))]
             public int Length
@@ -19,13 +61,21 @@ namespace FastScreener2
                 get => length;
                 set
                 {
-                if (value < 8 || value > 4000)
-                {
-                    // Show the error message on top of the form
-                    MessageBox.Show("Length must be between 8 and 4000.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Don't set the value if it's invalid
-                }
-                length = value;
+                    //get max lenght
+                    double halfDiag = GetMaxArrowLenght(resWorked);
+
+                    if (value < 8 || value > halfDiag)
+                    {
+                        // Show the error message on top of the form
+                        MessageBox.Show(
+                            $"Length must be between 8 and {halfDiag:N0}.\n(Current input: {value})",
+                            "Invalid Value",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return; // Don't set the value if it's invalid
+                    }
+                    length = value;
                     OnPropertyChanged(nameof(Length));
                 }
             }
@@ -33,14 +83,14 @@ namespace FastScreener2
             [Category("Arrow Settings")]
             [Description("Set arrow color.")]
             [DisplayName("Arrow Color")]
-            [TypeConverter(typeof(ColorConverter))]
+            [TypeConverter(typeof(SafeColorConverter))]
             public Color Color
             {
                 get => color;
                 set
                 {
-                    color = value;
-                    OnPropertyChanged(nameof(Color));
+                color = value;
+                OnPropertyChanged(nameof(Color));
                 }
             }
 
@@ -131,7 +181,7 @@ namespace FastScreener2
         }
     }
 
-
+    //GUIDE
     public class Guide : INotifyPropertyChanged
         {
             private int topindent, bottomindent, leftindent, rightindent;
@@ -141,7 +191,7 @@ namespace FastScreener2
 
             [Category("1. General Settings")]
             [DisplayName("Guide Type")]
-            [Description("Choose grid type. 3x3 and 4x4 divides the area into equal parts, custom - set arbitrary padding.")]
+            [Description("Choose guides type. 3x3, 4x4 divides the area into equal parts, custom - set arbitrary indent from the edge")]
             [TypeConverter(typeof(GuideTypeConverter))] // Apply the custom TypeConverter here    
             public string Type
             {
@@ -156,7 +206,7 @@ namespace FastScreener2
             [Category("1. General Settings")]
             [Description("Set guides color.")]
             [DisplayName("Guides Color")]
-            [TypeConverter(typeof(ColorConverter))]
+            [TypeConverter(typeof(SafeColorConverter))]
             public Color Color
             {
                 get => color;
@@ -190,10 +240,13 @@ namespace FastScreener2
                 get => topindent;
                 set
                 {
-                if (value < 1 || value > 3840)
+
+                Vector2 halfSize = GetHalfMaxScreenSize(resWorked);
+
+                if (value < 1 || value > halfSize.Y)
                 {
                     // Show the error message on top of the form
-                    MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Indent must be between 1 and {halfSize.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
 
@@ -211,10 +264,12 @@ namespace FastScreener2
                 get => bottomindent;
                 set
                 {
-                if (value < 1 || value > 3840)
+                Vector2 halfSize = GetHalfMaxScreenSize(resWorked);
+
+                if (value < 1 || value > halfSize.Y)
                 {
                     // Show the error message on top of the form
-                    MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Indent must be between 1 and {halfSize.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
 
@@ -224,7 +279,7 @@ namespace FastScreener2
             }
 
             [Category("2. Custom Type Settings")]
-            [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
+            [Description("Max size screenshot width/2. Minimum - 1. Default - 10.")]
             [DisplayName("Left Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
             public int leftIndent
@@ -232,10 +287,11 @@ namespace FastScreener2
                 get => leftindent;
                 set
                 {
-                    if (value < 1 || value > 3840)
+                    Vector2 halfSize = GetHalfMaxScreenSize(resWorked);
+                    if (value < 1 || value > halfSize.X)
                     {
                         // Show the error message on top of the form
-                        MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Indent must be between 1 and {halfSize.X}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return; // Don't set the value if it's invalid
                     }
                     leftindent = value;
@@ -244,7 +300,7 @@ namespace FastScreener2
             }
 
             [Category("2. Custom Type Settings")]
-            [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
+            [Description("Max size screenshot width/2. Minimum - 1. Default - 10.")]
             [DisplayName("Right Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
             public int rightIndent
@@ -252,10 +308,11 @@ namespace FastScreener2
                 get => rightindent;
                 set
                 {
-                    if (value < 1 || value > 3840)
+                    Vector2 halfSize = GetHalfMaxScreenSize(resWorked);
+                    if (value < 1 || value > halfSize.X)
                     {
                         // Show the error message on top of the form
-                        MessageBox.Show("Indent must be between 1 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Indent must be between 1 and {halfSize.X}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return; // Don't set the value if it's invalid
                     }
                     rightindent = value;
@@ -273,6 +330,7 @@ namespace FastScreener2
 
     }
 
+    //FRAME
     public class Frame
     {
         private int framewidth;
@@ -282,7 +340,7 @@ namespace FastScreener2
         private string type;
 
         [Category("2. Fixed Frame Settings")]
-        [Description("Frame width. Max - screenshot width, min - 16. Default 80.")]
+        [Description("Frame width (in px). Max - screenshot width/2, min - 16. Default 80.")]
         [DisplayName("Frame Width")]
         [TypeConverter(typeof(Int32OnlyConverter))]
         public int frameWidth
@@ -290,10 +348,12 @@ namespace FastScreener2
             get => framewidth;
             set
             {
+                Vector2 halfResolution = GetHalfMaxScreenSize(resWorked);
+
                 // Validation for FrameWidth
-                if (value < 16 || value > 3840)
+                if (value < 16 || value > halfResolution.X)
                 {
-                    MessageBox.Show("Frame width must be between 16 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Frame width must be between 16 and {halfResolution.X}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
                 framewidth = value;
@@ -302,7 +362,7 @@ namespace FastScreener2
         }
 
         [Category("2. Fixed Frame Settings")]
-        [Description("Frame height. Max - screenshot height, min - 16. Default 80.")]
+        [Description("Frame height (in px). Max - screenshot height/2, min - 16. Default 80.")]
         [DisplayName("Frame Height")]
         [TypeConverter(typeof(Int32OnlyConverter))]
         public int frameHeight
@@ -310,10 +370,11 @@ namespace FastScreener2
             get => frameheight;
             set
             {
+                Vector2 halfResolution = GetHalfMaxScreenSize(resWorked);
                 // Validation for FrameHeight
-                if (value < 16 || value > 3840)
+                if (value < 16 || value > halfResolution.Y)
                 {
-                    MessageBox.Show("Frame height must be between 16 and 3840.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Frame height must be between 16 and {halfResolution.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
                 frameheight = value;
@@ -345,7 +406,7 @@ namespace FastScreener2
         [Category("1. Base Frame Settings")]
         [Description("Set frame color.")]
         [DisplayName("Frame Color")]
-        [TypeConverter(typeof(ColorConverter))]
+        [TypeConverter(typeof(SafeColorConverter))]
         public Color Color
         {
             get => color;
@@ -389,7 +450,7 @@ namespace FastScreener2
         private Color color;
 
         [Category("Numbers Settings")]
-        [Description("Set number font size. Minimum - 8. Default - 26.")]
+        [Description("Set number font size. Max - 100, min - 8. Default - 26.")]
         [DisplayName("Number Font Size")]
         [TypeConverter(typeof(Int32OnlyConverter))]
         public int Size
@@ -397,11 +458,11 @@ namespace FastScreener2
             get => size;
             set
             {
-                if (value < 8 || value > 72)
+                if (value < 8 || value > 100)
                 {
                     // Show the error message on top of the form
-                    MessageBox.Show("Size must be between 8 and 72.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    size = 8;
+                    MessageBox.Show("Font size must be between 8 and 100.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    size = 26;
                     return; // Don't set the value if it's invalid
                 }
 
@@ -413,7 +474,7 @@ namespace FastScreener2
         [Category("Numbers Settings")]
         [Description("Set numbers color.")]
         [DisplayName("Number Color")]
-        [TypeConverter(typeof(ColorConverter))]
+        [TypeConverter(typeof(SafeColorConverter))]
         public Color Color
         {
             get => color;
@@ -440,7 +501,7 @@ namespace FastScreener2
         [Category("Bar Settings")]
         [Description("Set bar color.")]
         [DisplayName("Bar Color")]
-        [TypeConverter(typeof(ColorConverter))]
+        [TypeConverter(typeof(SafeColorConverter))]
         public Color Color
         {
             get => color;
@@ -465,7 +526,7 @@ namespace FastScreener2
         private int r1w, r1h, r2w, r2h, r3w, r3h, r4w, r4h;
 
         [Category("Size 1")]
-        [Description("Size 1 width. Max depends on your monitor resolution. Min - 300px.")]
+        [Description("Size 1 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("1.1 Width")]
         [TypeConverter(typeof(ResWidthConverter))]
         public int res1Width
@@ -473,13 +534,21 @@ namespace FastScreener2
             get => r1w;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_WIDTH || value > smalestRes.X)
+                {
+                    MessageBox.Show($"The value can be from {MIN_WIDTH}px to {smalestRes.X}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);                    
+                    return; // Don't set the value if it's invalid
+                }
+
                 r1w = value;
                 OnPropertyChanged(nameof(res1Width));
             }
         }
 
         [Category("Size 1")]
-        [Description("Size 1 height. Max depends on your monitor resolution. Min - 200px.")]
+        [Description("Size 1 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("1.2 Height")]
         [TypeConverter(typeof(ResHeightConverter))]
         public int res1Height
@@ -487,13 +556,21 @@ namespace FastScreener2
             get => r1h;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_HEIGHT || value > smalestRes.Y)
+                {
+                    MessageBox.Show($"The value can be from {MIN_HEIGHT}px to {smalestRes.Y}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
+
                 r1h = value;
                 OnPropertyChanged(nameof(res1Height));
             }
         }
 
         [Category("Size 2")]
-        [Description("Size 2 width. Max depends on your monitor resolution. Min - 300px.")]
+        [Description("Size 2 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("2.1 Width")]
         [TypeConverter(typeof(ResWidthConverter))]
         public int res2Width
@@ -501,13 +578,20 @@ namespace FastScreener2
             get => r2w;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_WIDTH || value > smalestRes.X)
+                {
+                    MessageBox.Show($"The value can be from {MIN_WIDTH}px to {smalestRes.X}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
                 r2w = value;
                 OnPropertyChanged(nameof(res2Width));
             }
         }
 
         [Category("Size 2")]
-        [Description("Size 2 height. Max depends on your monitor resolution. Min - 200px.")]
+        [Description("Size 2 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("2.2 Height")]
         [TypeConverter(typeof(ResHeightConverter))]
         public int res2Height
@@ -515,13 +599,20 @@ namespace FastScreener2
             get => r2h;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_HEIGHT || value > smalestRes.Y)
+                {
+                    MessageBox.Show($"The value can be from {MIN_HEIGHT}px to {smalestRes.Y}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
                 r2h = value;
                 OnPropertyChanged(nameof(res2Height));
             }
         }
 
         [Category("Size 3")]
-        [Description("Size 3 width. Max depends on your monitor resolution. Min - 300px.")]
+        [Description("Size 3 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("3.1 Width")]
         [TypeConverter(typeof(ResWidthConverter))]
         public int res3Width
@@ -529,13 +620,20 @@ namespace FastScreener2
             get => r3w;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_WIDTH || value > smalestRes.X)
+                {
+                    MessageBox.Show($"The value can be from {MIN_WIDTH}px to {smalestRes.X}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
                 r3w = value;
                 OnPropertyChanged(nameof(res3Width));
             }
         }
 
         [Category("Size 3")]
-        [Description("Size 3 height. Max depends on your monitor resolution. Min - 200px.")]
+        [Description("Size 3 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("3.2 Height")]
         [TypeConverter(typeof(ResHeightConverter))]
         public int res3Height
@@ -543,13 +641,20 @@ namespace FastScreener2
             get => r3h;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_HEIGHT || value > smalestRes.Y)
+                {
+                    MessageBox.Show($"The value can be from {MIN_HEIGHT}px to {smalestRes.Y}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
                 r3h = value;
                 OnPropertyChanged(nameof(res3Height));
             }
         }
 
         [Category("Size 4")]
-        [Description("Size 4 width. Max depends on your monitor resolution. Min - 300px.")]
+        [Description("Size 4 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("4.1 Width")]
         [TypeConverter(typeof(ResWidthConverter))]
         public int res4Width
@@ -557,13 +662,20 @@ namespace FastScreener2
             get => r4w;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_WIDTH || value > smalestRes.X)
+                {
+                    MessageBox.Show($"The value can be from {MIN_WIDTH}px to {smalestRes.X}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
                 r4w = value;
                 OnPropertyChanged(nameof(res4Width));
             }
         }
 
         [Category("Size 4")]
-        [Description("Size 4 height. Max depends on your monitor resolution. Min - 200px.")]
+        [Description("Size 4 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("4.2 Height")]
         [TypeConverter(typeof(ResHeightConverter))]
         public int res4Height
@@ -571,6 +683,13 @@ namespace FastScreener2
             get => r4h;
             set
             {
+                Vector2 smalestRes = GetSmallestScreenResolution();
+
+                if (value < MIN_HEIGHT || value > smalestRes.Y)
+                {
+                    MessageBox.Show($"The value can be from {MIN_HEIGHT}px to {smalestRes.Y}px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Don't set the value if it's invalid
+                }
                 r4h = value;
                 OnPropertyChanged(nameof(res4Height));
             }
@@ -596,11 +715,16 @@ namespace FastScreener2
             }
             else
             {
-                value = "Invalid value! Max is " + FS2SettingsManager.virtScreenWidth.ToString() + "px, min - " + FS2SettingsManager.MIN_WIDTH.ToString();
-            }
-            return base.ConvertTo(context, culture, value, destinationType);
-        }
+                Vector2 smalestRes = GetSmallestScreenResolution();
+                string message = "Invalid value! Max is " + smalestRes.X + "px, min - " + FS2SettingsManager.MIN_WIDTH.ToString() + "px";
 
+                // Show the message box with an error message
+                MessageBox.Show(message, "Invalid Resolution", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // You can also return a custom error message here, or a default valid value if necessary.
+                return base.ConvertTo(context, culture, "Invalid", destinationType);
+            }
+        }
     }
 
     public class ResHeightConverter : Int16Converter
@@ -614,65 +738,72 @@ namespace FastScreener2
             }
             else
             {
-                value = "Invalid value! Max is " + FS2SettingsManager.virtScreenHeight.ToString() + "px, min - " + FS2SettingsManager.MIN_HEIGHT.ToString();
-            }
-            return base.ConvertTo(context, culture, value, destinationType);
-        }
+                Vector2 smalestRes = GetSmallestScreenResolution();
+                string message = "Invalid value! Max is " + smalestRes.Y + "px, min - " + FS2SettingsManager.MIN_HEIGHT.ToString() + "px";
 
+                // Show the message box with an error message
+                MessageBox.Show(message, "Invalid Resolution", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // You can also return a custom error message here, or a default valid value if necessary.
+                return base.ConvertTo(context, culture, "Invalid", destinationType);
+            }
+        }
     }
 
 
     public class Int32OnlyConverter : TypeConverter
+    {
+        private static bool messageBoxShown = false; // Static flag to track message box display
+
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            if (sourceType == typeof(string))
             {
-                if (sourceType == typeof(string))
-                {
-                    return true;
-                }
-                return base.CanConvertFrom(context, sourceType);
+                return true;
             }
+            return base.CanConvertFrom(context, sourceType);
+        }
 
-            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            if (value is string str)
             {
-                bool messageBoxShown = false;
-
-                if (value is string str)
+                if (int.TryParse(str, out int result))
                 {
-                    if (int.TryParse(str, out int result))
-                    {
-                        return result;
-                    }
-                    else
-                    {
-
+                    return result;
+                }
+                else
+                {
                     // Show the message box only if it hasn't been shown yet
                     if (!messageBoxShown)
                     {
+                        // Display message box to inform the user about invalid input
                         MessageBox.Show(context?.Instance as IWin32Window, "Invalid integer format. Please enter a valid integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         messageBoxShown = true; // Set the flag to true after showing the message
                     }
 
+                    // Return default value in case of failure
                     return 0;
-                    }
                 }
-                return base.ConvertFrom(context, culture, value);
             }
-
-            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-            {
-                return destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
-            }
-
-            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
-            {
-                if (destinationType == typeof(string))
-                {
-                    return value.ToString();
-                }
-                return base.ConvertTo(context, culture, value, destinationType);
-            }
+            return base.ConvertFrom(context, culture, value);
         }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            return destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType == typeof(string))
+            {
+                return value.ToString();
+            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
+    }
+
 
 
 }

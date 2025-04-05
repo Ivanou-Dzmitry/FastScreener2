@@ -403,8 +403,6 @@ namespace FastScreener2
                 UpdateResolutionSetting("res4", "Height", resSettings.res4Height);
             }
 
-
-
             FS2SettingsManager.Save();
         }
 

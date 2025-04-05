@@ -1,4 +1,3 @@
-
 using System.Drawing.Imaging;
 using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
@@ -12,9 +11,6 @@ namespace FastScreener2
     {
         //alpha color to remove 
         private Color ALPHA_KEY_COLOR = Color.FromArgb(255, 1, 0, 1);
-
-        // Variables for dragging
-        // private Point formStartLocation; // Store form position when dragging starts
 
         //for scaling
         public static float scalingFactor;
@@ -47,25 +43,17 @@ namespace FastScreener2
         private string stringURL = "";
 
         public static FS2MainForm Instance { get; private set; }
-
         private const int WM_DPICHANGED = 0x02E0;
-        private Dictionary<Button, Image> originalImages = new Dictionary<Button, Image>();
-
-        //public int dpiChange = 0;
-        //private int previousDpi = 96;
 
         [DllImport("user32.dll")]
         private static extern int GetDpiForWindow(IntPtr hwnd);
 
-
-
         public FS2MainForm()
         {
+            Instance = this;  // Store the reference when the form is created
             InitializeComponent();
 
             this.AutoScaleMode = AutoScaleMode.Dpi;
-
-            Instance = this;  // Store the reference when the form is created
 
             //set transparent form
             this.BackColor = ALPHA_KEY_COLOR;
@@ -77,8 +65,8 @@ namespace FastScreener2
                 virtScreenRect = Rectangle.Union(virtScreenRect, screen.Bounds);
 
             //Get virtual screen size
-            FS2SettingsManager.virtScreenWidth = virtScreenRect.Width;
-            FS2SettingsManager.virtScreenHeight = virtScreenRect.Height;
+            virtScreenWidth = virtScreenRect.Width;
+            virtScreenHeight = virtScreenRect.Height;
 
             FS2SettingsManager.Load();
 
@@ -90,13 +78,8 @@ namespace FastScreener2
 
             FormResizer(FS2SettingsManager.startResW, FS2SettingsManager.startResH);
 
-            /*            //set client size
-                        clientWidth = this.ClientSize.Width;
-                        clientHeight = this.ClientSize.Height; //set height*/
-
             //load UI values Checked true/false
             mitArrow.Checked = FS2SettingsManager.drawArrows;
-            //btnArrowType.Enabled = FS2SettingsManager.drawArrows;
             chbArrow.Checked = FS2SettingsManager.drawArrows;
             ArrowPicUpdater(FS2SettingsManager.arrowType);
 
@@ -108,7 +91,6 @@ namespace FastScreener2
             //guides
             mitGuidlines.Checked = FS2SettingsManager.drawGuides;
             chbGuides.Checked = FS2SettingsManager.drawGuides;
-            //btnGuides.Enabled = FS2SettingsManager.drawGuides;
 
             //number
             mitNumber.Checked = FS2SettingsManager.drawNumber;
@@ -123,18 +105,13 @@ namespace FastScreener2
 
             FSUtils utils = new FSUtils();
 
-
             // Attach the same event handlers to all 4 panels
             utils.AttachDragEvents(panelDragBottomL);
             utils.AttachDragEvents(panelDragBottomR);
             utils.AttachDragEvents(panelDragTop);
             utils.AttachDragEvents(panelDragLeft);
-            // utils.AttachDragEvents(panelDragRightB);
-            //utils.AttachDragEvents(panelDragRightT);
             utils.AttachDragEvents(panelDragTopR);
             utils.AttachDragEvents(panelDragTopL);
-
-
 
             // Capture the events
             mouseHook.MiddleButtonDown += new MouseHook.MouseHookCallback(mouseHook_MMB);
@@ -154,8 +131,6 @@ namespace FastScreener2
             Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
 
             PanelSize();
-
-            //ButtonScaler();
 
             NameFieldPos();
 
@@ -219,8 +194,6 @@ namespace FastScreener2
             }
         }
 
-
-
         private void NameFieldPos()
         {
             int panelHeight = panelDragTop.Height / 2;
@@ -230,24 +203,6 @@ namespace FastScreener2
 
             txtbName.Left = splitter1.Left + splitter1.Width;
         }
-
-/*        private void ButtonScaler()
-        {
-            //scale buttons
-            ScaleButtonImage(btnScreen, scalingFactor);
-            ScaleButtonImage(buttonMainMenu, scalingFactor);
-            ScaleButtonImage(btnArrowType, scalingFactor);
-            ScaleButtonImage(btnFrameType, scalingFactor);
-            ScaleButtonImage(btnNextRes, scalingFactor);
-            ScaleButtonImage(chbNumbers, scalingFactor);
-            ScaleButtonImage(chbGuides, scalingFactor);
-            ScaleButtonImage(chbFrame, scalingFactor);
-            ScaleButtonImage(chbArrow, scalingFactor);
-            ScaleButtonImage(chbSave, scalingFactor);
-            ScaleButtonImage(btnSettings, scalingFactor);
-            ScaleButtonImage(buttonMinimizeForm, scalingFactor);
-            ScaleButtonImage(buttonCloseForm, scalingFactor);
-        }*/
 
         private void PanelSize()
         {
@@ -279,23 +234,7 @@ namespace FastScreener2
         {
             if (m.Msg == WM_DPICHANGED)
             {
-                //int newDpi = (int)(m.WParam.ToInt64() & 0xFFFF);
-
-                // Ask the user whether to restart
-                /*             DialogResult result = MessageBox.Show(
-                                 "DPI settings have changed. A restart is recommended for proper scaling.\nDo you want to restart now?",
-                                 "DPI Change Detected",
-                                 MessageBoxButtons.YesNo,
-                                 MessageBoxIcon.Question
-                             );
-
-                             if (result == DialogResult.Yes)
-                             {
-                                 RestartApplication();
-                             }*/
                 RestartApplication();
-
-                //scalingFactor = GetScalingFactor(this);
             }
 
             base.WndProc(ref m);
@@ -306,8 +245,6 @@ namespace FastScreener2
             Process.Start(Application.ExecutablePath); // Start a new instance
             Application.Exit(); // Close the current instance
         }
-
-
 
         public float GetScalingFactor(Form form)
         {
@@ -543,7 +480,6 @@ namespace FastScreener2
             {
                 mitHelp_Click(this, EventArgs.Empty);
             }
-
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -569,7 +505,7 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
-            //cyvle
+            //cycle
             if (keyData == (Keys.Control | Keys.Right))
             {
                 btnNextRes_Click(this, EventArgs.Empty);
@@ -595,7 +531,6 @@ namespace FastScreener2
                 lastPressedButton = btnFrameType; // Store button reference
                 return true; // Mark as handled
             }
-
 
 
             if (keyData == (Keys.Control | Keys.Shift | Keys.A))
@@ -646,7 +581,6 @@ namespace FastScreener2
                 lastPressedButton = null; // Clear stored button
             }
         }
-
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
@@ -702,8 +636,6 @@ namespace FastScreener2
             clickInArrowCount++;
 
             ArrowPicUpdater(clickInArrowCount);
-
-            //ScaleButtonImage(btnArrowType, scalingFactor);
         }
 
         private void ArrowPicUpdater(int number)
@@ -756,7 +688,6 @@ namespace FastScreener2
         {
             clickInFrameCount++;
             FramePicUpdater(clickInFrameCount);
-            //ScaleButtonImage(btnFrameType, scalingFactor);
         }
 
         private void FramePicUpdater(int number)
@@ -787,21 +718,6 @@ namespace FastScreener2
                     break;
             }
         }
-
-
-        //for DPI
-/*        private void ScaleButtonImage(Control targetControl, float scalingFactor)
-        {
-            if (targetControl is Button button && button.Image != null)
-            {
-                button.Image = FSUtils.ScaleImage(button.Image, scalingFactor);
-            }
-
-            if (targetControl is CheckBox chb && chb.Image != null)
-            {
-                chb.Image = FSUtils.ScaleImage(chb.Image, scalingFactor);
-            }
-        }*/
 
         private void mitSettings_Click(object sender, EventArgs e)
         {
@@ -892,6 +808,7 @@ namespace FastScreener2
             FS2SettingsManager.Save();
         }
 
+        //ARROW
         private void mitArrow_Click(object sender, EventArgs e)
         {
             DrawArrowStatus();
@@ -1011,9 +928,8 @@ namespace FastScreener2
             }
 
             //fixed
-            if (FS2SettingsManager.drawFrame && FS2SettingsManager.frameType == 2)
+            if (drawFrame && frameType == 2)
             {
-
                 int width = FS2SettingsManager.frameWidth;
                 int height = FS2SettingsManager.frameHeight;
 
@@ -1077,7 +993,6 @@ namespace FastScreener2
             panelScreenArea.Invalidate();
 
             this.Activate();
-
         }
 
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
@@ -1101,7 +1016,6 @@ namespace FastScreener2
                 }
 
                 panelScreenArea.Invalidate();
-
             }
         }
 
@@ -1267,8 +1181,6 @@ namespace FastScreener2
 
             int res = currentRes;
 
-            //Debug.WriteLine("CR2=" + currentRes + "/"+ res);
-
             if (res > 3)
             {
                 res = 0;
@@ -1289,8 +1201,6 @@ namespace FastScreener2
             int panelTop = this.Top + frameSize;
             int panelRight = panelLeft + panelScreenArea.Width;
             int panelBottom = panelTop + panelScreenArea.Height;
-
-            //Debug.WriteLine($"{currentScreen.DeviceName}, -/- {panelLeft} -/- {screenBounds.Left}");
 
             // Only snap if we are close to the screen edges, not if already unsnapped
             if (Math.Abs(panelLeft - screenBounds.Left) <= snapMargin)
@@ -1322,11 +1232,6 @@ namespace FastScreener2
             {
                 this.Top = screenBounds.Bottom - panelScreenArea.Height - frameSize; // Snap to BOTTOM edge
             }
-            else
-            {
-                // Same as above, prevent snapping when not near screen edge
-            }
-
         }
 
 
@@ -1364,7 +1269,5 @@ namespace FastScreener2
 
             ShowInfo("clear");
         }
-
-
     }
 }

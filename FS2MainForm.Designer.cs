@@ -161,7 +161,7 @@
             txtbName.Location = new Point(189, 5);
             txtbName.MaxLength = 35;
             txtbName.Name = "txtbName";
-            txtbName.PlaceholderText = "File name (35 symbols)";
+            txtbName.PlaceholderText = "File name (35 symbols, optional)";
             txtbName.Size = new Size(285, 25);
             txtbName.TabIndex = 6;
             toolTipFS.SetToolTip(txtbName, "File name");
@@ -227,6 +227,7 @@
             btnSettings.Dock = DockStyle.Right;
             btnSettings.FlatAppearance.BorderSize = 0;
             btnSettings.FlatStyle = FlatStyle.Flat;
+            btnSettings.Image = FS2Resources.settings_icon;
             btnSettings.Location = new Point(495, 0);
             btnSettings.Name = "btnSettings";
             btnSettings.Size = new Size(31, 35);

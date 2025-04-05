@@ -47,7 +47,7 @@
             // 
             pgSettings.Location = new Point(118, 35);
             pgSettings.Name = "pgSettings";
-            pgSettings.Size = new Size(389, 350);
+            pgSettings.Size = new Size(389, 357);
             pgSettings.TabIndex = 0;
             // 
             // lboxSetCat
@@ -59,7 +59,7 @@
             lboxSetCat.Items.AddRange(new object[] { "Arrow", "Bar", "Frame", "Guides", "Numbers", "Sizes" });
             lboxSetCat.Location = new Point(0, 35);
             lboxSetCat.Name = "lboxSetCat";
-            lboxSetCat.Size = new Size(114, 340);
+            lboxSetCat.Size = new Size(114, 357);
             lboxSetCat.TabIndex = 1;
             lboxSetCat.Click += lboxSetCat_Click;
             // 
@@ -67,7 +67,7 @@
             // 
             btnOK.BackColor = Color.WhiteSmoke;
             btnOK.FlatStyle = FlatStyle.Flat;
-            btnOK.Location = new Point(434, 18);
+            btnOK.Location = new Point(434, 14);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(61, 35);
             btnOK.TabIndex = 2;
@@ -81,16 +81,16 @@
             pnlSetBottom.Controls.Add(btnReset);
             pnlSetBottom.Controls.Add(btnOK);
             pnlSetBottom.Dock = DockStyle.Bottom;
-            pnlSetBottom.Location = new Point(0, 386);
+            pnlSetBottom.Location = new Point(0, 393);
             pnlSetBottom.Name = "pnlSetBottom";
-            pnlSetBottom.Size = new Size(509, 71);
+            pnlSetBottom.Size = new Size(509, 64);
             pnlSetBottom.TabIndex = 3;
             // 
             // btnReset
             // 
             btnReset.BackColor = Color.DimGray;
             btnReset.FlatStyle = FlatStyle.Flat;
-            btnReset.Location = new Point(11, 18);
+            btnReset.Location = new Point(10, 14);
             btnReset.Name = "btnReset";
             btnReset.Size = new Size(61, 35);
             btnReset.TabIndex = 3;
@@ -107,7 +107,7 @@
             pnlSetHeader.Dock = DockStyle.Top;
             pnlSetHeader.Location = new Point(0, 0);
             pnlSetHeader.Name = "pnlSetHeader";
-            pnlSetHeader.Size = new Size(509, 35);
+            pnlSetHeader.Size = new Size(509, 32);
             pnlSetHeader.TabIndex = 4;
             // 
             // labelSetHeader
@@ -116,7 +116,7 @@
             labelSetHeader.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
             labelSetHeader.Location = new Point(31, 0);
             labelSetHeader.Name = "labelSetHeader";
-            labelSetHeader.Size = new Size(65, 35);
+            labelSetHeader.Size = new Size(65, 32);
             labelSetHeader.TabIndex = 1;
             labelSetHeader.Text = "Settings";
             labelSetHeader.TextAlign = ContentAlignment.MiddleLeft;
@@ -129,7 +129,7 @@
             button1.Image = FS2Resources.close_icon;
             button1.Location = new Point(478, 0);
             button1.Name = "button1";
-            button1.Size = new Size(31, 35);
+            button1.Size = new Size(31, 32);
             button1.TabIndex = 0;
             button1.UseVisualStyleBackColor = true;
             button1.Click += btnOK_Click;
@@ -140,7 +140,7 @@
             pictureBox1.Image = FS2Resources.settings_icon;
             pictureBox1.Location = new Point(0, 0);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(31, 35);
+            pictureBox1.Size = new Size(31, 32);
             pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;

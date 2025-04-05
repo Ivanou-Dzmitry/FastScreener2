@@ -1,6 +1,8 @@
 ﻿using System.Drawing.Drawing2D;
 using System.Drawing;
 using static FastScreener2.FS2SettingsManager;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace FastScreener2
 {
@@ -164,8 +166,6 @@ namespace FastScreener2
             }
 
             AddArrow(startPoint, endPoint, color);
-
-            //RenderLines(new PaintEventArgs(pnlCanvas.CreateGraphics(), pnlCanvas.ClientRectangle), ARROW_SIZE);
         }
 
         public static void RenderArrows(PaintEventArgs e)
@@ -201,30 +201,6 @@ namespace FastScreener2
             // Add the line to the list
             drawnArrows.Add(newLine);
         }
-
-
-/*        public static void DrawNumber(Point relativePoint, String numberString)
-        {
-*//*            //for outline
-            int outlineShift = 1;*//*
-
-            
-            
-            //outline
-            //Font outlineFont = new Font("Arial", numberFontSize + outlineShift, FontStyle.Bold);
-
-
-*//*            //outline
-            e.Graphics.DrawString(numberString, outlineFont, outlineBrush, relativePoint.X, relativePoint.Y + outlineShift, drawFormat);
-            //number
-            e.Graphics.DrawString(numberString, drawFont, drawBrush, relativePoint.X, relativePoint.Y, drawFormat);
-
-            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;*//*
-
-           // AddNumber(numberString, relativePoint);
-            
-            //e.Graphics.Dispose();
-        }*/
 
         public static void RenderNumbers(PaintEventArgs e)
         {
@@ -388,6 +364,62 @@ namespace FastScreener2
             }
         }
 
+
+        public static double GetMaxArrowLenght(int[,] resolutions)
+        {
+            double maxDiagonal = 0;
+
+            for (int i = 0; i < resolutions.GetLength(1); i++)
+            {
+                int width = resolutions[0, i];
+                int height = resolutions[1, i];
+
+                double diagonal = Math.Sqrt(width * width + height * height);
+
+                if (diagonal > maxDiagonal)
+                    maxDiagonal = diagonal;
+            }
+
+            return maxDiagonal * 0.5;
+        }
+
+        public static Vector2 GetHalfMaxScreenSize(int[,] resolutions)
+        {
+            int maxWidth = 0;
+            int maxHeight = 0;
+
+            // Iterate over the resolutions to find the max width and max height
+            for (int i = 0; i < resolutions.GetLength(1); i++) // 0 -> width, 1 -> height
+            {
+                maxWidth = Math.Max(maxWidth, resolutions[0, i]);
+                maxHeight = Math.Max(maxHeight, resolutions[1, i]);
+            }
+
+            // Return a Vector2 with half of max width and max height
+            return new Vector2(maxWidth / 2f, maxHeight / 2f);
+        }
+
+        public static Vector2 GetSmallestScreenResolution()
+        {
+            // Get all screens connected to the system
+            var screens = Screen.AllScreens;
+
+            // Find the screen with the smallest resolution
+            var smallestScreen = screens
+                .OrderBy(s => s.Bounds.Width * s.Bounds.Height) // Order by area (width * height)
+                .First();
+
+            // Get the smallest width and height
+            int smallestWidth = smallestScreen.Bounds.Width;
+            int smallestHeight = smallestScreen.Bounds.Height;
+
+            // Reduce the smallest width and height by 10%
+            float reducedWidth = smallestWidth * 0.9f; // 90% of the smallest width
+            float reducedHeight = smallestHeight * 0.9f; // 90% of the smallest height
+
+            // Return as Vector2 (width, height)
+            return new Vector2(reducedWidth, reducedHeight);
+        }
 
     }
 }

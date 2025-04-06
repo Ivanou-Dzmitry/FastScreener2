@@ -56,7 +56,7 @@
             lboxSetCat.BorderStyle = BorderStyle.None;
             lboxSetCat.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lboxSetCat.ItemHeight = 17;
-            lboxSetCat.Items.AddRange(new object[] { "Arrow", "Bar", "Frame", "Guides", "Numbers", "Sizes" });
+            lboxSetCat.Items.AddRange(new object[] { "Arrow", "Bar", "File", "Frame", "Guides", "Numbers", "Sizes" });
             lboxSetCat.Location = new Point(0, 35);
             lboxSetCat.Name = "lboxSetCat";
             lboxSetCat.Size = new Size(114, 357);

@@ -63,6 +63,7 @@
             mitSize02 = new ToolStripMenuItem();
             mitSize03 = new ToolStripMenuItem();
             mitSize04 = new ToolStripMenuItem();
+            mitFulscreen = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             mitClear = new ToolStripMenuItem();
             mitTakeScreen = new ToolStripMenuItem();
@@ -474,9 +475,9 @@
             // contextMenuMain
             // 
             contextMenuMain.ImageScalingSize = new Size(24, 24);
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitClear, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitFulscreen, toolStripMenuItem1, mitClear, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(206, 478);
+            contextMenuMain.Size = new Size(206, 530);
             // 
             // mitSize01
             // 
@@ -509,6 +510,15 @@
             mitSize04.Size = new Size(205, 30);
             mitSize04.Text = "Size4";
             mitSize04.Click += mitSize04_Click;
+            // 
+            // mitFulscreen
+            // 
+            mitFulscreen.Name = "mitFulscreen";
+            mitFulscreen.ShortcutKeys = Keys.Alt | Keys.D5;
+            mitFulscreen.Size = new Size(205, 30);
+            mitFulscreen.Text = "Fulscreen";
+            mitFulscreen.ToolTipText = "Current screen without taskbar";
+            mitFulscreen.Click += mitFulscreen_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -698,5 +708,6 @@
         private BlurOutlineLabel labelDebug;
         private ToolStripMenuItem mitClear;
         private Splitter splitter1;
+        private ToolStripMenuItem mitFulscreen;
     }
 }

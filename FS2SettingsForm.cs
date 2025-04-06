@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -38,15 +40,18 @@ namespace FastScreener2
                     BarSettings();
                     break;
                 case 2:
-                    FrameSettings();
+                    FileSettings();
                     break;
                 case 3:
-                    GuideSettings();
+                    FrameSettings();
                     break;
                 case 4:
-                    NumberSettings();
+                    GuideSettings();
                     break;
                 case 5:
+                    NumberSettings();
+                    break;
+                case 6:
                     ResSettings();
                     break;
                 default:
@@ -114,6 +119,20 @@ namespace FastScreener2
 
 
             pgSettings.SelectedObject = guideSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
+        }
+
+        //FILE
+        private FileFormat fileFormat;
+        private void FileSettings()
+        {
+            fileFormat = new FileFormat()
+            {
+                fileType = FS2SettingsManager.fileFormat,
+                fileCompress = FS2SettingsManager.fileQuality
+            };
+
+            pgSettings.SelectedObject = fileFormat;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
@@ -279,6 +298,20 @@ namespace FastScreener2
                 FS2SettingsManager.guidlineType = tempTypeInt;
                 FS2SettingsManager.SetSetting("guidline_type", tempTypeInt.ToString());
             }
+
+            //FILE
+            if (e.ChangedItem.Label == "Format")
+            {
+                FS2SettingsManager.fileFormat = fileFormat.fileType;
+                FS2SettingsManager.SetSetting("picture_format", fileFormat.fileType.ToString());
+            }
+
+            if (e.ChangedItem.Label == "Compression")
+            {
+                FS2SettingsManager.fileQuality = fileFormat.fileCompress;
+                FS2SettingsManager.SetSetting("picture_quality", fileFormat.fileCompress.ToString());
+            }
+
 
             //FRAME
             if (e.ChangedItem.Label == "Frame Color")

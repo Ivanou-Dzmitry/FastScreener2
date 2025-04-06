@@ -28,7 +28,7 @@ namespace FastScreener2
 
         public static int guidlineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType, frameStrokeWidth;
 
-        public static int startResW, startResH;
+        public static int startResW, startResH, fileQuality;
 
         //for guidlines
         public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame;
@@ -53,6 +53,8 @@ namespace FastScreener2
         public const string SUBPATH = "screenshots";
 
         public static int currentRes;
+
+        public static string fileFormat;
 
         // Load settings from XML (create file if missing)
         public static void Load()
@@ -256,6 +258,31 @@ namespace FastScreener2
                 EnsureSettingExists("bar_color", "#313131");
             }
 
+            //format
+            try
+            {
+                fileFormat = (string)settings["picture_format"];
+            }
+            catch
+            {
+                fileFormat = "png";
+                EnsureSettingExists("picture_format", "png");
+            }
+
+
+            //quality
+            try
+            {
+                fileQuality = int.Parse(settings["picture_quality"]);
+            }
+            catch
+            {
+                fileQuality = 75;
+                EnsureSettingExists("picture_quality", "75");
+            }
+
+
+
             SetCurResBasedOnResOnClose();
         }
 
@@ -314,7 +341,9 @@ namespace FastScreener2
             { "res4", "960,600" },
             { "res_on_close", "650,366" },
             { "bar_color", "#313131" },
-            { "frame_stroke_width", "1" }            
+            { "frame_stroke_width", "1" },
+            { "picture_format", "png" },
+            { "picture_quality", "75" }
         };
 
             Save(); // Create the XML file with default values

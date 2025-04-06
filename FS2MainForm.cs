@@ -42,6 +42,8 @@ namespace FastScreener2
         //for file
         private string stringURL = "";
 
+        private string fileName = "";
+
         public static FS2MainForm Instance { get; private set; }
         private const int WM_DPICHANGED = 0x02E0;
 
@@ -171,7 +173,7 @@ namespace FastScreener2
             Debug.WriteLine($"Icon size: {iconSize}"); // Debugging line to check size
 
             byte[] svgData = (byte[])SVGres.ResourceManager.GetObject(resourceName);
-            
+
             if (svgData == null)
                 return;
 
@@ -288,7 +290,7 @@ namespace FastScreener2
 
             if (FS2SettingsManager.saveToFile)
             {
-                saveFile = "to file and clipboard";
+                saveFile = "to file (" + fileFormat + ") and clipboard";
             }
             else
             {
@@ -326,6 +328,12 @@ namespace FastScreener2
                 labelDebug.Text = "The screenshot area has been cleared";
 
             }
+
+            if (type == "fullscreen")
+            {
+                labelDebug.Text = "A screenshot of the current screen has been saved " + saveFile;
+
+            }
         }
 
         public void SwapPanelsIfNeeded()
@@ -353,6 +361,13 @@ namespace FastScreener2
             }
         }
 
+        private void SetFileName()
+        {           
+            string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
+            fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.{fileFormat}" : $"{currentTime}_screenshot.{fileFormat}";
+
+        }
+
 
         private void CaptureScreen()
         {
@@ -367,7 +382,7 @@ namespace FastScreener2
                 RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, ALPHA_KEY_COLOR);
             }
 
-            string fileName = "";
+            SetFileName();
 
             // Create bitmap and capture graphics
             using (Bitmap captureBitmap = new Bitmap(bitmapWidth, bitmapHeight, PixelFormat.Format32bppArgb))
@@ -382,41 +397,7 @@ namespace FastScreener2
                 // Save file if needed
                 if (saveToFile)
                 {
-                    string appExeDir = Directory.GetCurrentDirectory();
-                    string directoryPath = Path.Combine(appExeDir, SUBPATH);
-
-                    if (!Directory.Exists(directoryPath))
-                        Directory.CreateDirectory(directoryPath);
-
-                    string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
-                    fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.png" : $"{currentTime}_screenshot.png";
-
-                    stringURL = Path.Combine(directoryPath, fileName);
-
-                    try
-                    {
-                        // Scale down the image
-                        int newWidth = (int)(captureBitmap.Width / scalingFactor);
-                        int newHeight = (int)(captureBitmap.Height / scalingFactor);
-
-                        using (Bitmap scaledBitmap = new Bitmap(newWidth, newHeight))
-                        using (Graphics g = Graphics.FromImage(scaledBitmap))
-                        {
-                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                            g.Clear(Color.Transparent);
-
-                            g.DrawImage(captureBitmap, 0, 0, newWidth, newHeight);
-
-                            // Save the scaled image
-                            scaledBitmap.Save(stringURL, ImageFormat.Png);
-                        }
-                    }
-                    catch
-                    {
-                        MessageBox.Show($"Can't save screenshot to file! Path: {stringURL}", "FastScreener Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    SaveToFile(captureBitmap);
                 }
 
                 SetScaledBitmapToClipboard(captureBitmap, scalingFactor);
@@ -444,6 +425,69 @@ namespace FastScreener2
             LogScreenshot(DateTime.Now.ToString("yyyy-MM-dd"), bitmapWidth, bitmapHeight, fileName);
         }
 
+        private void SaveToFile(Bitmap captureBitmap)
+        {            
+            string appExeDir = Directory.GetCurrentDirectory();
+            string directoryPath = Path.Combine(appExeDir, SUBPATH);
+
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
+
+
+            // Set file extension and ImageCodecInfo
+            ImageCodecInfo codec = null;
+            ImageFormat imageFormat = ImageFormat.Png; // default
+
+            //select format
+            if (fileFormat == "jpg")
+            {
+                imageFormat = ImageFormat.Jpeg;
+                codec = ImageCodecInfo.GetImageEncoders().FirstOrDefault(c => c.FormatID == ImageFormat.Jpeg.Guid);
+            }
+            else
+            {
+                imageFormat = ImageFormat.Png;
+            }
+
+            stringURL = Path.Combine(directoryPath, fileName);
+
+            try
+            {
+                // Scale down the image
+                int newWidth = (int)(captureBitmap.Width / scalingFactor);
+                int newHeight = (int)(captureBitmap.Height / scalingFactor);
+
+                using (Bitmap scaledBitmap = new Bitmap(newWidth, newHeight))
+                using (Graphics g = Graphics.FromImage(scaledBitmap))
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    g.Clear(Color.Transparent);
+
+                    g.DrawImage(captureBitmap, 0, 0, newWidth, newHeight);
+
+                    // Save the scaled image
+                    if (imageFormat == ImageFormat.Jpeg && codec != null)
+                    {
+                        // Create Encoder parameters for JPEG quality
+                        EncoderParameters encoderParams = new EncoderParameters(1);
+                        encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, fileQuality);
+                        scaledBitmap.Save(stringURL, codec, encoderParams);
+                    }
+                    else
+                    {
+                        // Save normally (PNG, BMP, GIF)
+                        scaledBitmap.Save(stringURL, imageFormat);
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show($"Can't save screenshot to file! Path: {stringURL}", "FastScreener Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
 
         void SetScaledBitmapToClipboard(Bitmap originalBitmap, float scalingFactor)
         {
@@ -489,21 +533,27 @@ namespace FastScreener2
                 mitSize01_Click(this, EventArgs.Empty);
                 return true; // Mark as handled
             }
-            if (keyData == (Keys.Alt | Keys.D2)) // Alt + 1
+            if (keyData == (Keys.Alt | Keys.D2)) // Alt + 2
             {
                 mitSize02_Click(this, EventArgs.Empty);
                 return true; // Mark as handled
             }
-            if (keyData == (Keys.Alt | Keys.D3)) // Alt + 1
+            if (keyData == (Keys.Alt | Keys.D3)) // Alt + 3
             {
                 mitSize03_Click(this, EventArgs.Empty);
                 return true; // Mark as handled
             }
-            if (keyData == (Keys.Alt | Keys.D4)) // Alt + 1
+            if (keyData == (Keys.Alt | Keys.D4)) // Alt + 4
             {
                 mitSize04_Click(this, EventArgs.Empty);
                 return true; // Mark as handled
             }
+            if (keyData == (Keys.Alt | Keys.D5)) // Alt + 5
+            {
+                mitFulscreen_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+            
 
             //cycle
             if (keyData == (Keys.Control | Keys.Right))
@@ -930,8 +980,9 @@ namespace FastScreener2
             //fixed
             if (drawFrame && frameType == 2)
             {
-                int width = FS2SettingsManager.frameWidth;
-                int height = FS2SettingsManager.frameHeight;
+                //scale fixed frame
+                int width = (int)(frameWidth * scalingFactor);
+                int height = (int)(frameHeight * scalingFactor);
 
                 startPoint = new Point(relativePoint.X - width / 2, relativePoint.Y - height / 2);
                 currentRectangle = new Rectangle(startPoint, new Size(width, height));
@@ -1268,6 +1319,21 @@ namespace FastScreener2
             this.Refresh();
 
             ShowInfo("clear");
+        }
+
+        private void mitFulscreen_Click(object sender, EventArgs e)
+        {
+            Bitmap captureBitmap = CaptureCurrentMonitorScreenshot(this);
+            Clipboard.SetImage(captureBitmap);
+
+            // Save file if needed
+            if (saveToFile)
+            {
+                SetFileName();
+                SaveToFile(captureBitmap);
+                ShowInfo("fullscreen");
+            }
+
         }
     }
 }

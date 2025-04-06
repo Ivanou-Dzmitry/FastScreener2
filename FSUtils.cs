@@ -3,6 +3,7 @@ using System.Drawing;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Numerics;
+using System.Drawing.Imaging;
 
 namespace FastScreener2
 {
@@ -420,6 +421,40 @@ namespace FastScreener2
             // Return as Vector2 (width, height)
             return new Vector2(reducedWidth, reducedHeight);
         }
+
+
+        public static Bitmap CaptureCurrentMonitorScreenshot(Form form)
+        {
+            if (form == null) return null;
+
+            // Get the screen that contains the majority of the form
+            Screen screen = Screen.FromControl(form);
+
+            // Use WorkingArea to exclude the taskbar
+            Rectangle bounds = screen.WorkingArea;
+            Bitmap screenshot = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
+
+            try
+            {
+                // Hide the form before capturing
+                form.Hide();
+                Thread.Sleep(200); // Optional: slight delay to allow form to hide
+
+                using (Graphics g = Graphics.FromImage(screenshot))
+                {
+                    g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size, CopyPixelOperation.SourceCopy);
+                }
+            }
+            finally
+            {
+                // Restore the form
+                form.Show();
+                form.BringToFront(); // Optional: bring it back on top
+            }
+
+            return screenshot;
+        }
+
 
     }
 }

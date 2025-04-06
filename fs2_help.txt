@@ -30,3 +30,5 @@ If the DPI changes during operation, the program will restart with the first scr
 For monitors with resolution higher than Full HD. If the screen scale is different from 100% (150%, 200% etc), the scaled size and the original size in which the screenshot will be taken are displayed. The original size is saved to the buffer and to the file.
 
 If the file name is not specified, it will be saved with a unique generated name. If the file name is specified, it will be overwritten after each screenshot.
+
+The screenshot size cannot be larger than the monitor size (the smaller of the monitors in a multi-monitor configuration)

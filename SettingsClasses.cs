@@ -102,6 +102,42 @@ namespace FastScreener2
             }
         }
 
+        public class FileFormatTypeConverter : StringConverter
+        {
+            private readonly List<string> validValues = new List<string> { "png", "jpg" };
+
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
+                return new StandardValuesCollection(validValues);
+            }
+
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            {
+                return true;
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                if (value is string str)
+                {
+                    if (validValues.Contains(str))
+                    {
+                        return str;  // Return the valid string
+                    }
+                    else
+                    {
+                        // Show a message box with an error message
+                        MessageBox.Show("Invalid value. Please select from the predefined list: png or jpg", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        // Optionally, return a default value if invalid input is entered
+                        return "png";  // Set a default valid value
+                    }
+                }
+
+                return base.ConvertFrom(context, culture, value);  // Delegate to the base method for other types
+            }
+        }
+
         public class GuideTypeConverter : StringConverter
         {
             private readonly List<string> validValues = new List<string> { "3x3", "4x4", "Custom" };
@@ -330,6 +366,55 @@ namespace FastScreener2
 
     }
 
+
+    // FILE
+    public class FileFormat
+    {
+        private string filetype;
+        private int filecompess;
+
+        [Category("File")]
+        [Description("Chose file format. Default - png")]
+        [DisplayName("Format")]
+        [TypeConverter(typeof(FileFormatTypeConverter))]
+        public string fileType
+        {
+            get => filetype;
+            set
+            {
+                filetype = value;
+                OnPropertyChanged(nameof(Type));
+            }
+        }
+
+        [Category("File")]
+        [Description("Set сompression quality of JPG file. From 1 to 100. Default - 75")]
+        [DisplayName("Compression")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int fileCompress
+        {
+            get => filecompess;
+            set
+            {
+                if (value < 1 || value > 100)
+                {
+                    MessageBox.Show("Compression quality can be from 1 to 100", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                filecompess = value;
+                OnPropertyChanged(nameof(fileCompress));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
     //FRAME
     public class Frame
     {
@@ -528,7 +613,7 @@ namespace FastScreener2
         [Category("Size 1")]
         [Description("Size 1 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("1.1 Width")]
-        [TypeConverter(typeof(ResWidthConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res1Width
         {
             get => r1w;
@@ -550,7 +635,7 @@ namespace FastScreener2
         [Category("Size 1")]
         [Description("Size 1 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("1.2 Height")]
-        [TypeConverter(typeof(ResHeightConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res1Height
         {
             get => r1h;
@@ -572,7 +657,7 @@ namespace FastScreener2
         [Category("Size 2")]
         [Description("Size 2 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("2.1 Width")]
-        [TypeConverter(typeof(ResWidthConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res2Width
         {
             get => r2w;
@@ -593,7 +678,7 @@ namespace FastScreener2
         [Category("Size 2")]
         [Description("Size 2 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("2.2 Height")]
-        [TypeConverter(typeof(ResHeightConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res2Height
         {
             get => r2h;
@@ -614,7 +699,7 @@ namespace FastScreener2
         [Category("Size 3")]
         [Description("Size 3 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("3.1 Width")]
-        [TypeConverter(typeof(ResWidthConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res3Width
         {
             get => r3w;
@@ -635,7 +720,7 @@ namespace FastScreener2
         [Category("Size 3")]
         [Description("Size 3 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("3.2 Height")]
-        [TypeConverter(typeof(ResHeightConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res3Height
         {
             get => r3h;
@@ -656,7 +741,7 @@ namespace FastScreener2
         [Category("Size 4")]
         [Description("Size 4 width. Max depends on your smalest monitor resolution. Min - 550px")]
         [DisplayName("4.1 Width")]
-        [TypeConverter(typeof(ResWidthConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res4Width
         {
             get => r4w;
@@ -677,7 +762,7 @@ namespace FastScreener2
         [Category("Size 4")]
         [Description("Size 4 height. Max depends on your smalest monitor resolution. Min - 200px")]
         [DisplayName("4.2 Height")]
-        [TypeConverter(typeof(ResHeightConverter))]
+        [TypeConverter(typeof(Int32OnlyConverter))]
         public int res4Height
         {
             get => r4h;
@@ -702,54 +787,6 @@ namespace FastScreener2
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-
-
-    public class ResWidthConverter : Int16Converter
-    {
-        public override object ConvertTo(ITypeDescriptorContext context,
-            CultureInfo culture, object value, Type destinationType)
-        {
-            if (destinationType == typeof(string) && value is int && Convert.ToInt32(value) <= FS2SettingsManager.virtScreenWidth && Convert.ToInt32(value) >= FS2SettingsManager.MIN_WIDTH)
-            {
-                return ((int)value).ToString();
-            }
-            else
-            {
-                Vector2 smalestRes = GetSmallestScreenResolution();
-                string message = "Invalid value! Max is " + smalestRes.X + "px, min - " + FS2SettingsManager.MIN_WIDTH.ToString() + "px";
-
-                // Show the message box with an error message
-                MessageBox.Show(message, "Invalid Resolution", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                // You can also return a custom error message here, or a default valid value if necessary.
-                return base.ConvertTo(context, culture, "Invalid", destinationType);
-            }
-        }
-    }
-
-    public class ResHeightConverter : Int16Converter
-    {
-        public override object ConvertTo(ITypeDescriptorContext context,
-            CultureInfo culture, object value, Type destinationType)
-        {
-            if (destinationType == typeof(string) && value is int && Convert.ToInt32(value) <= FS2SettingsManager.virtScreenHeight && Convert.ToInt32(value) >= FS2SettingsManager.MIN_HEIGHT)
-            {
-                return ((int)value).ToString();
-            }
-            else
-            {
-                Vector2 smalestRes = GetSmallestScreenResolution();
-                string message = "Invalid value! Max is " + smalestRes.Y + "px, min - " + FS2SettingsManager.MIN_HEIGHT.ToString() + "px";
-
-                // Show the message box with an error message
-                MessageBox.Show(message, "Invalid Resolution", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                // You can also return a custom error message here, or a default valid value if necessary.
-                return base.ConvertTo(context, culture, "Invalid", destinationType);
-            }
-        }
-    }
-
 
     public class Int32OnlyConverter : TypeConverter
     {

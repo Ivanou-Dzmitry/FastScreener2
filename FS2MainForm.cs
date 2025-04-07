@@ -3,6 +3,7 @@ using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 
 namespace FastScreener2
@@ -46,6 +47,10 @@ namespace FastScreener2
 
         public static FS2MainForm Instance { get; private set; }
         private const int WM_DPICHANGED = 0x02E0;
+
+        public static string drawnTextString = string.Empty;
+        private bool isTextDialogOpen = false;
+        private PointF textPoint;
 
         [DllImport("user32.dll")]
         private static extern int GetDpiForWindow(IntPtr hwnd);
@@ -102,6 +107,10 @@ namespace FastScreener2
             mitSaveFile.Checked = FS2SettingsManager.saveToFile;
             chbSave.Checked = FS2SettingsManager.saveToFile;
 
+            //text
+            mitText.Checked = FS2SettingsManager.drawText;
+            chbText.Checked = FS2SettingsManager.drawText;
+
             //center panel
             panelScreenArea.BackColor = Color.Transparent;
 
@@ -157,6 +166,7 @@ namespace FastScreener2
             SetControlImage(chbFrame, "frame_icon");
             SetControlImage(chbArrow, "arrow_icon");
             SetControlImage(chbGuides, "guides_icon");
+            SetControlImage(chbText, "text_icon");
         }
 
         private void SetControlImage(Control control, string resourceName)
@@ -362,7 +372,7 @@ namespace FastScreener2
         }
 
         private void SetFileName()
-        {           
+        {
             string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
             fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.{fileFormat}" : $"{currentTime}_screenshot.{fileFormat}";
 
@@ -412,6 +422,8 @@ namespace FastScreener2
             drawnArrows.Clear();
             drawnTexts.Clear();
 
+            drawnTextString = string.Empty;
+
             ShowInfo("capture");
 
             numbering = 1; // Reset numbering
@@ -426,7 +438,7 @@ namespace FastScreener2
         }
 
         private void SaveToFile(Bitmap captureBitmap)
-        {            
+        {
             string appExeDir = Directory.GetCurrentDirectory();
             string directoryPath = Path.Combine(appExeDir, SUBPATH);
 
@@ -553,7 +565,7 @@ namespace FastScreener2
                 mitFulscreen_Click(this, EventArgs.Empty);
                 return true; // Mark as handled
             }
-            
+
 
             //cycle
             if (keyData == (Keys.Control | Keys.Right))
@@ -610,7 +622,7 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
-            if (keyData == (Keys.Control | Keys.Shift | Keys.C))
+            if (keyData == (Keys.Control | Keys.Shift | Keys.Z))
             {
                 mitClear_Click(this, EventArgs.Empty);
                 return true; // Mark as handled
@@ -867,6 +879,8 @@ namespace FastScreener2
         private void DrawArrowStatus()
         {
             ToggleStatus(mitArrow, ref FS2SettingsManager.drawArrows, "Arrows turned ON", "Arrows turned OFF", "draw_arrows", chbArrow, false);
+            if (drawText)
+                DrawTextStatus();
         }
 
         private void chbArrow_Click(object sender, EventArgs e)
@@ -883,6 +897,9 @@ namespace FastScreener2
         private void DrawFrameStatus()
         {
             ToggleStatus(mitFrame, ref FS2SettingsManager.drawFrame, "Frame turned ON", "Frame turned OFF", "draw_frame", chbFrame, false);
+            
+            if (drawText)
+                DrawTextStatus();
         }
 
         //GUIDES
@@ -915,10 +932,6 @@ namespace FastScreener2
             ToggleStatus(mitGuidlines, ref FS2SettingsManager.drawGuides, "Guides turned ON", "Guides turned OFF", "draw_guidlines", chbGuides, false);
         }
 
-        private void chbGuides_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void chbFrame_Click(object sender, EventArgs e)
         {
@@ -939,9 +952,12 @@ namespace FastScreener2
         private void DrawNumberStatus()
         {
             ToggleStatus(mitNumber, ref FS2SettingsManager.drawNumber, "Numbers turned ON", "Numbers turned OFF", "draw_number", chbNumbers, false);
+            
+            if(drawText)
+                DrawTextStatus();
         }
 
-
+        //SAVE
         private void chbSave_Click(object sender, EventArgs e)
         {
             SaveToFileStatus();
@@ -957,8 +973,39 @@ namespace FastScreener2
             ToggleStatus(mitSaveFile, ref FS2SettingsManager.saveToFile, "Save to file turned ON", "Save to file turned OFF", "save_to_file", chbSave, false);
         }
 
+        //TEXT
+        private void chbText_Click(object sender, EventArgs e)
+        {
+            DrawTextStatus();
+        }
 
-        //hook mouse MMB
+        private void mitText_Click(object sender, EventArgs e)
+        {
+            DrawTextStatus();
+        }
+
+        private void DrawTextStatus()
+        {
+            if(drawText)
+            {
+                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
+            }
+            else
+            {
+                if (drawArrows)
+                    DrawArrowStatus();
+
+                if (drawFrame)
+                    DrawFrameStatus();
+
+                if (drawNumber)
+                    DrawNumberStatus();
+
+                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
+            }                
+        }
+
+        //hook mouse MMB !Important
         private void mouseHook_MMB(MouseHook.MSLLHOOKSTRUCT mouse)
         {
             Panel usedPanel = panelScreenArea;
@@ -1007,6 +1054,26 @@ namespace FastScreener2
                 AddNumber(numbering.ToString(), relativePoint);
                 RenderNumbers(paintRect);
                 numbering++;
+            }
+
+            if(drawText)
+                textPoint = usedPanel.PointToClient(Cursor.Position);
+
+            //draw TEXT
+            if (drawText && !isTextDialogOpen)
+            {
+                isTextDialogOpen = true;
+               
+                //call text diallog
+                string userText = PromptForText(out textColor, out textSize, out textFont);
+
+                if (!string.IsNullOrWhiteSpace(userText))
+                {
+                    drawnTextString = userText;
+                    usedPanel.Invalidate(); // Force redraw
+                }
+
+                isTextDialogOpen = false;
             }
 
         }
@@ -1116,6 +1183,7 @@ namespace FastScreener2
             }
         }
 
+        //REPINT !Important
         private void panelScreenArea_Paint(object sender, PaintEventArgs e)
         {
 
@@ -1137,12 +1205,17 @@ namespace FastScreener2
                 DrawFrameCurrent(e);
             }
 
+            //text
+            if (!string.IsNullOrEmpty(drawnTextString))
+            {
+                RenderText(e, drawnTextString, textPoint, textFont, textColor);
+            }
+
             //numbers
             if (FS2SettingsManager.drawNumber || drawnTexts.Count > 0)
             {
                 RenderNumbers(e);
             }
-
         }
 
         private void mitOpenFolder_Click(object sender, EventArgs e)
@@ -1306,6 +1379,8 @@ namespace FastScreener2
             drawnArrows.Clear();
             drawnTexts.Clear();
 
+            drawnTextString = string.Empty;
+
             currentRectangle = new Rectangle(startPoint, new Size(0, 0));
 
             numbering = 1; // Reset numbering
@@ -1331,9 +1406,12 @@ namespace FastScreener2
             {
                 SetFileName();
                 SaveToFile(captureBitmap);
+                LogScreenshot(DateTime.Now.ToString("yyyy-MM-dd"), captureBitmap.Width, captureBitmap.Height, fileName);
                 ShowInfo("fullscreen");
             }
 
         }
+
+
     }
 }

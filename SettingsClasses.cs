@@ -285,14 +285,13 @@ namespace FastScreener2
                     MessageBox.Show($"Indent must be between 1 and {halfSize.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
-
                     topindent = value;
                     OnPropertyChanged(nameof(topIndent));
                 }
             }
 
             [Category("2. Custom Type Settings")]
-            [Description("Max size screenshot height/2. Minimum - 1. Default - 10.")]
+            [Description("Max size screenshot height/2. Minimum - 1. Default - 10. If Lock Indent is ON - it's main parameter")]
             [DisplayName("Bottom Indent")]
             [TypeConverter(typeof(Int32OnlyConverter))]
             public int bottomIndent
@@ -300,16 +299,27 @@ namespace FastScreener2
                 get => bottomindent;
                 set
                 {
-                Vector2 halfSize = GetHalfMaxScreenSize(resWorked);
+                    Vector2 halfSize = GetHalfMaxScreenSize(resWorked);
 
-                if (value < 1 || value > halfSize.Y)
-                {
-                    // Show the error message on top of the form
-                    MessageBox.Show($"Indent must be between 1 and {halfSize.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return; // Don't set the value if it's invalid
-                }
+                    if (value < 1 || value > halfSize.Y)
+                    {
+                        // Show the error message on top of the form
+                        MessageBox.Show($"Indent must be between 1 and {halfSize.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return; // Don't set the value if it's invalid
+                    }
 
-                    bottomindent = value;
+                    if (!lockind)
+                    {
+                        bottomindent = value;
+                    }
+                    else
+                    {
+                        bottomindent = value;
+                        topindent = value;
+                        leftindent = value;
+                        rightindent = value;
+                    }                    
+                    
                     OnPropertyChanged(nameof(bottomIndent));
                 }
             }

@@ -4,6 +4,7 @@ using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Numerics;
 using System.Drawing.Imaging;
+using System.Windows.Forms;
 
 namespace FastScreener2
 {
@@ -201,6 +202,26 @@ namespace FastScreener2
 
             // Add the line to the list
             drawnArrows.Add(newLine);
+        }
+
+        //TEXT
+        public static void RenderText(PaintEventArgs e, string text, PointF relativePoint, Font textFont, Color textColor)
+        {
+            // Calculate the size of the text
+            SizeF textSize = e.Graphics.MeasureString(text, textFont);
+
+            // Adjust the relativePoint so the text is centered around the pivot point
+            float x = relativePoint.X; // - textSize.Width / 2;  // Center the text horizontally
+            float y = relativePoint.Y - textSize.Height / 2; // Center the text vertically
+
+            // Create the point to draw the text, adjusted for centering
+            PointF drawPoint = new PointF(x, y);
+
+            // Use the adjusted point to draw the string
+            using (Brush brush = new SolidBrush(textColor))
+            {
+                e.Graphics.DrawString(text, textFont, brush, drawPoint);
+            }
         }
 
         public static void RenderNumbers(PaintEventArgs e)
@@ -455,6 +476,117 @@ namespace FastScreener2
             return screenshot;
         }
 
+
+        public static string PromptForText(out Color textColor, out float textSize, out Font textFont)
+        {
+            //set input values
+            textColor = FS2SettingsManager.textColor;
+            textSize = FS2SettingsManager.textSize;
+
+/*            if(FS2SettingsManager.textFont!=null)
+                Debug.WriteLine("F: "+FS2SettingsManager.textFont.FontFamily);
+
+            textFont = new Font(SystemFonts.DefaultFont.FontFamily, textSize, SystemFonts.DefaultFont.Style);*/
+
+            if (FS2SettingsManager.textFont != null)
+            {
+                textFont = new Font(FS2SettingsManager.textFont.FontFamily, textSize, SystemFonts.DefaultFont.Style);
+            }
+            else
+            {
+                textFont = new Font(SystemFonts.DefaultFont.FontFamily, textSize, SystemFonts.DefaultFont.Style);
+            }
+
+
+            using (Form inputForm = new Form())
+            {
+                inputForm.Text = "Enter Text (46 symbols)";
+                inputForm.Width = 400;
+                inputForm.Height = 200;
+                inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                inputForm.StartPosition = FormStartPosition.CenterParent;
+                inputForm.MinimizeBox = false;
+                inputForm.MaximizeBox = false;
+                inputForm.TopMost = true;
+
+                TextBox inputBox = new TextBox() { Left = 10, Top = 20, Width = 360 };
+                Label infoLabel = new Label() { Left=10, Top=90, Width=360, Height=16 };
+                Button fontButton = new Button() { Text = "Font", Left = 10, Top = 60, Width = 60 };
+                Button colorButton = new Button() { Text = "Color", Left = 80, Top = 60, Width = 60 };
+                Button okButton = new Button() { Text = "OK", Left = 220, Width = 70, Top = 110, DialogResult = DialogResult.OK };
+                Button cancelButton = new Button() { Text = "Cancel", Left = 300, Width = 70, Top = 110, DialogResult = DialogResult.Cancel };
+
+                //symbols count
+                inputBox.MaxLength = 46;
+
+                //label
+                infoLabel.Font = new Font(infoLabel.Font.FontFamily, 8);
+                infoLabel.ForeColor = FS2SettingsManager.textColor;
+                infoLabel.BackColor = InvertColor(infoLabel.ForeColor);
+
+                fontButton.Click += (s, e) =>
+                {
+                    using (FontDialog fontDialog = new FontDialog())
+                    {
+                        fontDialog.Font = FS2SettingsManager.textFont;                        
+                        if (fontDialog.ShowDialog() == DialogResult.OK)
+                        {                            
+                            FS2SettingsManager.textFont = fontDialog.Font;
+                            FS2SettingsManager.textSize = (int)Math.Floor(fontDialog.Font.Size);
+                            FS2SettingsManager.SetSetting("text_size", FS2SettingsManager.textSize.ToString());
+                            FS2SettingsManager.Save();
+                            infoLabel.Text = "Font size/family: " + FS2SettingsManager.textSize + ", " + fontDialog.Font.FontFamily.Name;
+                        }
+                    }
+                };
+
+                colorButton.Click += (s, e) =>
+                {
+                    using (ColorDialog colorDialog = new ColorDialog())
+                    {
+                        colorDialog.Color = FS2SettingsManager.textColor;
+                        if (colorDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            FS2SettingsManager.textColor = colorDialog.Color;
+                            FS2SettingsManager.SetSetting("text_color", ColorTranslator.ToHtml(colorDialog.Color));
+                            FS2SettingsManager.Save();
+                            infoLabel.ForeColor = FS2SettingsManager.textColor;
+                            infoLabel.BackColor = InvertColor(infoLabel.ForeColor);
+                        }
+                    }
+                };
+
+
+
+                infoLabel.Text = "Font size/family: " + textSize + ", " + textFont.FontFamily.Name;                                
+                // Invert the ForeColor and set it as the BackColor
+                
+
+                inputForm.Controls.Add(inputBox);
+                inputForm.Controls.Add(fontButton);
+                inputForm.Controls.Add(colorButton);
+                inputForm.Controls.Add(okButton);
+                inputForm.Controls.Add(cancelButton);
+                inputForm.Controls.Add(infoLabel);
+                inputForm.AcceptButton = okButton;
+                inputForm.CancelButton = cancelButton;
+
+                if(drawText != null)
+                {
+                    inputBox.Text = FS2MainForm.drawnTextString;
+                }
+
+                inputBox.Focus();
+
+                return inputForm.ShowDialog() == DialogResult.OK ? inputBox.Text : null;
+            }
+        }
+
+        private static Color InvertColor(Color color)
+        {
+            // Invert each RGB component
+            return Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B);
+        }
 
     }
 }

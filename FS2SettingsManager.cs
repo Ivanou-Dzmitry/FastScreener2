@@ -30,8 +30,12 @@ namespace FastScreener2
 
         public static int startResW, startResH, fileQuality;
 
+        public static float textSize;
+
         //for guidlines
-        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame;
+        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText;
+
+        public static Font textFont;
 
         public static bool lockIndent = false;
 
@@ -40,6 +44,7 @@ namespace FastScreener2
         public static Color arrowColor = Color.Aqua;
         public static Color numberColor = Color.Yellow;
         public static Color frameColor = Color.Gray;
+        public static Color textColor = Color.Gray;
         public static Color barColor;
 
 
@@ -281,6 +286,36 @@ namespace FastScreener2
                 EnsureSettingExists("picture_quality", "75");
             }
 
+            //text
+            try
+            {
+                drawText = Convert.ToBoolean(settings["draw_text"]);
+            }
+            catch
+            {
+                drawText = false;
+                EnsureSettingExists("draw_text", "false");
+            }
+
+            try
+            {
+                textSize = int.Parse(settings["text_size"]);
+            }
+            catch
+            {
+                textSize = 26;
+                EnsureSettingExists("text_size", "26");
+            }
+
+            try
+            {
+                textColor = ColorTranslator.FromHtml(settings["text_color"]);
+            }
+            catch
+            {
+                textColor = Color.LightGray;
+                EnsureSettingExists("text_color", "#D9D9D9");
+            }
 
 
             SetCurResBasedOnResOnClose();
@@ -343,7 +378,10 @@ namespace FastScreener2
             { "bar_color", "#313131" },
             { "frame_stroke_width", "1" },
             { "picture_format", "png" },
-            { "picture_quality", "75" }
+            { "picture_quality", "75" },
+            { "text_size", "26" },
+            { "text_color", "#FFA500" },
+            { "draw_text", "false" }
         };
 
             Save(); // Create the XML file with default values

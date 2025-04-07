@@ -8,6 +8,9 @@ Available graphic elements:
 - Arrow
 - Frame
 - Number
+- One short line of text (46 characters)
+
+A text string cannot be added at the same time (by mouse click) as other elements. Add the line first and then the other elements, or vice versa.
 
 Set visual options of graphics elements, and bar in the Settings (color, size etc).
 

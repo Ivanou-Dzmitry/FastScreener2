@@ -116,8 +116,6 @@ namespace FastScreener2
                 Type = tempTypeStr
             };
 
-
-
             pgSettings.SelectedObject = guideSettings;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
@@ -246,8 +244,25 @@ namespace FastScreener2
 
             if (e.ChangedItem.Label == "Bottom Indent")
             {
-                FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
-                FS2SettingsManager.SetSetting("bottom_indent", guideSettings.bottomIndent.ToString());
+                if(guideSettings.lockIndent == false)
+                {
+                    FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
+                    FS2SettingsManager.SetSetting("bottom_indent", guideSettings.bottomIndent.ToString());
+                }
+                else
+                {
+                    FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
+                    FS2SettingsManager.SetSetting("bottom_indent", guideSettings.bottomIndent.ToString());
+
+                    FS2SettingsManager.customGuide[2] = guideSettings.bottomIndent;
+                    FS2SettingsManager.SetSetting("left_indent", guideSettings.bottomIndent.ToString());
+
+                    FS2SettingsManager.customGuide[3] = guideSettings.bottomIndent;
+                    FS2SettingsManager.SetSetting("right_indent", guideSettings.bottomIndent.ToString());
+
+                    FS2SettingsManager.customGuide[0] = guideSettings.bottomIndent;
+                    FS2SettingsManager.SetSetting("top_indent", guideSettings.bottomIndent.ToString());
+                }
             }
 
             if (e.ChangedItem.Label == "Left Indent")

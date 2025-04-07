@@ -48,10 +48,11 @@
             panelDragTopR = new Panel();
             panelDragTopL = new Panel();
             panelDragLeft = new Panel();
-            chbSave = new CheckBox();
             chbArrow = new CheckBox();
             chbFrame = new CheckBox();
             chbNumbers = new CheckBox();
+            chbText = new CheckBox();
+            chbSave = new CheckBox();
             chbGuides = new CheckBox();
             panelRight = new Panel();
             rangeTrackBar = new VerticalRangeTrackBar();
@@ -63,16 +64,17 @@
             mitSize02 = new ToolStripMenuItem();
             mitSize03 = new ToolStripMenuItem();
             mitSize04 = new ToolStripMenuItem();
-            mitFulscreen = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
-            mitClear = new ToolStripMenuItem();
             mitTakeScreen = new ToolStripMenuItem();
+            mitFulscreen = new ToolStripMenuItem();
+            mitClear = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripSeparator();
             mitArrow = new ToolStripMenuItem();
             mitFrame = new ToolStripMenuItem();
-            mitGuidlines = new ToolStripMenuItem();
             mitNumber = new ToolStripMenuItem();
+            mitText = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripSeparator();
+            mitGuidlines = new ToolStripMenuItem();
             mitSaveFile = new ToolStripMenuItem();
             mitOpenFolder = new ToolStripMenuItem();
             toolStripMenuItem4 = new ToolStripSeparator();
@@ -320,32 +322,17 @@
             // panelDragLeft
             // 
             panelDragLeft.BackColor = Color.SlateGray;
-            panelDragLeft.Controls.Add(chbSave);
             panelDragLeft.Controls.Add(chbArrow);
             panelDragLeft.Controls.Add(chbFrame);
             panelDragLeft.Controls.Add(chbNumbers);
+            panelDragLeft.Controls.Add(chbText);
+            panelDragLeft.Controls.Add(chbSave);
             panelDragLeft.Controls.Add(chbGuides);
             panelDragLeft.Dock = DockStyle.Left;
             panelDragLeft.Location = new Point(0, 35);
             panelDragLeft.Name = "panelDragLeft";
             panelDragLeft.Size = new Size(31, 337);
             panelDragLeft.TabIndex = 2;
-            // 
-            // chbSave
-            // 
-            chbSave.Appearance = Appearance.Button;
-            chbSave.BackColor = Color.DimGray;
-            chbSave.Dock = DockStyle.Bottom;
-            chbSave.FlatAppearance.BorderSize = 0;
-            chbSave.FlatStyle = FlatStyle.Flat;
-            chbSave.Image = FS2Resources.save_icon;
-            chbSave.Location = new Point(0, 162);
-            chbSave.Name = "chbSave";
-            chbSave.Size = new Size(31, 35);
-            chbSave.TabIndex = 12;
-            toolTipFS.SetToolTip(chbSave, "Save to file");
-            chbSave.UseVisualStyleBackColor = false;
-            chbSave.Click += chbSave_Click;
             // 
             // chbArrow
             // 
@@ -355,7 +342,7 @@
             chbArrow.FlatAppearance.BorderSize = 0;
             chbArrow.FlatStyle = FlatStyle.Flat;
             chbArrow.Image = FS2Resources.arrow_icon;
-            chbArrow.Location = new Point(0, 197);
+            chbArrow.Location = new Point(0, 127);
             chbArrow.Name = "chbArrow";
             chbArrow.Size = new Size(31, 35);
             chbArrow.TabIndex = 11;
@@ -371,7 +358,7 @@
             chbFrame.FlatAppearance.BorderSize = 0;
             chbFrame.FlatStyle = FlatStyle.Flat;
             chbFrame.Image = FS2Resources.frame_icon;
-            chbFrame.Location = new Point(0, 232);
+            chbFrame.Location = new Point(0, 162);
             chbFrame.Name = "chbFrame";
             chbFrame.Size = new Size(31, 35);
             chbFrame.TabIndex = 10;
@@ -387,13 +374,45 @@
             chbNumbers.FlatAppearance.BorderSize = 0;
             chbNumbers.FlatStyle = FlatStyle.Flat;
             chbNumbers.Image = FS2Resources.number_icon;
-            chbNumbers.Location = new Point(0, 267);
+            chbNumbers.Location = new Point(0, 197);
             chbNumbers.Name = "chbNumbers";
             chbNumbers.Size = new Size(31, 35);
             chbNumbers.TabIndex = 9;
             toolTipFS.SetToolTip(chbNumbers, "Numbers");
             chbNumbers.UseVisualStyleBackColor = false;
             chbNumbers.Click += chbNumbers_Click;
+            // 
+            // chbText
+            // 
+            chbText.Appearance = Appearance.Button;
+            chbText.BackColor = Color.DimGray;
+            chbText.Dock = DockStyle.Bottom;
+            chbText.FlatAppearance.BorderSize = 0;
+            chbText.FlatStyle = FlatStyle.Flat;
+            chbText.Image = FS2Resources.text_icon;
+            chbText.Location = new Point(0, 232);
+            chbText.Name = "chbText";
+            chbText.Size = new Size(31, 35);
+            chbText.TabIndex = 13;
+            toolTipFS.SetToolTip(chbText, "Text");
+            chbText.UseVisualStyleBackColor = false;
+            chbText.Click += chbText_Click;
+            // 
+            // chbSave
+            // 
+            chbSave.Appearance = Appearance.Button;
+            chbSave.BackColor = Color.DimGray;
+            chbSave.Dock = DockStyle.Bottom;
+            chbSave.FlatAppearance.BorderSize = 0;
+            chbSave.FlatStyle = FlatStyle.Flat;
+            chbSave.Image = FS2Resources.save_icon;
+            chbSave.Location = new Point(0, 267);
+            chbSave.Name = "chbSave";
+            chbSave.Size = new Size(31, 35);
+            chbSave.TabIndex = 12;
+            toolTipFS.SetToolTip(chbSave, "Save to file");
+            chbSave.UseVisualStyleBackColor = false;
+            chbSave.Click += chbSave_Click;
             // 
             // chbGuides
             // 
@@ -408,8 +427,7 @@
             chbGuides.Size = new Size(31, 35);
             chbGuides.TabIndex = 8;
             toolTipFS.SetToolTip(chbGuides, "Guides");
-            chbGuides.UseVisualStyleBackColor = false;
-            chbGuides.CheckedChanged += chbGuides_CheckedChanged;
+            chbGuides.UseVisualStyleBackColor = false;            
             chbGuides.Click += chbGuides_Click;
             // 
             // panelRight
@@ -475,9 +493,9 @@
             // contextMenuMain
             // 
             contextMenuMain.ImageScalingSize = new Size(24, 24);
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitFulscreen, toolStripMenuItem1, mitClear, mitTakeScreen, toolStripMenuItem3, mitArrow, mitFrame, mitGuidlines, mitNumber, toolStripMenuItem2, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(206, 530);
+            contextMenuMain.Size = new Size(206, 538);
             // 
             // mitSize01
             // 
@@ -511,28 +529,10 @@
             mitSize04.Text = "Size4";
             mitSize04.Click += mitSize04_Click;
             // 
-            // mitFulscreen
-            // 
-            mitFulscreen.Name = "mitFulscreen";
-            mitFulscreen.ShortcutKeys = Keys.Alt | Keys.D5;
-            mitFulscreen.Size = new Size(205, 30);
-            mitFulscreen.Text = "Fulscreen";
-            mitFulscreen.ToolTipText = "Current screen without taskbar";
-            mitFulscreen.Click += mitFulscreen_Click;
-            // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
             toolStripMenuItem1.Size = new Size(202, 6);
-            // 
-            // mitClear
-            // 
-            mitClear.Name = "mitClear";
-            mitClear.ShortcutKeys = Keys.Control | Keys.Shift | Keys.C;
-            mitClear.Size = new Size(205, 30);
-            mitClear.Text = "Clear";
-            mitClear.ToolTipText = "Clear screenshot area";
-            mitClear.Click += mitClear_Click;
             // 
             // mitTakeScreen
             // 
@@ -540,7 +540,25 @@
             mitTakeScreen.Name = "mitTakeScreen";
             mitTakeScreen.ShortcutKeys = Keys.F4;
             mitTakeScreen.Size = new Size(205, 30);
-            mitTakeScreen.Text = "Screen";
+            mitTakeScreen.Text = "Screenshot";
+            // 
+            // mitFulscreen
+            // 
+            mitFulscreen.Name = "mitFulscreen";
+            mitFulscreen.ShortcutKeys = Keys.Alt | Keys.D5;
+            mitFulscreen.Size = new Size(205, 30);
+            mitFulscreen.Text = "Fullscreen";
+            mitFulscreen.ToolTipText = "Current screen without taskbar";
+            mitFulscreen.Click += mitFulscreen_Click;
+            // 
+            // mitClear
+            // 
+            mitClear.Name = "mitClear";
+            mitClear.ShortcutKeys = Keys.Control | Keys.Shift | Keys.Z;
+            mitClear.Size = new Size(205, 30);
+            mitClear.Text = "Clear";
+            mitClear.ToolTipText = "Clear screenshot area";
+            mitClear.Click += mitClear_Click;
             // 
             // toolStripMenuItem3
             // 
@@ -563,14 +581,6 @@
             mitFrame.Text = "Frame";
             mitFrame.Click += mitFrame_Click;
             // 
-            // mitGuidlines
-            // 
-            mitGuidlines.Name = "mitGuidlines";
-            mitGuidlines.ShortcutKeys = Keys.Control | Keys.Shift | Keys.G;
-            mitGuidlines.Size = new Size(205, 30);
-            mitGuidlines.Text = "Guidlines";
-            mitGuidlines.Click += mitGuidlines_Click;
-            // 
             // mitNumber
             // 
             mitNumber.Name = "mitNumber";
@@ -579,10 +589,25 @@
             mitNumber.Text = "Number";
             mitNumber.Click += mitNumber_Click;
             // 
+            // mitText
+            // 
+            mitText.Name = "mitText";
+            mitText.Size = new Size(205, 30);
+            mitText.Text = "Text";
+            mitText.Click += mitText_Click;
+            // 
             // toolStripMenuItem2
             // 
             toolStripMenuItem2.Name = "toolStripMenuItem2";
             toolStripMenuItem2.Size = new Size(202, 6);
+            // 
+            // mitGuidlines
+            // 
+            mitGuidlines.Name = "mitGuidlines";
+            mitGuidlines.ShortcutKeys = Keys.Control | Keys.Shift | Keys.G;
+            mitGuidlines.Size = new Size(205, 30);
+            mitGuidlines.Text = "Guidlines";
+            mitGuidlines.Click += mitGuidlines_Click;
             // 
             // mitSaveFile
             // 
@@ -709,5 +734,7 @@
         private ToolStripMenuItem mitClear;
         private Splitter splitter1;
         private ToolStripMenuItem mitFulscreen;
+        private CheckBox chbText;
+        private ToolStripMenuItem mitText;
     }
 }

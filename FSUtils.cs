@@ -483,14 +483,16 @@ namespace FastScreener2
             textColor = FS2SettingsManager.textColor;
             textSize = FS2SettingsManager.textSize;
 
-/*            if(FS2SettingsManager.textFont!=null)
-                Debug.WriteLine("F: "+FS2SettingsManager.textFont.FontFamily);
-
-            textFont = new Font(SystemFonts.DefaultFont.FontFamily, textSize, SystemFonts.DefaultFont.Style);*/
-
-            if (FS2SettingsManager.textFont != null)
+            if (textFontFam != null)
             {
-                textFont = new Font(FS2SettingsManager.textFont.FontFamily, textSize, SystemFonts.DefaultFont.Style);
+                 Font newFont = new Font(textFontFam, textSize, SystemFonts.DefaultFont.Style);                    
+                //textFontFam = FS2SettingsManager.textFont.FontFamily.Name;
+
+                textFont = newFont;
+                FS2SettingsManager.textFont = newFont;
+
+                FS2SettingsManager.SetSetting("text_font", textFontFam);
+                FS2SettingsManager.Save();
             }
             else
             {
@@ -500,7 +502,7 @@ namespace FastScreener2
 
             using (Form inputForm = new Form())
             {
-                inputForm.Text = "Enter Text (46 symbols)";
+                inputForm.Text = "Enter Text (45 symbols)";
                 inputForm.Width = 400;
                 inputForm.Height = 200;
                 inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -517,7 +519,7 @@ namespace FastScreener2
                 Button cancelButton = new Button() { Text = "Cancel", Left = 300, Width = 70, Top = 110, DialogResult = DialogResult.Cancel };
 
                 //symbols count
-                inputBox.MaxLength = 46;
+                inputBox.MaxLength = 45;
 
                 //label
                 infoLabel.Font = new Font(infoLabel.Font.FontFamily, 8);
@@ -535,7 +537,8 @@ namespace FastScreener2
                             FS2SettingsManager.textSize = (int)Math.Floor(fontDialog.Font.Size);
                             FS2SettingsManager.SetSetting("text_size", FS2SettingsManager.textSize.ToString());
                             FS2SettingsManager.Save();
-                            infoLabel.Text = "Font size/family: " + FS2SettingsManager.textSize + ", " + fontDialog.Font.FontFamily.Name;
+                            textFontFam = fontDialog.Font.FontFamily.Name;
+                            infoLabel.Text = "Font size/family: " + FS2SettingsManager.textSize + ", " + textFontFam;
                         }
                     }
                 };
@@ -558,9 +561,12 @@ namespace FastScreener2
 
 
 
-                infoLabel.Text = "Font size/family: " + textSize + ", " + textFont.FontFamily.Name;                                
+                infoLabel.Text = "Font size/family: " + textSize + ", " + textFontFam;
+                FS2SettingsManager.SetSetting("text_font", textFontFam);
+                FS2SettingsManager.Save();
+
                 // Invert the ForeColor and set it as the BackColor
-                
+
 
                 inputForm.Controls.Add(inputBox);
                 inputForm.Controls.Add(fontButton);

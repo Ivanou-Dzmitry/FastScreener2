@@ -20,7 +20,7 @@ namespace FastScreener2
 
             //select grid in list
             lboxSetCat.SetSelected(0, true);
-            ArrowSettings();
+            AppearanceSettings();
 
             FSUtils utils = new FSUtils();
             utils.AttachDragEvents(pnlSetHeader);
@@ -34,24 +34,27 @@ namespace FastScreener2
             switch (selCat)
             {
                 case 0:
-                    ArrowSettings();
+                    AppearanceSettings();
                     break;
                 case 1:
-                    BarSettings();
+                    ArrowSettings();
                     break;
                 case 2:
-                    FileSettings();
+                    BarSettings();
                     break;
                 case 3:
-                    FrameSettings();
+                    FileSettings();
                     break;
                 case 4:
-                    GuideSettings();
+                    FrameSettings();
                     break;
                 case 5:
-                    NumberSettings();
+                    GuideSettings();
                     break;
                 case 6:
+                    NumberSettings();
+                    break;
+                case 7:
                     ResSettings();
                     break;
                 default:
@@ -65,6 +68,20 @@ namespace FastScreener2
             pgSettings.Refresh();
             FS2SettingsManager.Save();
             Close();
+        }
+
+
+        private AppAppearance appearanceSettings;
+
+        private void AppearanceSettings()
+        {
+            appearanceSettings = new AppAppearance
+            {
+                PanelColor = FS2SettingsManager.panelColor
+            };
+
+            pgSettings.SelectedObject = appearanceSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
 
@@ -222,6 +239,13 @@ namespace FastScreener2
         // --- Save Changes Automatically ---
         private void PgSettings_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
+            //App Appearnce
+            if (e.ChangedItem.Label == "Panel Color")
+            {
+                FS2SettingsManager.panelColor = appearanceSettings.PanelColor;
+                FS2SettingsManager.SetSetting("panel_color", ColorTranslator.ToHtml(appearanceSettings.PanelColor));
+            }
+
             //ARROW
             if (e.ChangedItem.Label == "Arrow Length")
             {

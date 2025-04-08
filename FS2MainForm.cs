@@ -167,6 +167,12 @@ namespace FastScreener2
             SetControlImage(chbArrow, "arrow_icon");
             SetControlImage(chbGuides, "guides_icon");
             SetControlImage(chbText, "text_icon");
+
+            //label
+            labelDebug.Visible = showInfoLabel;
+            mitShowInfo.Checked = showInfoLabel;
+
+            PanelColor();
         }
 
         private void SetControlImage(Control control, string resourceName)
@@ -214,6 +220,19 @@ namespace FastScreener2
             txtbName.Top = panelHeight - fieldHeight;
 
             txtbName.Left = splitter1.Left + splitter1.Width;
+        }
+
+
+        private void PanelColor()
+        {
+            panelDragTop.BackColor = panelColor;
+            panelDragLeft.BackColor = panelColor;
+
+            panelDragBottomL.BackColor = panelColor;
+            panelDragBottomR.BackColor = panelColor;
+
+            panelDragTopR.BackColor = panelColor;
+            panelDragTopL.BackColor = panelColor;
         }
 
         private void PanelSize()
@@ -628,6 +647,12 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
+            if (keyData == (Keys.Control | Keys.Shift | Keys.T))
+            {
+                mitText_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -812,6 +837,8 @@ namespace FastScreener2
                 isReseted = false;
             }
 
+            PanelColor();
+
         }
 
         private void ToggleStatus(
@@ -897,7 +924,7 @@ namespace FastScreener2
         private void DrawFrameStatus()
         {
             ToggleStatus(mitFrame, ref FS2SettingsManager.drawFrame, "Frame turned ON", "Frame turned OFF", "draw_frame", chbFrame, false);
-            
+
             if (drawText)
                 DrawTextStatus();
         }
@@ -911,9 +938,16 @@ namespace FastScreener2
         private void chbGuides_Click(object sender, EventArgs e)
         {
             DrawGuideStatus();
+        }
 
+        private void DrawGuideStatus()
+        {
             //paint rect
             PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
+
+            ToggleStatus(mitGuidlines, ref FS2SettingsManager.drawGuides, "Guides turned ON", "Guides turned OFF", "draw_guidlines", chbGuides, false);
+
+            Debug.WriteLine("DG" + drawGuides);
 
             if (drawGuides == false)
             {
@@ -924,12 +958,6 @@ namespace FastScreener2
             {
                 RenderGuides(paintRect, panelScreenArea, guideColor);
             }
-
-        }
-
-        private void DrawGuideStatus()
-        {
-            ToggleStatus(mitGuidlines, ref FS2SettingsManager.drawGuides, "Guides turned ON", "Guides turned OFF", "draw_guidlines", chbGuides, false);
         }
 
 
@@ -952,8 +980,8 @@ namespace FastScreener2
         private void DrawNumberStatus()
         {
             ToggleStatus(mitNumber, ref FS2SettingsManager.drawNumber, "Numbers turned ON", "Numbers turned OFF", "draw_number", chbNumbers, false);
-            
-            if(drawText)
+
+            if (drawText)
                 DrawTextStatus();
         }
 
@@ -986,7 +1014,7 @@ namespace FastScreener2
 
         private void DrawTextStatus()
         {
-            if(drawText)
+            if (drawText)
             {
                 ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
             }
@@ -1002,7 +1030,7 @@ namespace FastScreener2
                     DrawNumberStatus();
 
                 ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
-            }                
+            }
         }
 
         //hook mouse MMB !Important
@@ -1056,14 +1084,14 @@ namespace FastScreener2
                 numbering++;
             }
 
-            if(drawText)
+            if (drawText)
                 textPoint = usedPanel.PointToClient(Cursor.Position);
 
             //draw TEXT
             if (drawText && !isTextDialogOpen)
             {
                 isTextDialogOpen = true;
-               
+
                 //call text diallog
                 string userText = PromptForText(out textColor, out textSize, out textFont);
 
@@ -1412,6 +1440,18 @@ namespace FastScreener2
 
         }
 
+        private void mitShowInfo_Click(object sender, EventArgs e)
+        {
+            // Toggle the flag
+            showInfoLabel = !showInfoLabel;
 
+            mitShowInfo.Checked = showInfoLabel;
+
+            // Set label visibility to match
+            labelDebug.Visible = showInfoLabel;
+
+            FS2SettingsManager.SetSetting("show_info_label", showInfoLabel.ToString().ToLower());
+            FS2SettingsManager.Save();
+        }
     }
 }

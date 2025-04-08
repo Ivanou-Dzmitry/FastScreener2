@@ -19,7 +19,7 @@ namespace FastScreener2
         public static int[,] resWorked = new int[2, 4];
 
         //Min size
-        public const int MIN_WIDTH = 550, MIN_HEIGHT = 200;
+        public const int MIN_WIDTH = 550, MIN_HEIGHT = 240;
 
         //all monitors
         public static int virtScreenWidth = 0, virtScreenHeight = 0;
@@ -33,9 +33,10 @@ namespace FastScreener2
         public static float textSize;
 
         //for guidlines
-        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText;
+        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel;
 
         public static Font textFont;
+        public static string textFontFam = "";
 
         public static bool lockIndent = false;
 
@@ -46,6 +47,7 @@ namespace FastScreener2
         public static Color frameColor = Color.Gray;
         public static Color textColor = Color.Gray;
         public static Color barColor;
+        public static Color panelColor = Color.SlateGray;
 
 
         private static string settingsFilePath = "fs2_settings.xml";
@@ -317,6 +319,36 @@ namespace FastScreener2
                 EnsureSettingExists("text_color", "#D9D9D9");
             }
 
+            try
+            {
+                textFontFam = (string)settings["text_font"];
+            }
+            catch
+            {
+                textFontFam = SystemFonts.DefaultFont.FontFamily.Name;
+                EnsureSettingExists("text_font", SystemFonts.DefaultFont.FontFamily.Name);
+            }
+
+            try
+            {
+                showInfoLabel = Convert.ToBoolean(settings["show_info_label"]);
+            }
+            catch
+            {
+                showInfoLabel = false;
+                EnsureSettingExists("show_info_label", "false");
+            }
+
+            //panel
+            try
+            {
+                panelColor = ColorTranslator.FromHtml(settings["panel_color"]);
+            }
+            catch
+            {
+                panelColor = Color.SlateGray;
+                EnsureSettingExists("panel_color", "#708090");
+            }
 
             SetCurResBasedOnResOnClose();
         }
@@ -381,7 +413,10 @@ namespace FastScreener2
             { "picture_quality", "75" },
             { "text_size", "26" },
             { "text_color", "#FFA500" },
-            { "draw_text", "false" }
+            { "draw_text", "false" },
+            { "text_font", "" },
+            { "show_info_label", "false" },
+            { "panel_color", "#708090" }
         };
 
             Save(); // Create the XML file with default values

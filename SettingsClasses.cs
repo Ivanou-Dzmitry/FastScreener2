@@ -46,6 +46,33 @@ namespace FastScreener2
         }
     }
 
+
+    public class AppAppearance : INotifyPropertyChanged
+    {
+        private Color color;
+
+        [Category("Appearance")]
+        [Description("Set panels color.")]
+        [DisplayName("Panel Color")]
+        [TypeConverter(typeof(SafeColorConverter))]
+        public Color PanelColor
+        {
+            get => color;
+            set
+            {
+                color = value;
+                OnPropertyChanged(nameof(PanelColor));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
     //ARROW
     public class Arrow : INotifyPropertyChanged
         {

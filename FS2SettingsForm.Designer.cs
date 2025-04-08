@@ -45,21 +45,22 @@
             // 
             // pgSettings
             // 
-            pgSettings.Location = new Point(118, 35);
+            pgSettings.Location = new Point(120, 36);
             pgSettings.Name = "pgSettings";
-            pgSettings.Size = new Size(389, 357);
+            pgSettings.Size = new Size(376, 336);
             pgSettings.TabIndex = 0;
             // 
             // lboxSetCat
             // 
-            lboxSetCat.BackColor = Color.Silver;
-            lboxSetCat.BorderStyle = BorderStyle.None;
+            lboxSetCat.BackColor = Color.Gainsboro;
+            lboxSetCat.BorderStyle = BorderStyle.FixedSingle;
             lboxSetCat.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
             lboxSetCat.ItemHeight = 17;
-            lboxSetCat.Items.AddRange(new object[] { "Arrow", "Bar", "File", "Frame", "Guides", "Numbers", "Sizes" });
-            lboxSetCat.Location = new Point(0, 35);
+            lboxSetCat.Items.AddRange(new object[] { "Appearance", "Arrow", "Bar", "File", "Frame", "Guides", "Numbers", "Sizes" });
+            lboxSetCat.Location = new Point(13, 63);
             lboxSetCat.Name = "lboxSetCat";
-            lboxSetCat.Size = new Size(114, 357);
+            lboxSetCat.Size = new Size(102, 308);
+            lboxSetCat.Sorted = true;
             lboxSetCat.TabIndex = 1;
             lboxSetCat.Click += lboxSetCat_Click;
             // 
@@ -67,9 +68,9 @@
             // 
             btnOK.BackColor = Color.WhiteSmoke;
             btnOK.FlatStyle = FlatStyle.Flat;
-            btnOK.Location = new Point(434, 14);
+            btnOK.Location = new Point(394, 18);
             btnOK.Name = "btnOK";
-            btnOK.Size = new Size(61, 35);
+            btnOK.Size = new Size(102, 35);
             btnOK.TabIndex = 2;
             btnOK.Text = "OK";
             btnOK.UseVisualStyleBackColor = false;
@@ -77,22 +78,22 @@
             // 
             // pnlSetBottom
             // 
-            pnlSetBottom.BackColor = Color.SlateGray;
+            pnlSetBottom.BackColor = SystemColors.Control;
             pnlSetBottom.Controls.Add(btnReset);
             pnlSetBottom.Controls.Add(btnOK);
             pnlSetBottom.Dock = DockStyle.Bottom;
-            pnlSetBottom.Location = new Point(0, 393);
+            pnlSetBottom.Location = new Point(0, 372);
             pnlSetBottom.Name = "pnlSetBottom";
-            pnlSetBottom.Size = new Size(509, 64);
+            pnlSetBottom.Size = new Size(509, 72);
             pnlSetBottom.TabIndex = 3;
             // 
             // btnReset
             // 
             btnReset.BackColor = Color.DimGray;
             btnReset.FlatStyle = FlatStyle.Flat;
-            btnReset.Location = new Point(10, 14);
+            btnReset.Location = new Point(13, 18);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(61, 35);
+            btnReset.Size = new Size(102, 35);
             btnReset.TabIndex = 3;
             btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = false;
@@ -149,7 +150,7 @@
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            ClientSize = new Size(509, 457);
+            ClientSize = new Size(509, 444);
             Controls.Add(pnlSetHeader);
             Controls.Add(pnlSetBottom);
             Controls.Add(lboxSetCat);

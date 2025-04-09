@@ -64,6 +64,7 @@
             mitSize02 = new ToolStripMenuItem();
             mitSize03 = new ToolStripMenuItem();
             mitSize04 = new ToolStripMenuItem();
+            mitMax = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             mitTakeScreen = new ToolStripMenuItem();
             mitFulscreen = new ToolStripMenuItem();
@@ -494,9 +495,9 @@
             // contextMenuMain
             // 
             contextMenuMain.ImageScalingSize = new Size(24, 24);
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(206, 496);
+            contextMenuMain.Size = new Size(206, 526);
             // 
             // mitSize01
             // 
@@ -504,7 +505,7 @@
             mitSize01.Name = "mitSize01";
             mitSize01.ShortcutKeys = Keys.Alt | Keys.D1;
             mitSize01.Size = new Size(205, 25);
-            mitSize01.Text = "Size1";
+            mitSize01.Text = "Size 1";
             mitSize01.Click += mitSize01_Click;
             // 
             // mitSize02
@@ -513,7 +514,7 @@
             mitSize02.Name = "mitSize02";
             mitSize02.ShortcutKeys = Keys.Alt | Keys.D2;
             mitSize02.Size = new Size(205, 25);
-            mitSize02.Text = "Size2";
+            mitSize02.Text = "Size 2";
             mitSize02.Click += mitSize02_Click;
             // 
             // mitSize03
@@ -522,7 +523,7 @@
             mitSize03.Name = "mitSize03";
             mitSize03.ShortcutKeys = Keys.Alt | Keys.D3;
             mitSize03.Size = new Size(205, 25);
-            mitSize03.Text = "Size3";
+            mitSize03.Text = "Size 3";
             mitSize03.Click += mitSize03_Click;
             // 
             // mitSize04
@@ -531,8 +532,16 @@
             mitSize04.Name = "mitSize04";
             mitSize04.ShortcutKeys = Keys.Alt | Keys.D4;
             mitSize04.Size = new Size(205, 25);
-            mitSize04.Text = "Size4";
+            mitSize04.Text = "Size 4";
             mitSize04.Click += mitSize04_Click;
+            // 
+            // mitMax
+            // 
+            mitMax.Name = "mitMax";
+            mitMax.Size = new Size(205, 30);
+            mitMax.Text = "Max";
+            mitMax.ToolTipText = "Zoom to current monitor size";
+            mitMax.Click += mitMax_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -769,5 +778,6 @@
         private CheckBox chbText;
         private ToolStripMenuItem mitText;
         private ToolStripMenuItem mitShowInfo;
+        private ToolStripMenuItem mitMax;
     }
 }

@@ -594,5 +594,23 @@ namespace FastScreener2
             return Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B);
         }
 
+        public static class ScreenHelper
+        {
+            public static void MaximizeFormToCurrentMonitor(Form form)
+            {
+                if (form == null) return;
+
+                // Get the screen the form is currently on
+                Screen currentScreen = Screen.FromControl(form);
+
+                // Get the working area (excluding taskbar)
+                Rectangle workingArea = currentScreen.WorkingArea;
+
+                // Set form location and size to fit the current screen's working area
+                form.Location = workingArea.Location;
+                form.ClientSize = new Size(workingArea.Width, workingArea.Height);
+            }
+        }
+
     }
 }

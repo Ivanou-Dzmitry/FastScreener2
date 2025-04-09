@@ -180,7 +180,7 @@ namespace FastScreener2
             // Determine the size of the icon based on scaling factor
             int iconSize = scalingFactor switch
             {
-                1 => 16,
+                1 => 24,
                 1.5f => 32,
                 2 => 48,
                 _ => 16 // Default to 16px if scalingFactor is unexpected
@@ -683,8 +683,30 @@ namespace FastScreener2
             //scaling
             int scaledW = Convert.ToInt32(panelScreenArea.Width / scalingFactor);
             int scaledH = Convert.ToInt32(panelScreenArea.Height / scalingFactor);
+            
+            string res;
 
-            string res = scaledW + "," + scaledH;
+            // Check if the current resolution is in resWorked
+            bool found = false;
+            for (int i = 0; i < 4; i++)
+            {
+                if (resWorked[0, i] == scaledW && resWorked[1, i] == scaledH)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                res = scaledW + "," + scaledH;
+            }
+            else
+            {
+                res = resWorked[0, 0] + "," + resWorked[1, 0];
+            }
+
+            //save
             FS2SettingsManager.SetSetting("res_on_close", res);
             FS2SettingsManager.Save();
         }
@@ -808,12 +830,27 @@ namespace FastScreener2
 
         private void mitSettings_Click(object sender, EventArgs e)
         {
+            // Store the original resolution values before showing the form
+            int oldWidth = resWorked[0, currentRes];
+            int oldHeight = resWorked[1, currentRes];
+
             // Create a new instance of the Form2 class            
             formFS2Settings settingsForm = new formFS2Settings();
 
             settingsForm.ShowDialog();
 
             MenuItemUpdate();
+
+            // Get new resolution values
+            int newWidth = resWorked[0, currentRes];
+            int newHeight = resWorked[1, currentRes];
+
+            // Compare and resize if needed
+            if (oldWidth != newWidth || oldHeight != newHeight)
+            {
+                FormResizer(newWidth, newHeight);
+            }
+
 
             if (drawGuides == true)
             {
@@ -1452,6 +1489,13 @@ namespace FastScreener2
 
             FS2SettingsManager.SetSetting("show_info_label", showInfoLabel.ToString().ToLower());
             FS2SettingsManager.Save();
+        }
+
+        private void mitMax_Click(object sender, EventArgs e)
+        {
+            ScreenHelper.MaximizeFormToCurrentMonitor(this);
+            // Refresh the form
+            this.Refresh();
         }
     }
 }

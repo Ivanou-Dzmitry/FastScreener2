@@ -28,12 +28,12 @@ namespace FastScreener2
 
         public static int guidlineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType, frameStrokeWidth;
 
-        public static int startResW, startResH, fileQuality;
+        public static int startResW, startResH, fileQuality, watermarkSize, watermarkPadding;
 
         public static float textSize;
 
         //for guidlines
-        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel;
+        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel, drawWatermark;
 
         public static Font textFont;
         public static string textFontFam = "";
@@ -62,6 +62,10 @@ namespace FastScreener2
         public static int currentRes;
 
         public static string fileFormat;
+
+        public static Image watermarkImage = null;
+        public static string watermarkPath = "";
+        public static string watermarkPosition = "";
 
         // Load settings from XML (create file if missing)
         public static void Load()
@@ -350,6 +354,64 @@ namespace FastScreener2
                 EnsureSettingExists("panel_color", "#708090");
             }
 
+            //watermark
+            /*            { "draw_watermark", "false" },
+                        { "watermark_position", "false" },
+                        { "watermark_path", "" },
+                        { "watermark_size", "64" }*/
+
+            try
+            {
+                drawWatermark = Convert.ToBoolean(settings["draw_watermark"]);
+            }
+            catch
+            {
+                drawWatermark = false;
+                EnsureSettingExists("draw_watermark", "false");
+            }
+
+            try
+            {
+                watermarkPath = (string)settings["watermark_path"];
+            }
+            catch
+            {
+                watermarkPath = "";
+                EnsureSettingExists("watermark_path", "");
+            }
+
+            try
+            {
+                watermarkPosition = (string)settings["watermark_position"];
+            }
+            catch
+            {
+                watermarkPosition = "top-left";
+                EnsureSettingExists("watermark_position", "top-left");
+            }
+
+            try
+            {
+                watermarkSize = int.Parse(settings["watermark_size"]);
+            }
+            catch
+            {
+                watermarkSize = 64;
+                EnsureSettingExists("watermark_size", "64");
+            }
+
+
+            try
+            {
+                watermarkPadding = int.Parse(settings["watermark_padding"]);
+            }
+            catch
+            {
+                watermarkPadding = 10;
+                EnsureSettingExists("watermark_padding", "10");
+            }
+
+
             SetCurResBasedOnResOnClose();
         }
 
@@ -416,7 +478,12 @@ namespace FastScreener2
             { "draw_text", "false" },
             { "text_font", "" },
             { "show_info_label", "false" },
-            { "panel_color", "#708090" }
+            { "panel_color", "#708090" },
+            { "draw_watermark", "false" },
+            { "watermark_position", "false" },
+            { "watermark_path", "" },
+            { "watermark_size", "64" },
+            {"watermark_padding", "10" }
         };
 
             Save(); // Create the XML file with default values

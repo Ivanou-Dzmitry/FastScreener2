@@ -4,6 +4,7 @@ using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Windows.Forms;
 
 
 namespace FastScreener2
@@ -111,6 +112,26 @@ namespace FastScreener2
             mitText.Checked = FS2SettingsManager.drawText;
             chbText.Checked = FS2SettingsManager.drawText;
 
+            mitWatermark.Checked = FS2SettingsManager.drawWatermark;
+            chbWatermark.Checked = FS2SettingsManager.drawWatermark;
+
+            if(watermarkPath != string.Empty && drawWatermark)
+            {            
+                try
+                {
+                    watermarkImage = Image.FromFile(watermarkPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Failed to load watermark image:\n{ex.Message}",
+                        "Error Loading Image",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+
             //center panel
             panelScreenArea.BackColor = Color.Transparent;
 
@@ -173,6 +194,9 @@ namespace FastScreener2
             mitShowInfo.Checked = showInfoLabel;
 
             PanelColor();
+
+            Image checkmarkImage = FS2Resources.Checkmark;
+            contextMenuMain.Renderer = new CustomCheckRenderer(checkmarkImage);
         }
 
         private void SetControlImage(Control control, string resourceName)
@@ -585,6 +609,12 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
+            if (keyData == (Keys.Control | Keys.Shift | Keys.M))
+            {
+                mitMax_Click(this, EventArgs.Empty);
+                return true; // Mark as handled
+            }
+
 
             //cycle
             if (keyData == (Keys.Control | Keys.Right))
@@ -683,7 +713,7 @@ namespace FastScreener2
             //scaling
             int scaledW = Convert.ToInt32(panelScreenArea.Width / scalingFactor);
             int scaledH = Convert.ToInt32(panelScreenArea.Height / scalingFactor);
-            
+
             string res;
 
             // Check if the current resolution is in resWorked
@@ -1252,6 +1282,12 @@ namespace FastScreener2
         private void panelScreenArea_Paint(object sender, PaintEventArgs e)
         {
 
+            // Render watermark in top-left
+            if (watermarkImage != null && drawWatermark)
+            {
+                RenderWatermark(e);
+            }
+
             if (drawGuides)
             {
                 RenderGuides(e, panelScreenArea, guideColor);
@@ -1497,5 +1533,60 @@ namespace FastScreener2
             // Refresh the form
             this.Refresh();
         }
+
+
+        private void chbWatermark_Click(object sender, EventArgs e)
+        {
+            DrawWatermarkStatus();
+        }
+
+        private void mitWatermark_Click(object sender, EventArgs e)
+        {
+            DrawWatermarkStatus();
+        }
+
+        private void DrawWatermarkStatus()
+        {
+
+            ToggleStatus(mitWatermark, ref FS2SettingsManager.drawWatermark, "Watermark turned ON", "Watermark turned OFF", "draw_watermark", chbWatermark, false);
+
+            if (chbWatermark.Checked)
+            {
+                //Checkbox was checked user is trying to enable watermark
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.Filter = "Image Files (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg";
+                    openFileDialog.Title = "Select Watermark Image";
+
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        watermarkPath = openFileDialog.FileName;
+
+                        //Dispose old image if needed
+                        watermarkImage?.Dispose();
+                        watermarkImage = Image.FromFile(watermarkPath);
+
+                        drawWatermark = true;
+                        panelScreenArea.Invalidate(); // Refresh to show watermark
+
+                        FS2SettingsManager.SetSetting("watermark_path", watermarkPath);
+                        FS2SettingsManager.Save();
+                    }
+                    else
+                    {
+                        //User canceled uncheck and don't draw watermark
+                        chbWatermark.Checked = false;
+                        drawWatermark = false;
+                    }
+                }
+            }
+            else
+            {
+                //Checkbox was unchecked disable watermark
+                drawWatermark = false;
+                panelScreenArea.Invalidate(); // Refresh to remove watermark
+            }
+        }
+    
     }
 }

@@ -52,6 +52,7 @@
             chbFrame = new CheckBox();
             chbNumbers = new CheckBox();
             chbText = new CheckBox();
+            chbWatermark = new CheckBox();
             chbSave = new CheckBox();
             chbGuides = new CheckBox();
             panelRight = new Panel();
@@ -74,6 +75,7 @@
             mitFrame = new ToolStripMenuItem();
             mitNumber = new ToolStripMenuItem();
             mitText = new ToolStripMenuItem();
+            mitWatermark = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripSeparator();
             mitGuidlines = new ToolStripMenuItem();
             mitSaveFile = new ToolStripMenuItem();
@@ -192,7 +194,7 @@
             btnNextRes.Name = "btnNextRes";
             btnNextRes.Size = new Size(31, 35);
             btnNextRes.TabIndex = 5;
-            toolTipFS.SetToolTip(btnNextRes, "Resolution cycle (Ctrl+Right arrow)");
+            toolTipFS.SetToolTip(btnNextRes, "Size cycle (Ctrl+Right arrow)");
             btnNextRes.UseVisualStyleBackColor = false;
             btnNextRes.Click += btnNextRes_Click;
             // 
@@ -328,6 +330,7 @@
             panelDragLeft.Controls.Add(chbFrame);
             panelDragLeft.Controls.Add(chbNumbers);
             panelDragLeft.Controls.Add(chbText);
+            panelDragLeft.Controls.Add(chbWatermark);
             panelDragLeft.Controls.Add(chbSave);
             panelDragLeft.Controls.Add(chbGuides);
             panelDragLeft.Dock = DockStyle.Left;
@@ -344,7 +347,7 @@
             chbArrow.FlatAppearance.BorderSize = 0;
             chbArrow.FlatStyle = FlatStyle.Flat;
             chbArrow.Image = FS2Resources.arrow_icon;
-            chbArrow.Location = new Point(0, 127);
+            chbArrow.Location = new Point(0, 92);
             chbArrow.Name = "chbArrow";
             chbArrow.Size = new Size(31, 35);
             chbArrow.TabIndex = 11;
@@ -360,7 +363,7 @@
             chbFrame.FlatAppearance.BorderSize = 0;
             chbFrame.FlatStyle = FlatStyle.Flat;
             chbFrame.Image = FS2Resources.frame_icon;
-            chbFrame.Location = new Point(0, 162);
+            chbFrame.Location = new Point(0, 127);
             chbFrame.Name = "chbFrame";
             chbFrame.Size = new Size(31, 35);
             chbFrame.TabIndex = 10;
@@ -376,7 +379,7 @@
             chbNumbers.FlatAppearance.BorderSize = 0;
             chbNumbers.FlatStyle = FlatStyle.Flat;
             chbNumbers.Image = FS2Resources.number_icon;
-            chbNumbers.Location = new Point(0, 197);
+            chbNumbers.Location = new Point(0, 162);
             chbNumbers.Name = "chbNumbers";
             chbNumbers.Size = new Size(31, 35);
             chbNumbers.TabIndex = 9;
@@ -392,13 +395,29 @@
             chbText.FlatAppearance.BorderSize = 0;
             chbText.FlatStyle = FlatStyle.Flat;
             chbText.Image = FS2Resources.text_icon;
-            chbText.Location = new Point(0, 232);
+            chbText.Location = new Point(0, 197);
             chbText.Name = "chbText";
             chbText.Size = new Size(31, 35);
             chbText.TabIndex = 13;
             toolTipFS.SetToolTip(chbText, "Text");
             chbText.UseVisualStyleBackColor = false;
             chbText.Click += chbText_Click;
+            // 
+            // chbWatermark
+            // 
+            chbWatermark.Appearance = Appearance.Button;
+            chbWatermark.BackColor = Color.Gray;
+            chbWatermark.Dock = DockStyle.Bottom;
+            chbWatermark.FlatAppearance.BorderSize = 0;
+            chbWatermark.FlatStyle = FlatStyle.Flat;
+            chbWatermark.Image = FS2Resources.watermark_icon;
+            chbWatermark.Location = new Point(0, 232);
+            chbWatermark.Name = "chbWatermark";
+            chbWatermark.Size = new Size(31, 35);
+            chbWatermark.TabIndex = 14;
+            toolTipFS.SetToolTip(chbWatermark, "Watermark");
+            chbWatermark.UseVisualStyleBackColor = false;
+            chbWatermark.Click += chbWatermark_Click;
             // 
             // chbSave
             // 
@@ -495,16 +514,16 @@
             // contextMenuMain
             // 
             contextMenuMain.ImageScalingSize = new Size(24, 24);
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, mitWatermark, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(206, 526);
+            contextMenuMain.Size = new Size(218, 573);
             // 
             // mitSize01
             // 
             mitSize01.AutoSize = false;
             mitSize01.Name = "mitSize01";
             mitSize01.ShortcutKeys = Keys.Alt | Keys.D1;
-            mitSize01.Size = new Size(205, 25);
+            mitSize01.Size = new Size(205, 26);
             mitSize01.Text = "Size 1";
             mitSize01.Click += mitSize01_Click;
             // 
@@ -513,7 +532,7 @@
             mitSize02.AutoSize = false;
             mitSize02.Name = "mitSize02";
             mitSize02.ShortcutKeys = Keys.Alt | Keys.D2;
-            mitSize02.Size = new Size(205, 25);
+            mitSize02.Size = new Size(205, 26);
             mitSize02.Text = "Size 2";
             mitSize02.Click += mitSize02_Click;
             // 
@@ -522,7 +541,7 @@
             mitSize03.AutoSize = false;
             mitSize03.Name = "mitSize03";
             mitSize03.ShortcutKeys = Keys.Alt | Keys.D3;
-            mitSize03.Size = new Size(205, 25);
+            mitSize03.Size = new Size(205, 26);
             mitSize03.Text = "Size 3";
             mitSize03.Click += mitSize03_Click;
             // 
@@ -538,16 +557,17 @@
             // mitMax
             // 
             mitMax.Name = "mitMax";
-            mitMax.Size = new Size(205, 30);
-            mitMax.Text = "Max";
-            mitMax.ToolTipText = "Zoom to current monitor size";
+            mitMax.ShortcutKeys = Keys.Control | Keys.Shift | Keys.M;
+            mitMax.Size = new Size(217, 30);
+            mitMax.Text = "Max Size";
+            mitMax.ToolTipText = "Zoom to current working area";
             mitMax.Click += mitMax_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.AutoSize = false;
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(202, 5);
+            toolStripMenuItem1.Size = new Size(214, 5);
             // 
             // mitTakeScreen
             // 
@@ -555,17 +575,18 @@
             mitTakeScreen.Image = FS2Resources.screen_icon;
             mitTakeScreen.Name = "mitTakeScreen";
             mitTakeScreen.ShortcutKeys = Keys.F4;
-            mitTakeScreen.Size = new Size(205, 25);
+            mitTakeScreen.Size = new Size(205, 26);
             mitTakeScreen.Text = "Screenshot";
+            mitTakeScreen.ToolTipText = "Take a screenshot";
             // 
             // mitFulscreen
             // 
             mitFulscreen.AutoSize = false;
             mitFulscreen.Name = "mitFulscreen";
             mitFulscreen.ShortcutKeys = Keys.Alt | Keys.D5;
-            mitFulscreen.Size = new Size(205, 25);
+            mitFulscreen.Size = new Size(205, 26);
             mitFulscreen.Text = "Fullscreen";
-            mitFulscreen.ToolTipText = "Current screen without taskbar";
+            mitFulscreen.ToolTipText = "Screenshot of the сurrent screen without taskbar";
             mitFulscreen.Click += mitFulscreen_Click;
             // 
             // mitClear
@@ -573,7 +594,7 @@
             mitClear.AutoSize = false;
             mitClear.Name = "mitClear";
             mitClear.ShortcutKeys = Keys.Control | Keys.Shift | Keys.Z;
-            mitClear.Size = new Size(205, 25);
+            mitClear.Size = new Size(205, 26);
             mitClear.Text = "Clear";
             mitClear.ToolTipText = "Clear screenshot area";
             mitClear.Click += mitClear_Click;
@@ -582,14 +603,14 @@
             // 
             toolStripMenuItem3.AutoSize = false;
             toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(202, 5);
+            toolStripMenuItem3.Size = new Size(214, 5);
             // 
             // mitArrow
             // 
             mitArrow.AutoSize = false;
             mitArrow.Name = "mitArrow";
             mitArrow.ShortcutKeys = Keys.Control | Keys.Shift | Keys.A;
-            mitArrow.Size = new Size(205, 25);
+            mitArrow.Size = new Size(205, 26);
             mitArrow.Text = "Arrow";
             mitArrow.Click += mitArrow_Click;
             // 
@@ -598,7 +619,7 @@
             mitFrame.AutoSize = false;
             mitFrame.Name = "mitFrame";
             mitFrame.ShortcutKeys = Keys.Control | Keys.Shift | Keys.F;
-            mitFrame.Size = new Size(205, 25);
+            mitFrame.Size = new Size(205, 26);
             mitFrame.Text = "Frame";
             mitFrame.Click += mitFrame_Click;
             // 
@@ -607,7 +628,7 @@
             mitNumber.AutoSize = false;
             mitNumber.Name = "mitNumber";
             mitNumber.ShortcutKeys = Keys.Control | Keys.Shift | Keys.N;
-            mitNumber.Size = new Size(205, 25);
+            mitNumber.Size = new Size(205, 26);
             mitNumber.Text = "Number";
             mitNumber.Click += mitNumber_Click;
             // 
@@ -616,22 +637,30 @@
             mitText.AutoSize = false;
             mitText.Name = "mitText";
             mitText.ShortcutKeys = Keys.Control | Keys.Shift | Keys.T;
-            mitText.Size = new Size(205, 25);
+            mitText.Size = new Size(205, 26);
             mitText.Text = "Text";
             mitText.Click += mitText_Click;
+            // 
+            // mitWatermark
+            // 
+            mitWatermark.Name = "mitWatermark";
+            mitWatermark.ShortcutKeys = Keys.Control | Keys.Shift | Keys.W;
+            mitWatermark.Size = new Size(217, 30);
+            mitWatermark.Text = "Watermark";
+            mitWatermark.Click += mitWatermark_Click;
             // 
             // toolStripMenuItem2
             // 
             toolStripMenuItem2.AutoSize = false;
             toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new Size(202, 5);
+            toolStripMenuItem2.Size = new Size(214, 5);
             // 
             // mitGuidlines
             // 
             mitGuidlines.AutoSize = false;
             mitGuidlines.Name = "mitGuidlines";
             mitGuidlines.ShortcutKeys = Keys.Control | Keys.Shift | Keys.G;
-            mitGuidlines.Size = new Size(205, 25);
+            mitGuidlines.Size = new Size(205, 26);
             mitGuidlines.Text = "Guidlines";
             mitGuidlines.Click += mitGuidlines_Click;
             // 
@@ -639,7 +668,7 @@
             // 
             mitSaveFile.AutoSize = false;
             mitSaveFile.Name = "mitSaveFile";
-            mitSaveFile.Size = new Size(205, 25);
+            mitSaveFile.Size = new Size(205, 26);
             mitSaveFile.Text = "Save to File";
             mitSaveFile.Click += mitSaveFile_Click;
             // 
@@ -647,7 +676,7 @@
             // 
             mitOpenFolder.AutoSize = false;
             mitOpenFolder.Name = "mitOpenFolder";
-            mitOpenFolder.Size = new Size(205, 25);
+            mitOpenFolder.Size = new Size(205, 26);
             mitOpenFolder.Text = "Open Folder with Files";
             mitOpenFolder.Click += mitOpenFolder_Click;
             // 
@@ -655,13 +684,13 @@
             // 
             toolStripMenuItem4.AutoSize = false;
             toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(202, 5);
+            toolStripMenuItem4.Size = new Size(214, 5);
             // 
             // mitShowInfo
             // 
             mitShowInfo.AutoSize = false;
             mitShowInfo.Name = "mitShowInfo";
-            mitShowInfo.Size = new Size(205, 25);
+            mitShowInfo.Size = new Size(205, 26);
             mitShowInfo.Text = "Show Info";
             mitShowInfo.ToolTipText = "Show information";
             mitShowInfo.Click += mitShowInfo_Click;
@@ -671,7 +700,7 @@
             mitSettings.AutoSize = false;
             mitSettings.Image = FS2Resources.settings_icon;
             mitSettings.Name = "mitSettings";
-            mitSettings.Size = new Size(205, 25);
+            mitSettings.Size = new Size(205, 26);
             mitSettings.Text = "Settings";
             mitSettings.Click += mitSettings_Click;
             // 
@@ -681,7 +710,7 @@
             mitHelp.Image = FS2Resources.help_icon;
             mitHelp.Name = "mitHelp";
             mitHelp.ShortcutKeys = Keys.F1;
-            mitHelp.Size = new Size(205, 25);
+            mitHelp.Size = new Size(205, 26);
             mitHelp.Text = "Help";
             mitHelp.Click += mitHelp_Click;
             // 
@@ -690,7 +719,7 @@
             mitExit.AutoSize = false;
             mitExit.Name = "mitExit";
             mitExit.ShortcutKeys = Keys.Alt | Keys.F4;
-            mitExit.Size = new Size(205, 25);
+            mitExit.Size = new Size(205, 26);
             mitExit.Text = "Exit";
             mitExit.Click += buttonCloseForm_Click;
             // 
@@ -779,5 +808,7 @@
         private ToolStripMenuItem mitText;
         private ToolStripMenuItem mitShowInfo;
         private ToolStripMenuItem mitMax;
+        private CheckBox chbWatermark;
+        private ToolStripMenuItem mitWatermark;
     }
 }

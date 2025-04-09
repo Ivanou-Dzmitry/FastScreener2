@@ -303,6 +303,90 @@ namespace FastScreener2
             }            
         }
 
+        //draw Watermark
+        public static void RenderWatermark(PaintEventArgs e)
+        {
+            // Define padding for some space around the watermark
+            int padding = 10;
+
+            // Resize watermark based on the larger side
+            if (watermarkImage != null)
+            {
+                // Calculate aspect ratio
+                float aspectRatio = (float)watermarkImage.Width / watermarkImage.Height;
+                int newWidth = watermarkSize;
+                int newHeight = watermarkSize;
+
+                if (watermarkImage.Width > watermarkImage.Height)
+                {
+                    // Resize based on width (larger side is width)
+                    newHeight = (int)(watermarkSize / aspectRatio);
+                }
+                else
+                {
+                    // Resize based on height (larger side is height)
+                    newWidth = (int)(watermarkSize * aspectRatio);
+                }
+
+                // Create a new Bitmap to hold the resized image
+                Bitmap resizedWatermark = new Bitmap(newWidth, newHeight);
+
+                // Create Graphics object from the resized bitmap
+                using (Graphics g = Graphics.FromImage(resizedWatermark))
+                {
+                    // Set high-quality interpolation and smoothing modes for better image quality
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                    // Set background transparency (important for semi-transparent images)
+                    g.Clear(Color.Transparent);
+
+                    // Draw the original image onto the resized bitmap
+                    g.DrawImage(watermarkImage, 0, 0, newWidth, newHeight);
+                }
+
+                // Calculate the watermark position based on the watermarkPosition string
+                int xPos = padding;
+                int yPos = padding;
+
+                switch (watermarkPosition.ToLower())
+                {
+                    case "top-left":
+                        xPos = padding;
+                        yPos = padding;
+                        break;
+
+                    case "top-right":
+                        xPos = e.ClipRectangle.Width - resizedWatermark.Width - padding;
+                        yPos = padding;
+                        break;
+
+                    case "bottom-left":
+                        xPos = padding;
+                        yPos = e.ClipRectangle.Height - resizedWatermark.Height - padding;
+                        break;
+
+                    case "bottom-right":
+                        xPos = e.ClipRectangle.Width - resizedWatermark.Width - padding;
+                        yPos = e.ClipRectangle.Height - resizedWatermark.Height - padding;
+                        break;
+
+                    default:
+                        xPos = padding;
+                        yPos = padding;
+                        break;
+                }
+
+                // Draw the resized watermark image
+                e.Graphics.DrawImage(resizedWatermark, new Rectangle(xPos, yPos, resizedWatermark.Width, resizedWatermark.Height));
+
+                // Optionally, dispose the resized image after drawing it to release resources
+                resizedWatermark.Dispose();
+            }
+        }
+
 
         public static void RenderGuides(PaintEventArgs e, Panel panel, Color color)
         {
@@ -611,6 +695,36 @@ namespace FastScreener2
                 form.ClientSize = new Size(workingArea.Width, workingArea.Height);
             }
         }
+
+        public class CustomCheckRenderer : ToolStripProfessionalRenderer
+        {
+            private Image _customCheckImage;
+
+            public CustomCheckRenderer(Image customCheckImage)
+            {
+                _customCheckImage = customCheckImage;
+            }
+
+            protected override void OnRenderItemCheck(ToolStripItemImageRenderEventArgs e)
+            {
+                if (e.Item is ToolStripMenuItem menuItem && menuItem.Checked)
+                {
+                    // Enable high-quality alpha rendering
+                    e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    e.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                    // DO NOT fill the background — this causes the opaque block
+                    // e.Graphics.FillRectangle(new SolidBrush(e.Item.BackColor), e.ImageRectangle); ← Remove this!
+
+                    // Draw your transparent PNG
+                    e.Graphics.DrawImage(_customCheckImage, e.ImageRectangle);
+                }
+            }
+        }
+
+
 
     }
 }

@@ -244,6 +244,47 @@ namespace FastScreener2
         }
     }
 
+
+    public class WatermarkPositionConverter : StringConverter
+    {
+        private readonly List<string> validValues = new List<string> { "top-left", "top-right", "bottom-left", "bottom-right" };
+
+        // GetStandardValues will provide the list of allowed values
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            return new StandardValuesCollection(validValues);
+        }
+
+        // Check if StandardValues are supported
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        {
+            return true;
+        }
+
+        // ConvertFrom will ensure that only valid values are accepted
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            if (value is string str)
+            {
+                if (validValues.Contains(str))
+                {
+                    return str;  // Return the valid string
+                }
+                else
+                {
+                    // Show a message box with an error message
+                    MessageBox.Show("Invalid value. Please select from the predefined list.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    // Optionally, return a default value if invalid input is entered
+                    return "top-right";  // Set a default valid value
+                }
+            }
+
+            return base.ConvertFrom(context, culture, value);  // Delegate to the base method for other types
+        }
+    }
+
+
     //GUIDE
     public class Guide : INotifyPropertyChanged
         {
@@ -816,6 +857,82 @@ namespace FastScreener2
                 OnPropertyChanged(nameof(res4Height));
             }
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+
+    class Watermark
+    {
+        private int size;
+        private int padding;
+        private string position;
+
+        [Category("Watermark Settings")]
+        [Description("Set the watermark size (50–200 px). For rectangular images, the larger side is used. Default: 50. ")]
+        [DisplayName("Watermark Size")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int Size
+        {
+            get => size;
+            set
+            {
+                if (value < 50 || value > 200)
+                {
+                    // Show the error message on top of the form
+                    MessageBox.Show("Enter a watermark size between 50–200px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    size = 50;
+                    return; // Don't set the value if it's invalid
+                }
+
+                size = value;
+                OnPropertyChanged(nameof(Size));
+            }
+        }
+
+
+        [Category("Watermark Settings")]
+        [Description("Set the distance from the watermark to the edge of the screenshot (10–100 px). Default: 10.")]
+        [DisplayName("Watermark Padding")]
+        [TypeConverter(typeof(Int32OnlyConverter))]
+        public int Padding
+        {
+            get => padding;
+            set
+            {
+                if (value < 10 || value > 100)
+                {
+                    // Show the error message on top of the form
+                    MessageBox.Show("Enter a padding size between 10–100px", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    padding = 10;
+                    return; // Don't set the value if it's invalid
+                }
+
+                padding = value;
+                OnPropertyChanged(nameof(Padding));
+            }
+        }
+
+
+        [Category("Watermark Settings")]
+        [DisplayName("Watermark Position")]
+        [Description("Choose watermark position")]
+        [TypeConverter(typeof(WatermarkPositionConverter))]
+        public string Position
+        {
+            get => position;
+            set
+            {
+                position = value;
+                OnPropertyChanged(nameof(Position));
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -239,5 +239,15 @@ namespace FastScreener2 {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] watermark_icon {
+            get {
+                object obj = ResourceManager.GetObject("watermark_icon", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

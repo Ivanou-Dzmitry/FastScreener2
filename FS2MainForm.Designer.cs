@@ -38,8 +38,6 @@
             txtbName = new TextBox();
             splitter1 = new Splitter();
             btnNextRes = new Button();
-            btnFrameType = new Button();
-            btnArrowType = new Button();
             btnSettings = new Button();
             btnScreen = new Button();
             buttonMainMenu = new Button();
@@ -49,10 +47,23 @@
             panelDragTopL = new Panel();
             panelDragLeft = new Panel();
             chbArrow = new CheckBox();
+            cmenuArrow = new ContextMenuStrip(components);
+            mitArrowType01 = new ToolStripMenuItem();
+            mitArrowType02 = new ToolStripMenuItem();
+            mitArrowType03 = new ToolStripMenuItem();
+            mitArrowType04 = new ToolStripMenuItem();
             chbFrame = new CheckBox();
+            cmenuFrame = new ContextMenuStrip(components);
+            mitFreeFrame = new ToolStripMenuItem();
+            mitFixedFrame = new ToolStripMenuItem();
             chbNumbers = new CheckBox();
             chbText = new CheckBox();
             chbWatermark = new CheckBox();
+            cmenuWatermark = new ContextMenuStrip(components);
+            mitTR = new ToolStripMenuItem();
+            mitTL = new ToolStripMenuItem();
+            mitBR = new ToolStripMenuItem();
+            mitBL = new ToolStripMenuItem();
             chbSave = new CheckBox();
             chbGuides = new CheckBox();
             panelRight = new Panel();
@@ -89,6 +100,9 @@
             panelBottom.SuspendLayout();
             panelDragTop.SuspendLayout();
             panelDragLeft.SuspendLayout();
+            cmenuArrow.SuspendLayout();
+            cmenuFrame.SuspendLayout();
+            cmenuWatermark.SuspendLayout();
             panelRight.SuspendLayout();
             panelScreenArea.SuspendLayout();
             contextMenuMain.SuspendLayout();
@@ -145,8 +159,6 @@
             panelDragTop.Controls.Add(txtbName);
             panelDragTop.Controls.Add(splitter1);
             panelDragTop.Controls.Add(btnNextRes);
-            panelDragTop.Controls.Add(btnFrameType);
-            panelDragTop.Controls.Add(btnArrowType);
             panelDragTop.Controls.Add(btnSettings);
             panelDragTop.Controls.Add(btnScreen);
             panelDragTop.Controls.Add(buttonMainMenu);
@@ -165,11 +177,11 @@
             txtbName.BackColor = Color.AliceBlue;
             txtbName.BorderStyle = BorderStyle.FixedSingle;
             txtbName.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            txtbName.Location = new Point(189, 5);
-            txtbName.MaxLength = 35;
+            txtbName.Location = new Point(128, 5);
+            txtbName.MaxLength = 42;
             txtbName.Name = "txtbName";
-            txtbName.PlaceholderText = "File name (35 symbols, optional)";
-            txtbName.Size = new Size(285, 25);
+            txtbName.PlaceholderText = "File name (42 symbols, optional)";
+            txtbName.Size = new Size(347, 25);
             txtbName.TabIndex = 6;
             toolTipFS.SetToolTip(txtbName, "File name");
             txtbName.WordWrap = false;
@@ -177,7 +189,7 @@
             // splitter1
             // 
             splitter1.BackColor = Color.SlateGray;
-            splitter1.Location = new Point(186, 0);
+            splitter1.Location = new Point(124, 0);
             splitter1.Name = "splitter1";
             splitter1.Size = new Size(4, 35);
             splitter1.TabIndex = 4;
@@ -190,43 +202,13 @@
             btnNextRes.FlatAppearance.BorderSize = 0;
             btnNextRes.FlatStyle = FlatStyle.Flat;
             btnNextRes.Image = FS2Resources.res_cycle_icon;
-            btnNextRes.Location = new Point(155, 0);
+            btnNextRes.Location = new Point(93, 0);
             btnNextRes.Name = "btnNextRes";
             btnNextRes.Size = new Size(31, 35);
             btnNextRes.TabIndex = 5;
             toolTipFS.SetToolTip(btnNextRes, "Size cycle (Ctrl+Right arrow)");
             btnNextRes.UseVisualStyleBackColor = false;
             btnNextRes.Click += btnNextRes_Click;
-            // 
-            // btnFrameType
-            // 
-            btnFrameType.BackColor = Color.Gray;
-            btnFrameType.Dock = DockStyle.Left;
-            btnFrameType.FlatAppearance.BorderSize = 0;
-            btnFrameType.FlatStyle = FlatStyle.Flat;
-            btnFrameType.Image = FS2Resources.frame_unlocked_icon;
-            btnFrameType.Location = new Point(124, 0);
-            btnFrameType.Name = "btnFrameType";
-            btnFrameType.Size = new Size(31, 35);
-            btnFrameType.TabIndex = 4;
-            toolTipFS.SetToolTip(btnFrameType, "Frame type: free or fixed  (Ctrl+Down arrow)");
-            btnFrameType.UseVisualStyleBackColor = false;
-            btnFrameType.Click += btnFrame_Click;
-            // 
-            // btnArrowType
-            // 
-            btnArrowType.BackColor = Color.Gray;
-            btnArrowType.Dock = DockStyle.Left;
-            btnArrowType.FlatAppearance.BorderSize = 0;
-            btnArrowType.FlatStyle = FlatStyle.Flat;
-            btnArrowType.Image = FS2Resources.arrow_type01_icon;
-            btnArrowType.Location = new Point(93, 0);
-            btnArrowType.Name = "btnArrowType";
-            btnArrowType.Size = new Size(31, 35);
-            btnArrowType.TabIndex = 3;
-            toolTipFS.SetToolTip(btnArrowType, "Arrow direction (Ctrl+Up arrow)");
-            btnArrowType.UseVisualStyleBackColor = false;
-            btnArrowType.Click += btnArrowType_Click;
             // 
             // btnSettings
             // 
@@ -343,6 +325,7 @@
             // 
             chbArrow.Appearance = Appearance.Button;
             chbArrow.BackColor = Color.Gray;
+            chbArrow.ContextMenuStrip = cmenuArrow;
             chbArrow.Dock = DockStyle.Bottom;
             chbArrow.FlatAppearance.BorderSize = 0;
             chbArrow.FlatStyle = FlatStyle.Flat;
@@ -354,11 +337,64 @@
             toolTipFS.SetToolTip(chbArrow, "Arrow");
             chbArrow.UseVisualStyleBackColor = false;
             chbArrow.Click += chbArrow_Click;
+            chbArrow.MouseUp += chbArrow_MouseUp;
+            // 
+            // cmenuArrow
+            // 
+            cmenuArrow.AutoSize = false;
+            cmenuArrow.Items.AddRange(new ToolStripItem[] { mitArrowType01, mitArrowType02, mitArrowType03, mitArrowType04 });
+            cmenuArrow.Name = "cmenuArrow";
+            cmenuArrow.Size = new Size(33, 132);
+            // 
+            // mitArrowType01
+            // 
+            mitArrowType01.AutoSize = false;
+            mitArrowType01.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitArrowType01.Image = FS2Resources.arrow_type01_icon;
+            mitArrowType01.ImageScaling = ToolStripItemImageScaling.None;
+            mitArrowType01.Name = "mitArrowType01";
+            mitArrowType01.Size = new Size(32, 32);
+            mitArrowType01.Text = "1";
+            mitArrowType01.Click += mitArrowType01_Click;
+            // 
+            // mitArrowType02
+            // 
+            mitArrowType02.AutoSize = false;
+            mitArrowType02.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitArrowType02.Image = FS2Resources.arrow_type02_icon;
+            mitArrowType02.ImageScaling = ToolStripItemImageScaling.None;
+            mitArrowType02.Name = "mitArrowType02";
+            mitArrowType02.Size = new Size(32, 32);
+            mitArrowType02.Text = "2";
+            mitArrowType02.Click += mitArrowType02_Click;
+            // 
+            // mitArrowType03
+            // 
+            mitArrowType03.AutoSize = false;
+            mitArrowType03.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitArrowType03.Image = FS2Resources.arrow_type03_icon;
+            mitArrowType03.ImageScaling = ToolStripItemImageScaling.None;
+            mitArrowType03.Name = "mitArrowType03";
+            mitArrowType03.Size = new Size(32, 32);
+            mitArrowType03.Text = "3";
+            mitArrowType03.Click += mitArrowType03_Click;
+            // 
+            // mitArrowType04
+            // 
+            mitArrowType04.AutoSize = false;
+            mitArrowType04.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitArrowType04.Image = FS2Resources.arrow_type04_icon;
+            mitArrowType04.ImageScaling = ToolStripItemImageScaling.None;
+            mitArrowType04.Name = "mitArrowType04";
+            mitArrowType04.Size = new Size(32, 32);
+            mitArrowType04.Text = "4";
+            mitArrowType04.Click += mitArrowType04_Click;
             // 
             // chbFrame
             // 
             chbFrame.Appearance = Appearance.Button;
             chbFrame.BackColor = Color.Gray;
+            chbFrame.ContextMenuStrip = cmenuFrame;
             chbFrame.Dock = DockStyle.Bottom;
             chbFrame.FlatAppearance.BorderSize = 0;
             chbFrame.FlatStyle = FlatStyle.Flat;
@@ -370,6 +406,34 @@
             toolTipFS.SetToolTip(chbFrame, "Frame");
             chbFrame.UseVisualStyleBackColor = false;
             chbFrame.Click += chbFrame_Click;
+            chbFrame.MouseUp += chbFrame_MouseUp;
+            // 
+            // cmenuFrame
+            // 
+            cmenuFrame.AutoSize = false;
+            cmenuFrame.Items.AddRange(new ToolStripItem[] { mitFreeFrame, mitFixedFrame });
+            cmenuFrame.Name = "cmenuFrame";
+            cmenuFrame.Size = new Size(100, 70);
+            // 
+            // mitFreeFrame
+            // 
+            mitFreeFrame.AutoSize = false;
+            mitFreeFrame.Image = FS2Resources.frame_unlocked_icon;
+            mitFreeFrame.ImageScaling = ToolStripItemImageScaling.None;
+            mitFreeFrame.Name = "mitFreeFrame";
+            mitFreeFrame.Size = new Size(100, 32);
+            mitFreeFrame.Text = "Free";
+            mitFreeFrame.Click += mitFreeFrame_Click;
+            // 
+            // mitFixedFrame
+            // 
+            mitFixedFrame.AutoSize = false;
+            mitFixedFrame.Image = FS2Resources.frame_locked_icon;
+            mitFixedFrame.ImageScaling = ToolStripItemImageScaling.None;
+            mitFixedFrame.Name = "mitFixedFrame";
+            mitFixedFrame.Size = new Size(100, 32);
+            mitFixedFrame.Text = "Fixed";
+            mitFixedFrame.Click += mitFixedFrame_Click;
             // 
             // chbNumbers
             // 
@@ -407,6 +471,7 @@
             // 
             chbWatermark.Appearance = Appearance.Button;
             chbWatermark.BackColor = Color.Gray;
+            chbWatermark.ContextMenuStrip = cmenuWatermark;
             chbWatermark.Dock = DockStyle.Bottom;
             chbWatermark.FlatAppearance.BorderSize = 0;
             chbWatermark.FlatStyle = FlatStyle.Flat;
@@ -418,6 +483,58 @@
             toolTipFS.SetToolTip(chbWatermark, "Watermark");
             chbWatermark.UseVisualStyleBackColor = false;
             chbWatermark.Click += chbWatermark_Click;
+            chbWatermark.MouseUp += chbWatermark_MouseUp;
+            // 
+            // cmenuWatermark
+            // 
+            cmenuWatermark.AutoSize = false;
+            cmenuWatermark.Items.AddRange(new ToolStripItem[] { mitTR, mitTL, mitBR, mitBL });
+            cmenuWatermark.Name = "cmenuWatermark";
+            cmenuWatermark.Size = new Size(33, 132);
+            // 
+            // mitTR
+            // 
+            mitTR.AutoSize = false;
+            mitTR.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitTR.Image = FS2Resources.top_right_icon;
+            mitTR.ImageScaling = ToolStripItemImageScaling.None;
+            mitTR.Name = "mitTR";
+            mitTR.Size = new Size(32, 32);
+            mitTR.Text = "Top right";
+            mitTR.Click += mitTR_Click;
+            // 
+            // mitTL
+            // 
+            mitTL.AutoSize = false;
+            mitTL.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitTL.Image = FS2Resources.top_left_icon;
+            mitTL.ImageScaling = ToolStripItemImageScaling.None;
+            mitTL.Name = "mitTL";
+            mitTL.Size = new Size(32, 32);
+            mitTL.Text = "Top left";
+            mitTL.Click += mitTL_Click;
+            // 
+            // mitBR
+            // 
+            mitBR.AutoSize = false;
+            mitBR.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitBR.Image = FS2Resources.bottom_right_icon;
+            mitBR.ImageScaling = ToolStripItemImageScaling.None;
+            mitBR.Name = "mitBR";
+            mitBR.Size = new Size(32, 32);
+            mitBR.Text = "Bottom right";
+            mitBR.Click += mitBR_Click;
+            // 
+            // mitBL
+            // 
+            mitBL.AutoSize = false;
+            mitBL.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            mitBL.Image = FS2Resources.bottom_left_icon;
+            mitBL.ImageScaling = ToolStripItemImageScaling.None;
+            mitBL.Name = "mitBL";
+            mitBL.Size = new Size(32, 32);
+            mitBL.Text = "Bottom left";
+            mitBL.Click += mitBL_Click;
             // 
             // chbSave
             // 
@@ -516,7 +633,7 @@
             contextMenuMain.ImageScalingSize = new Size(24, 24);
             contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, mitWatermark, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(218, 573);
+            contextMenuMain.Size = new Size(218, 551);
             // 
             // mitSize01
             // 
@@ -746,6 +863,9 @@
             panelDragTop.ResumeLayout(false);
             panelDragTop.PerformLayout();
             panelDragLeft.ResumeLayout(false);
+            cmenuArrow.ResumeLayout(false);
+            cmenuFrame.ResumeLayout(false);
+            cmenuWatermark.ResumeLayout(false);
             panelRight.ResumeLayout(false);
             panelScreenArea.ResumeLayout(false);
             contextMenuMain.ResumeLayout(false);
@@ -770,7 +890,6 @@
         private Button buttonMainMenu;
         private ToolStripSeparator toolStripMenuItem1;
         private Button btnScreen;
-        private Button btnArrowType;
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem mitHelp;
         private ToolStripMenuItem mitExit;
@@ -790,7 +909,6 @@
         private CheckBox chbArrow;
         private Panel panelDragBottomL;
         private Panel panelDragBottomR;
-        private Button btnFrameType;
         private Button btnNextRes;
         private Panel panelDragTopR;
         private CheckBox chbSave;
@@ -810,5 +928,18 @@
         private ToolStripMenuItem mitMax;
         private CheckBox chbWatermark;
         private ToolStripMenuItem mitWatermark;
+        private ContextMenuStrip cmenuWatermark;
+        private ToolStripMenuItem mitTR;
+        private ToolStripMenuItem mitTL;
+        private ToolStripMenuItem mitBR;
+        private ToolStripMenuItem mitBL;
+        private ContextMenuStrip cmenuFrame;
+        private ToolStripMenuItem mitFreeFrame;
+        private ToolStripMenuItem mitFixedFrame;
+        private ContextMenuStrip cmenuArrow;
+        private ToolStripMenuItem mitArrowType01;
+        private ToolStripMenuItem mitArrowType02;
+        private ToolStripMenuItem mitArrowType03;
+        private ToolStripMenuItem mitArrowType04;
     }
 }

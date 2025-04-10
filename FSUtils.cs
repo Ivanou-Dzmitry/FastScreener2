@@ -307,7 +307,7 @@ namespace FastScreener2
         public static void RenderWatermark(PaintEventArgs e)
         {
             // Define padding for some space around the watermark
-            int padding = 10;
+            //int padding = 10;
 
             // Resize watermark based on the larger side
             if (watermarkImage != null)
@@ -348,34 +348,34 @@ namespace FastScreener2
                 }
 
                 // Calculate the watermark position based on the watermarkPosition string
-                int xPos = padding;
-                int yPos = padding;
+                int xPos = watermarkPadding;
+                int yPos = watermarkPadding;
 
                 switch (watermarkPosition.ToLower())
                 {
                     case "top-left":
-                        xPos = padding;
-                        yPos = padding;
+                        xPos = watermarkPadding;
+                        yPos = watermarkPadding;
                         break;
 
                     case "top-right":
-                        xPos = e.ClipRectangle.Width - resizedWatermark.Width - padding;
-                        yPos = padding;
+                        xPos = e.ClipRectangle.Width - resizedWatermark.Width - watermarkPadding;
+                        yPos = watermarkPadding;
                         break;
 
                     case "bottom-left":
-                        xPos = padding;
-                        yPos = e.ClipRectangle.Height - resizedWatermark.Height - padding;
+                        xPos = watermarkPadding;
+                        yPos = e.ClipRectangle.Height - resizedWatermark.Height - watermarkPadding;
                         break;
 
                     case "bottom-right":
-                        xPos = e.ClipRectangle.Width - resizedWatermark.Width - padding;
-                        yPos = e.ClipRectangle.Height - resizedWatermark.Height - padding;
+                        xPos = e.ClipRectangle.Width - resizedWatermark.Width - watermarkPadding;
+                        yPos = e.ClipRectangle.Height - resizedWatermark.Height - watermarkPadding;
                         break;
 
                     default:
-                        xPos = padding;
-                        yPos = padding;
+                        xPos = watermarkPadding;
+                        yPos = watermarkPadding;
                         break;
                 }
 

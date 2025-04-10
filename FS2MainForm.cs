@@ -3,8 +3,8 @@ using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Windows.Forms;
+
+
 
 
 namespace FastScreener2
@@ -61,6 +61,7 @@ namespace FastScreener2
             Instance = this;  // Store the reference when the form is created
             InitializeComponent();
 
+
             this.AutoScaleMode = AutoScaleMode.Dpi;
 
             //set transparent form
@@ -94,7 +95,7 @@ namespace FastScreener2
             //frame
             mitFrame.Checked = FS2SettingsManager.drawFrame;
             chbFrame.Checked = FS2SettingsManager.drawFrame;
-            FramePicUpdater(FS2SettingsManager.frameType);
+            //FramePicUpdater(FS2SettingsManager.frameType);
 
             //guides
             mitGuidlines.Checked = FS2SettingsManager.drawGuides;
@@ -115,8 +116,8 @@ namespace FastScreener2
             mitWatermark.Checked = FS2SettingsManager.drawWatermark;
             chbWatermark.Checked = FS2SettingsManager.drawWatermark;
 
-            if(watermarkPath != string.Empty && drawWatermark)
-            {            
+            if (watermarkPath != string.Empty && drawWatermark)
+            {
                 try
                 {
                     watermarkImage = Image.FromFile(watermarkPath);
@@ -184,10 +185,25 @@ namespace FastScreener2
             //checkboxes
             SetControlImage(chbSave, "save_icon");
             SetControlImage(chbNumbers, "number_icon");
-            SetControlImage(chbFrame, "frame_icon");
-            SetControlImage(chbArrow, "arrow_icon");
+
+            //frame
+            if (frameType == 1)
+            {
+                SetControlImage(chbFrame, "frame_unlocked_icon");
+                toolTipFS.SetToolTip(chbFrame, "Free frame");
+            }
+            else
+            {
+                SetControlImage(chbFrame, "frame_locked_icon");
+                toolTipFS.SetToolTip(chbFrame, "Fixed frame");
+            }
+
+            ApplyArrowType(arrowType);
+
+            //SetControlImage(chbArrow, "arrow_icon");
             SetControlImage(chbGuides, "guides_icon");
             SetControlImage(chbText, "text_icon");
+            SetControlImage(chbWatermark, "watermark_icon");
 
             //label
             labelDebug.Visible = showInfoLabel;
@@ -338,7 +354,6 @@ namespace FastScreener2
                 frameSize = "Bar bottom: " + pnlBarBottom.Height + ", top: " + pnlBarTop.Height;
             }
 
-
             string saveFile = "";
 
             if (FS2SettingsManager.saveToFile)
@@ -418,9 +433,7 @@ namespace FastScreener2
         {
             string currentTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
             fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.{fileFormat}" : $"{currentTime}_screenshot.{fileFormat}";
-
         }
-
 
         private void CaptureScreen()
         {
@@ -626,22 +639,22 @@ namespace FastScreener2
             }
 
             //arrow
-            if (keyData == (Keys.Control | Keys.Up))
-            {
-                btnArrowType_Click(this, EventArgs.Empty);
-                btnArrowType.BackColor = Color.WhiteSmoke;
-                lastPressedButton = btnArrowType; // Store button reference
-                return true; // Mark as handled
-            }
+            /*            if (keyData == (Keys.Control | Keys.Up))
+                        {
+                            btnArrowType_Click(this, EventArgs.Empty);
+                            btnArrowType.BackColor = Color.WhiteSmoke;
+                            lastPressedButton = btnArrowType; // Store button reference
+                            return true; // Mark as handled
+                        }*/
 
-            //arrow
-            if (keyData == (Keys.Control | Keys.Down))
-            {
-                btnFrame_Click(this, EventArgs.Empty);
-                btnFrameType.BackColor = Color.WhiteSmoke;
-                lastPressedButton = btnFrameType; // Store button reference
-                return true; // Mark as handled
-            }
+            /*            //arrow
+                        if (keyData == (Keys.Control | Keys.Down))
+                        {
+                            //btnFrame_Click(this, EventArgs.Empty);
+                            btnFrameType.BackColor = Color.WhiteSmoke;
+                            lastPressedButton = btnFrameType; // Store button reference
+                            return true; // Mark as handled
+                        }*/
 
 
             if (keyData == (Keys.Control | Keys.Shift | Keys.A))
@@ -789,30 +802,30 @@ namespace FastScreener2
             switch (number)
             {
                 case 1:
-                    btnArrowType.Image = FS2Resources.arrow_type01_icon;
+                    //btnArrowType.Image = FS2Resources.arrow_type01_icon;
                     FS2SettingsManager.arrowType = 1; clickInArrowCount = 1;
-                    SetControlImage(btnArrowType, "arrow_type01_icon");
+                    //SetControlImage(btnArrowType, "arrow_type01_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "1");
                     FS2SettingsManager.Save();
                     break;
                 case 2:
-                    btnArrowType.Image = FS2Resources.arrow_type02_icon;
+                    //btnArrowType.Image = FS2Resources.arrow_type02_icon;
                     FS2SettingsManager.arrowType = 2; clickInArrowCount = 2;
-                    SetControlImage(btnArrowType, "arrow_type02_icon");
+                    //SetControlImage(btnArrowType, "arrow_type02_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "2");
                     FS2SettingsManager.Save();
                     break;
                 case 3:
-                    btnArrowType.Image = FS2Resources.arrow_type03_icon;
+                    //btnArrowType.Image = FS2Resources.arrow_type03_icon;
                     FS2SettingsManager.arrowType = 3; clickInArrowCount = 3;
-                    SetControlImage(btnArrowType, "arrow_type03_icon");
+                    //SetControlImage(btnArrowType, "arrow_type03_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "3");
                     FS2SettingsManager.Save();
                     break;
                 case 4:
-                    btnArrowType.Image = FS2Resources.arrow_type04_icon;
+                    //btnArrowType.Image = FS2Resources.arrow_type04_icon;
                     FS2SettingsManager.arrowType = 4; clickInArrowCount = 4;
-                    SetControlImage(btnArrowType, "arrow_type04_icon");
+                    //SetControlImage(btnArrowType, "arrow_type04_icon");
                     FS2SettingsManager.SetSetting("arrow_type", "4");
                     FS2SettingsManager.Save();
                     break;
@@ -823,40 +836,40 @@ namespace FastScreener2
         }
 
 
-        private void btnFrame_Click(object sender, EventArgs e)
-        {
-            clickInFrameCount++;
-            FramePicUpdater(clickInFrameCount);
-        }
+        /*        private void btnFrame_Click(object sender, EventArgs e)
+                {
+                    clickInFrameCount++;
+                    FramePicUpdater(clickInFrameCount);
+                }
 
-        private void FramePicUpdater(int number)
-        {
-            if (clickInFrameCount > 2)
-            {
-                clickInFrameCount = 1;
-                number = 1;
-            }
+                private void FramePicUpdater(int number)
+                {
+                    if (clickInFrameCount > 2)
+                    {
+                        clickInFrameCount = 1;
+                        number = 1;
+                    }
 
-            switch (number)
-            {
-                case 1:
-                    btnFrameType.Image = FS2Resources.frame_unlocked_icon;
-                    frameType = 1; clickInFrameCount = 1;
-                    SetControlImage(btnFrameType, "frame_unlocked_icon");
-                    SetSetting("frame_type", "1");
-                    Save();
-                    break;
-                case 2:
-                    btnFrameType.Image = FS2Resources.frame_locked_icon;
-                    SetControlImage(btnFrameType, "frame_locked_icon");
-                    frameType = 2; clickInFrameCount = 2;
-                    SetSetting("frame_type", "2");
-                    Save();
-                    break;
-                default:
-                    break;
-            }
-        }
+                    switch (number)
+                    {
+                        case 1:
+                            btnFrameType.Image = FS2Resources.frame_unlocked_icon;
+                            frameType = 1; clickInFrameCount = 1;
+                            SetControlImage(btnFrameType, "frame_unlocked_icon");
+                            SetSetting("frame_type", "1");
+                            Save();
+                            break;
+                        case 2:
+                            btnFrameType.Image = FS2Resources.frame_locked_icon;
+                            SetControlImage(btnFrameType, "frame_locked_icon");
+                            frameType = 2; clickInFrameCount = 2;
+                            SetSetting("frame_type", "2");
+                            Save();
+                            break;
+                        default:
+                            break;
+                    }
+                }*/
 
         private void mitSettings_Click(object sender, EventArgs e)
         {
@@ -970,16 +983,23 @@ namespace FastScreener2
             DrawArrowStatus();
         }
 
-        private void DrawArrowStatus()
-        {
-            ToggleStatus(mitArrow, ref FS2SettingsManager.drawArrows, "Arrows turned ON", "Arrows turned OFF", "draw_arrows", chbArrow, false);
-            if (drawText)
-                DrawTextStatus();
-        }
-
         private void chbArrow_Click(object sender, EventArgs e)
         {
             DrawArrowStatus();
+        }
+
+        private void DrawArrowStatus()
+        {
+            if (drawFrame)
+                DrawFrameStatus();
+
+            if (drawNumber)
+                DrawNumberStatus();
+
+            if (drawText)
+                DrawTextStatus();
+
+            ToggleStatus(mitArrow, ref FS2SettingsManager.drawArrows, "Arrows turned ON", "Arrows turned OFF", "draw_arrows", chbArrow, false);
         }
 
         //FRAME
@@ -990,10 +1010,16 @@ namespace FastScreener2
 
         private void DrawFrameStatus()
         {
-            ToggleStatus(mitFrame, ref FS2SettingsManager.drawFrame, "Frame turned ON", "Frame turned OFF", "draw_frame", chbFrame, false);
+            if (drawArrows)
+                DrawArrowStatus();
+
+            if (drawNumber)
+                DrawNumberStatus();
 
             if (drawText)
                 DrawTextStatus();
+
+            ToggleStatus(mitFrame, ref FS2SettingsManager.drawFrame, "Frame turned ON", "Frame turned OFF", "draw_frame", chbFrame, false);
         }
 
         //GUIDES
@@ -1046,10 +1072,16 @@ namespace FastScreener2
 
         private void DrawNumberStatus()
         {
-            ToggleStatus(mitNumber, ref FS2SettingsManager.drawNumber, "Numbers turned ON", "Numbers turned OFF", "draw_number", chbNumbers, false);
+            if (drawArrows)
+                DrawArrowStatus();
+
+            if (drawFrame)
+                DrawFrameStatus();
 
             if (drawText)
                 DrawTextStatus();
+
+            ToggleStatus(mitNumber, ref FS2SettingsManager.drawNumber, "Numbers turned ON", "Numbers turned OFF", "draw_number", chbNumbers, false);
         }
 
         //SAVE
@@ -1587,6 +1619,108 @@ namespace FastScreener2
                 panelScreenArea.Invalidate(); // Refresh to remove watermark
             }
         }
-    
+        //"top-left", "top-right", "bottom-left", "bottom-right"
+        private void UpdateWatermarkPosition(string position)
+        {
+            watermarkPosition = position;
+            panelScreenArea.Invalidate();
+            FS2SettingsManager.SetSetting("watermark_position", watermarkPosition);
+            FS2SettingsManager.Save();
+        }
+
+        private void mitBL_Click(object sender, EventArgs e)
+        {
+            UpdateWatermarkPosition("bottom-left");
+        }
+
+        private void mitTL_Click(object sender, EventArgs e)
+        {
+            UpdateWatermarkPosition("top-left");
+        }
+
+        private void mitBR_Click(object sender, EventArgs e)
+        {
+            UpdateWatermarkPosition("bottom-right");
+        }
+
+        private void mitTR_Click(object sender, EventArgs e)
+        {
+            UpdateWatermarkPosition("top-right");
+        }
+
+        private void mitFreeFrame_Click(object sender, EventArgs e)
+        {
+            frameType = 1;
+            SetControlImage(chbFrame, "frame_unlocked_icon");
+            SetSetting("frame_type", "1");
+            Save();
+            toolTipFS.SetToolTip(chbFrame, "Free frame");
+        }
+
+        private void mitFixedFrame_Click(object sender, EventArgs e)
+        {
+            frameType = 2;
+            SetControlImage(chbFrame, "frame_locked_icon");
+            SetSetting("frame_type", "2");
+            Save();
+            toolTipFS.SetToolTip(chbFrame, "Fixed frame");
+        }
+
+        private void ApplyArrowType(int type)
+        {
+            string iconName = $"arrow_type0{type}_icon";
+            //btnArrowType.Image = (Image)FS2Resources.ResourceManager.GetObject(iconName);
+            FS2SettingsManager.arrowType = type;
+            SetControlImage(chbArrow, iconName);
+            FS2SettingsManager.SetSetting("arrow_type", type.ToString());
+            FS2SettingsManager.Save();
+        }
+
+        private void mitArrowType01_Click(object sender, EventArgs e)
+        {
+            ApplyArrowType(1);
+        }
+
+        private void mitArrowType02_Click(object sender, EventArgs e)
+        {
+            ApplyArrowType(2);
+        }
+
+        private void mitArrowType03_Click(object sender, EventArgs e)
+        {
+            ApplyArrowType(3);
+        }
+
+        private void mitArrowType04_Click(object sender, EventArgs e)
+        {
+            ApplyArrowType(4);
+        }
+
+        private void chbArrow_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int x = chbArrow.Left + chbArrow.Width + 1;
+                cmenuArrow.Show(chbArrow, new Point(x, 0));
+            }
+        }
+
+        private void chbFrame_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int x = chbFrame.Left + chbFrame.Width + 1;
+                cmenuFrame.Show(chbFrame, new Point(x, 0));
+            }
+        }
+
+        private void chbWatermark_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int x = chbWatermark.Left + chbWatermark.Width + 1;
+                cmenuWatermark.Show(chbWatermark, new Point(x, 0));
+            }
+        }
     }
 }

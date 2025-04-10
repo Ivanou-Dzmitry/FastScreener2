@@ -133,6 +133,12 @@
   <data name="arrow_type04_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\arrow_type04_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="bottom_left_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\bottom_left_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bottom_right_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\bottom_right_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Checkmark" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Checkmark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -180,6 +186,12 @@
   </data>
   <data name="text_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\text_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_left_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\top_left_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_right_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\top_right_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="watermark_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\watermark_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

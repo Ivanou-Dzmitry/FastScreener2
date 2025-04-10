@@ -9,6 +9,9 @@ Available graphic elements:
 - Frame
 - Number
 - One short line of text (45 characters)
+- One watermark
+
+Use context menu with options for Arrow, Frame, and Watermark.
 
 A text string cannot be added at the same time (by mouse click) as other elements. Add the line first and then the other elements, or vice versa.
 

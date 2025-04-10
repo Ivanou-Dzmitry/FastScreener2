@@ -172,4 +172,7 @@
   <data name="text_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\text_icon.svg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="watermark_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\watermark_icon.svg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

@@ -57,6 +57,9 @@ namespace FastScreener2
                 case 7:
                     ResSettings();
                     break;
+                case 8:
+                    WatermarkSettings();
+                    break;
                 default:
                     break;
             }
@@ -235,6 +238,22 @@ namespace FastScreener2
             pgSettings.SelectedObject = barsSettings;
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
+
+        private Watermark watermarkSettings;
+
+        private void WatermarkSettings()
+        {
+            watermarkSettings = new Watermark
+            {
+                Position = FS2SettingsManager.watermarkPosition,
+                Size = FS2SettingsManager.watermarkSize,
+                Padding = FS2SettingsManager.watermarkPadding                
+            };
+
+            pgSettings.SelectedObject = watermarkSettings;
+            pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
+        }
+
 
         // --- Save Changes Automatically ---
         private void PgSettings_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -473,6 +492,25 @@ namespace FastScreener2
             {
                 FS2SettingsManager.resWorked[1, 3] = resSettings.res4Height;
                 UpdateResolutionSetting("res4", "Height", resSettings.res4Height);
+            }
+
+            //WATERMARK
+            if (e.ChangedItem.Label == "Watermark Size")
+            {
+                FS2SettingsManager.watermarkSize = watermarkSettings.Size;
+                FS2SettingsManager.SetSetting("watermark_size", watermarkSettings.Size.ToString());
+            }
+            
+            if (e.ChangedItem.Label == "Watermark Padding")
+            {
+                FS2SettingsManager.watermarkPadding = watermarkSettings.Padding;
+                FS2SettingsManager.SetSetting("watermark_padding", watermarkSettings.Padding.ToString());
+            }
+            
+            if (e.ChangedItem.Label == "Watermark Position")
+            {
+                FS2SettingsManager.watermarkPosition = watermarkSettings.Position;
+                FS2SettingsManager.SetSetting("watermark_position", watermarkSettings.Position.ToString());
             }
 
             FS2SettingsManager.Save();

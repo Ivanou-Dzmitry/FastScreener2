@@ -213,6 +213,8 @@ namespace FastScreener2
 
             Image checkmarkImage = FS2Resources.Checkmark;
             contextMenuMain.Renderer = new CustomCheckRenderer(checkmarkImage);
+
+            CenterLabelInPanel();
         }
 
         private void SetControlImage(Control control, string resourceName)
@@ -226,7 +228,7 @@ namespace FastScreener2
                 _ => 16 // Default to 16px if scalingFactor is unexpected
             };
 
-            Debug.WriteLine($"Icon size: {iconSize}"); // Debugging line to check size
+            //Debug.WriteLine($"Icon size: {iconSize}"); // Debugging line to check size
 
             byte[] svgData = (byte[])SVGres.ResourceManager.GetObject(resourceName);
 
@@ -345,7 +347,7 @@ namespace FastScreener2
             }
 
             string name = "FastScreener 2.0";
-            string scale = "Scaling: " + scalingFactor;
+            string scale = "Scale: " + scalingFactor;
 
             string frameSize = "";
 
@@ -379,6 +381,7 @@ namespace FastScreener2
             {
                 labelDebug.Text = "Captured to " + saveFile + " | " + screenArea + " | " + scale;
             }
+
 
             if (type == "frame")
             {
@@ -628,7 +631,6 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
-
             //cycle
             if (keyData == (Keys.Control | Keys.Right))
             {
@@ -637,25 +639,6 @@ namespace FastScreener2
                 lastPressedButton = btnNextRes; // Store button reference
                 return true; // Mark as handled
             }
-
-            //arrow
-            /*            if (keyData == (Keys.Control | Keys.Up))
-                        {
-                            btnArrowType_Click(this, EventArgs.Empty);
-                            btnArrowType.BackColor = Color.WhiteSmoke;
-                            lastPressedButton = btnArrowType; // Store button reference
-                            return true; // Mark as handled
-                        }*/
-
-            /*            //arrow
-                        if (keyData == (Keys.Control | Keys.Down))
-                        {
-                            //btnFrame_Click(this, EventArgs.Empty);
-                            btnFrameType.BackColor = Color.WhiteSmoke;
-                            lastPressedButton = btnFrameType; // Store button reference
-                            return true; // Mark as handled
-                        }*/
-
 
             if (keyData == (Keys.Control | Keys.Shift | Keys.A))
             {
@@ -835,42 +818,6 @@ namespace FastScreener2
             }
         }
 
-
-        /*        private void btnFrame_Click(object sender, EventArgs e)
-                {
-                    clickInFrameCount++;
-                    FramePicUpdater(clickInFrameCount);
-                }
-
-                private void FramePicUpdater(int number)
-                {
-                    if (clickInFrameCount > 2)
-                    {
-                        clickInFrameCount = 1;
-                        number = 1;
-                    }
-
-                    switch (number)
-                    {
-                        case 1:
-                            btnFrameType.Image = FS2Resources.frame_unlocked_icon;
-                            frameType = 1; clickInFrameCount = 1;
-                            SetControlImage(btnFrameType, "frame_unlocked_icon");
-                            SetSetting("frame_type", "1");
-                            Save();
-                            break;
-                        case 2:
-                            btnFrameType.Image = FS2Resources.frame_locked_icon;
-                            SetControlImage(btnFrameType, "frame_locked_icon");
-                            frameType = 2; clickInFrameCount = 2;
-                            SetSetting("frame_type", "2");
-                            Save();
-                            break;
-                        default:
-                            break;
-                    }
-                }*/
-
         private void mitSettings_Click(object sender, EventArgs e)
         {
             // Store the original resolution values before showing the form
@@ -1040,7 +987,7 @@ namespace FastScreener2
 
             ToggleStatus(mitGuidlines, ref FS2SettingsManager.drawGuides, "Guides turned ON", "Guides turned OFF", "draw_guidlines", chbGuides, false);
 
-            Debug.WriteLine("DG" + drawGuides);
+            //Debug.WriteLine("DG" + drawGuides);
 
             if (drawGuides == false)
             {
@@ -1445,6 +1392,8 @@ namespace FastScreener2
             }
 
             AdjustClientSize(res, res);
+
+            CenterLabelInPanel();
         }
 
         private void FS2MainForm_Move(object sender, EventArgs e)
@@ -1489,6 +1438,8 @@ namespace FastScreener2
             {
                 this.Top = screenBounds.Bottom - panelScreenArea.Height - frameSize; // Snap to BOTTOM edge
             }
+
+            CenterLabelInPanel();
         }
 
 
@@ -1722,5 +1673,16 @@ namespace FastScreener2
                 cmenuWatermark.Show(chbWatermark, new Point(x, 0));
             }
         }
+
+        private void CenterLabelInPanel()
+        {
+            // Calculate the center position of the panel
+            int centerX = (panelBottom.Width - labelDebug.Width) / 2;
+            int centerY = (panelBottom.Height - labelDebug.Height) / 2;
+
+            // Set the label's location to the calculated center position
+            labelDebug.Location = new Point(centerX, centerY);
+        }
+
     }
 }

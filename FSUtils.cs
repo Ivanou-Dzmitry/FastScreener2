@@ -1,10 +1,8 @@
 ﻿using System.Drawing.Drawing2D;
-using System.Drawing;
 using static FastScreener2.FS2SettingsManager;
-using System.Diagnostics;
 using System.Numerics;
 using System.Drawing.Imaging;
-using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace FastScreener2
 {
@@ -723,8 +721,6 @@ namespace FastScreener2
                 }
             }
         }
-
-
 
     }
 }

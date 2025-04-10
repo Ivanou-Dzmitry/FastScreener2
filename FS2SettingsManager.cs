@@ -355,11 +355,6 @@ namespace FastScreener2
             }
 
             //watermark
-            /*            { "draw_watermark", "false" },
-                        { "watermark_position", "false" },
-                        { "watermark_path", "" },
-                        { "watermark_size", "64" }*/
-
             try
             {
                 drawWatermark = Convert.ToBoolean(settings["draw_watermark"]);
@@ -411,6 +406,7 @@ namespace FastScreener2
                 EnsureSettingExists("watermark_padding", "10");
             }
 
+            EnsureSingleTrueParam();
 
             SetCurResBasedOnResOnClose();
         }
@@ -547,6 +543,29 @@ namespace FastScreener2
 
             // If no match found, set currentRes to 0 (default resolution)
             currentRes = 0;
+        }
+
+        private static void EnsureSingleTrueParam()
+        {
+            // Get the current state of the 4 booleans (assuming these are properties or variables)
+            bool[] paramValues = new bool[] { drawArrows, drawNumber, drawText, drawFrame };
+
+            // Count how many of the params are true
+            int trueCount = paramValues.Count(p => p);
+
+            // If more than 1 is true, reset all to false
+            if (trueCount > 1)
+            {
+                drawArrows = false;
+                drawNumber = false;
+                drawText = false;
+                drawFrame = false;
+
+                SetSetting("draw_frame", "false");
+                SetSetting("draw_number", "false");
+                SetSetting("draw_arrows", "false");
+                SetSetting("draw_text", "false");
+            }
         }
 
 

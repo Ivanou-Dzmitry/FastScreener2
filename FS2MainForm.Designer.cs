@@ -31,7 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FS2MainForm));
             panelBottom = new Panel();
-            labelDebug = new BlurOutlineLabel();
+            labelDebug = new Label();
             panelDragBottomR = new Panel();
             panelDragBottomL = new Panel();
             panelDragTop = new Panel();
@@ -123,17 +123,16 @@
             // 
             // labelDebug
             // 
-            labelDebug.BlurAmount = 2;
-            labelDebug.Dock = DockStyle.Fill;
+            labelDebug.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            labelDebug.AutoSize = true;
+            labelDebug.BackColor = Color.Gray;
             labelDebug.Font = new Font("Inter", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            labelDebug.ForeColor = Color.WhiteSmoke;
-            labelDebug.Location = new Point(57, 0);
+            labelDebug.Location = new Point(303, 9);
             labelDebug.Name = "labelDebug";
-            labelDebug.OutlineColor = Color.Black;
-            labelDebug.OutlineWidth = 2F;
-            labelDebug.Size = new Size(505, 35);
-            labelDebug.TabIndex = 2;
-            labelDebug.Text = "labelDebug with info";
+            labelDebug.Size = new Size(36, 16);
+            labelDebug.TabIndex = 3;
+            labelDebug.Text = "label1";
+            labelDebug.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // panelDragBottomR
             // 
@@ -860,6 +859,7 @@
             Shown += FS2MainForm_Shown;
             Move += FS2MainForm_Move;
             panelBottom.ResumeLayout(false);
+            panelBottom.PerformLayout();
             panelDragTop.ResumeLayout(false);
             panelDragTop.PerformLayout();
             panelDragLeft.ResumeLayout(false);
@@ -918,7 +918,6 @@
         private Panel pnlBarBottom;
         private ToolTip toolTipFS;
         private TextBox txtbName;
-        private BlurOutlineLabel labelDebug;
         private ToolStripMenuItem mitClear;
         private Splitter splitter1;
         private ToolStripMenuItem mitFulscreen;
@@ -941,5 +940,6 @@
         private ToolStripMenuItem mitArrowType02;
         private ToolStripMenuItem mitArrowType03;
         private ToolStripMenuItem mitArrowType04;
+        private Label labelDebug;
     }
 }

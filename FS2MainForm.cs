@@ -55,7 +55,7 @@ namespace FastScreener2
         private PointF textPoint;
 
         public static bool isAppActive;
-
+        private Point previousValidPoint = Point.Empty;
 
         [DllImport("user32.dll")]
         private static extern int GetDpiForWindow(IntPtr hwnd);
@@ -415,6 +415,8 @@ namespace FastScreener2
                 labelDebug.Text = "A screenshot of the current screen has been saved " + saveFile;
 
             }
+
+            CenterLabelInPanel();
         }
 
         public void SwapPanelsIfNeeded()
@@ -1140,11 +1142,11 @@ namespace FastScreener2
                 numbering++;
             }
 
-            if (drawText)
+            if (drawText && panelScreenArea.Bounds.Contains(panelScreenArea.PointToClient(Cursor.Position)))
                 textPoint = usedPanel.PointToClient(Cursor.Position);
 
             //draw TEXT
-            if (drawText && !isTextDialogOpen)
+            if (this.WindowState != FormWindowState.Minimized && drawText && !isTextDialogOpen && this.Bounds.Contains(this.PointToScreen(relativePoint)))
             {
                 isTextDialogOpen = true;
                 isAppActive = false; //for mouse hook
@@ -1204,10 +1206,7 @@ namespace FastScreener2
 
             if (IsAppInForeground())
             {
-
                 isAppActive = true;
-                // Your application is in the foreground
-                // Do something specific to your application being active
             }
             else
             {
@@ -1220,12 +1219,20 @@ namespace FastScreener2
             if (isDrawing)
             {
                 // important point
-                relativePoint = panelScreenArea.PointToClient(Cursor.Position);
+                if (panelScreenArea.Bounds.Contains(panelScreenArea.PointToClient(Cursor.Position)))
+                {
+                    relativePoint = panelScreenArea.PointToClient(Cursor.Position);
+                }
+                else
+                {
+                    relativePoint = Point.Empty;
+                }
+
 
                 int width = 0;
                 int height = 0;
 
-                if (frameType == 1)
+                if (frameType == 1 && relativePoint != Point.Empty)
                 {
                     width = relativePoint.X - startPoint.X;
                     height = relativePoint.Y - startPoint.Y;
@@ -1312,9 +1319,14 @@ namespace FastScreener2
             }
 
             //text
-            if (!string.IsNullOrEmpty(drawnTextString))
+            if (!string.IsNullOrEmpty(drawnTextString) && this.Bounds.Contains(this.PointToScreen(relativePoint)) && relativePoint != Point.Empty)
             {
+                previousValidPoint = relativePoint; // Save valid point
                 RenderText(e, drawnTextString, textPoint, textFont, textColor);
+            }
+            else
+            {
+                    RenderText(e, drawnTextString, previousValidPoint, textFont, textColor);
             }
 
             //numbers
@@ -1722,6 +1734,12 @@ namespace FastScreener2
         private void FS2MainForm_Resize(object sender, EventArgs e)
         {
             CenterLabelInPanel();
+        }
+
+        private void mitClearText_Click(object sender, EventArgs e)
+        {
+            drawnTextString = string.Empty;
+            panelScreenArea.Invalidate();
         }
     }
 }

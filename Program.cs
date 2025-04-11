@@ -22,7 +22,7 @@ namespace FastScreener2
             {
                 if (!createdNew)
                 {
-                    MessageBox.Show("FastScreener is already running!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Please restart application, or FastScreener is already running!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return; // Exit if another instance is already running
                 }
 

@@ -97,6 +97,8 @@
             mitHelp = new ToolStripMenuItem();
             mitExit = new ToolStripMenuItem();
             toolTipFS = new ToolTip(components);
+            cmenuText = new ContextMenuStrip(components);
+            mitClearText = new ToolStripMenuItem();
             panelBottom.SuspendLayout();
             panelDragTop.SuspendLayout();
             panelDragLeft.SuspendLayout();
@@ -106,6 +108,7 @@
             panelRight.SuspendLayout();
             panelScreenArea.SuspendLayout();
             contextMenuMain.SuspendLayout();
+            cmenuText.SuspendLayout();
             SuspendLayout();
             // 
             // panelBottom
@@ -123,7 +126,7 @@
             // 
             // labelDebug
             // 
-            labelDebug.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            labelDebug.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             labelDebug.AutoSize = true;
             labelDebug.BackColor = Color.Gray;
             labelDebug.Font = new Font("Inter", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
@@ -454,6 +457,7 @@
             // 
             chbText.Appearance = Appearance.Button;
             chbText.BackColor = Color.Gray;
+            chbText.ContextMenuStrip = cmenuText;
             chbText.Dock = DockStyle.Bottom;
             chbText.FlatAppearance.BorderSize = 0;
             chbText.FlatStyle = FlatStyle.Flat;
@@ -462,7 +466,7 @@
             chbText.Name = "chbText";
             chbText.Size = new Size(31, 35);
             chbText.TabIndex = 13;
-            toolTipFS.SetToolTip(chbText, "Text");
+            toolTipFS.SetToolTip(chbText, "Add text");
             chbText.UseVisualStyleBackColor = false;
             chbText.Click += chbText_Click;
             // 
@@ -839,6 +843,19 @@
             mitExit.Text = "Exit";
             mitExit.Click += buttonCloseForm_Click;
             // 
+            // cmenuText
+            // 
+            cmenuText.Items.AddRange(new ToolStripItem[] { mitClearText });
+            cmenuText.Name = "cmenuText";
+            cmenuText.Size = new Size(181, 48);
+            // 
+            // mitClearText
+            // 
+            mitClearText.Name = "mitClearText";
+            mitClearText.Size = new Size(180, 22);
+            mitClearText.Text = "Clear text";
+            mitClearText.Click += mitClearText_Click;
+            // 
             // FS2MainForm
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -870,6 +887,7 @@
             panelRight.ResumeLayout(false);
             panelScreenArea.ResumeLayout(false);
             contextMenuMain.ResumeLayout(false);
+            cmenuText.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -942,5 +960,7 @@
         private ToolStripMenuItem mitArrowType03;
         private ToolStripMenuItem mitArrowType04;
         private Label labelDebug;
+        private ContextMenuStrip cmenuText;
+        private ToolStripMenuItem mitClearText;
     }
 }

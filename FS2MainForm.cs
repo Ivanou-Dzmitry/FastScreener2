@@ -3,6 +3,7 @@ using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using static FastScreener2.MouseHook;
 
 
 
@@ -53,8 +54,17 @@ namespace FastScreener2
         private bool isTextDialogOpen = false;
         private PointF textPoint;
 
+        public static bool isAppActive;
+
+
         [DllImport("user32.dll")]
         private static extern int GetDpiForWindow(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetActiveWindow();
 
         public FS2MainForm()
         {
@@ -1137,6 +1147,7 @@ namespace FastScreener2
             if (drawText && !isTextDialogOpen)
             {
                 isTextDialogOpen = true;
+                isAppActive = false; //for mouse hook
 
                 //call text diallog
                 string userText = PromptForText(out textColor, out textSize, out textFont);
@@ -1148,6 +1159,7 @@ namespace FastScreener2
                 }
 
                 isTextDialogOpen = false;
+                isAppActive = true; //for mouse hook
             }
 
         }
@@ -1189,6 +1201,20 @@ namespace FastScreener2
 
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
         {
+
+            if (IsAppInForeground())
+            {
+
+                isAppActive = true;
+                // Your application is in the foreground
+                // Do something specific to your application being active
+            }
+            else
+            {
+                // Your application is not in the foreground
+                isAppActive = false;
+            }
+
             isLineDrawing = false;
 
             if (isDrawing)
@@ -1684,5 +1710,18 @@ namespace FastScreener2
             labelDebug.Location = new Point(centerX, centerY);
         }
 
+        public bool IsAppInForeground()
+        {
+            IntPtr foregroundWindow = GetForegroundWindow();
+            IntPtr thisWindowHandle = this.Handle;
+
+            // Check if the foreground window is the current window
+            return foregroundWindow == thisWindowHandle;
+        }
+
+        private void FS2MainForm_Resize(object sender, EventArgs e)
+        {
+            CenterLabelInPanel();
+        }
     }
 }

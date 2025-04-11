@@ -476,9 +476,9 @@ namespace FastScreener2
             { "show_info_label", "false" },
             { "panel_color", "#708090" },
             { "draw_watermark", "false" },
-            { "watermark_position", "false" },
+            { "watermark_position", "top-right" },
             { "watermark_path", "" },
-            { "watermark_size", "64" },
+            { "watermark_size", "50" },
             {"watermark_padding", "10" }
         };
 

@@ -86,7 +86,7 @@ namespace FastScreener2
         /// <summary>
         /// Callback function
         /// </summary>
-        private IntPtr HookFunc(int nCode, IntPtr wParam, IntPtr lParam)
+        /*private IntPtr HookFunc(int nCode, IntPtr wParam, IntPtr lParam)
         {
             // parse system messages
             if (nCode >= 0)
@@ -120,7 +120,54 @@ namespace FastScreener2
                         MiddleButtonUp((MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT)));
             }
             return CallNextHookEx(hookID, nCode, wParam, lParam);
+        }*/
+
+        private IntPtr HookFunc(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0)
+            {
+                var mouseStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
+                MouseMessages message = (MouseMessages)wParam;
+
+                // Check if your app is in the foreground
+                bool isAppActive = FS2MainForm.isAppActive; //Form.ActiveForm != null && Form.ActiveForm.Focused;
+
+                // Only handle and block MMB if your form is focused
+                if (message == MouseMessages.WM_MBUTTONDOWN)
+                {
+                    MiddleButtonDown?.Invoke(mouseStruct);
+
+                    if (isAppActive)
+                        return (IntPtr)1; // Block middle mouse globally only if app is active
+                }
+                if (message == MouseMessages.WM_MBUTTONUP)
+                {
+                    MiddleButtonUp?.Invoke(mouseStruct);
+
+                    if (isAppActive)
+                        return (IntPtr)1;
+                }
+
+                // Other mouse events
+                if (message == MouseMessages.WM_LBUTTONDOWN)
+                    LeftButtonDown?.Invoke(mouseStruct);
+                if (message == MouseMessages.WM_LBUTTONUP)
+                    LeftButtonUp?.Invoke(mouseStruct);
+                if (message == MouseMessages.WM_RBUTTONDOWN)
+                    RightButtonDown?.Invoke(mouseStruct);
+                if (message == MouseMessages.WM_RBUTTONUP)
+                    RightButtonUp?.Invoke(mouseStruct);
+                if (message == MouseMessages.WM_MOUSEMOVE)
+                    MouseMove?.Invoke(mouseStruct);
+                if (message == MouseMessages.WM_MOUSEWHEEL)
+                    MouseWheel?.Invoke(mouseStruct);
+                if (message == MouseMessages.WM_LBUTTONDBLCLK)
+                    DoubleClick?.Invoke(mouseStruct);
+            }
+
+            return CallNextHookEx(hookID, nCode, wParam, lParam);
         }
+
 
         #region WinAPI
         private const int WH_MOUSE_LL = 14;

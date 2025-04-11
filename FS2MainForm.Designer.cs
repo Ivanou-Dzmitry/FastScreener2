@@ -858,6 +858,7 @@
             TopMost = true;
             Shown += FS2MainForm_Shown;
             Move += FS2MainForm_Move;
+            Resize += FS2MainForm_Resize;
             panelBottom.ResumeLayout(false);
             panelBottom.PerformLayout();
             panelDragTop.ResumeLayout(false);

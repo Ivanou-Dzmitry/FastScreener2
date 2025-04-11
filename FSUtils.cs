@@ -568,8 +568,7 @@ namespace FastScreener2
             if (textFontFam != null)
             {
                  Font newFont = new Font(textFontFam, textSize, SystemFonts.DefaultFont.Style);                    
-                //textFontFam = FS2SettingsManager.textFont.FontFamily.Name;
-
+    
                 textFont = newFont;
                 FS2SettingsManager.textFont = newFont;
 
@@ -642,13 +641,11 @@ namespace FastScreener2
                 };
 
 
-
                 infoLabel.Text = "Font size/family: " + textSize + ", " + textFontFam;
                 FS2SettingsManager.SetSetting("text_font", textFontFam);
                 FS2SettingsManager.Save();
 
                 // Invert the ForeColor and set it as the BackColor
-
 
                 inputForm.Controls.Add(inputBox);
                 inputForm.Controls.Add(fontButton);
@@ -663,8 +660,6 @@ namespace FastScreener2
                 {
                     inputBox.Text = FS2MainForm.drawnTextString;
                 }
-
-                inputBox.Focus();
 
                 return inputForm.ShowDialog() == DialogResult.OK ? inputBox.Text : null;
             }

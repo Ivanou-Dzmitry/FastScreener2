@@ -493,7 +493,7 @@ namespace FastScreener2
             drawnArrows.Clear();
             drawnTexts.Clear();
 
-            drawnTextString = string.Empty;
+            //drawnTextString = string.Empty;
 
             ShowInfo("capture");
 
@@ -1074,7 +1074,7 @@ namespace FastScreener2
         {
             if (drawText)
             {
-                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
+                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);                
             }
             else
             {
@@ -1087,7 +1087,7 @@ namespace FastScreener2
                 if (drawNumber)
                     DrawNumberStatus();
 
-                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
+                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);                
             }
         }
 
@@ -1323,9 +1323,9 @@ namespace FastScreener2
 
             //check in win
             bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
-            
-            //text
-            if (!string.IsNullOrEmpty(drawnTextString) && inWin && relativePoint != Point.Empty)
+
+            //text !string.IsNullOrEmpty(drawnTextString)
+            if (drawText && inWin && relativePoint != Point.Empty)
             {
                 previousValidPoint = relativePoint; // Save valid point
                 RenderText(e, drawnTextString, textPoint, textFont, textColor);

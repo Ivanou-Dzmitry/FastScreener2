@@ -1142,11 +1142,14 @@ namespace FastScreener2
                 numbering++;
             }
 
-            if (drawText && panelScreenArea.Bounds.Contains(panelScreenArea.PointToClient(Cursor.Position)))
+            bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
+            if(drawText &&  inWin)
+            {
                 textPoint = usedPanel.PointToClient(Cursor.Position);
+            }
 
             //draw TEXT
-            if (this.WindowState != FormWindowState.Minimized && drawText && !isTextDialogOpen && this.Bounds.Contains(this.PointToScreen(relativePoint)))
+            if (this.WindowState != FormWindowState.Minimized && drawText && !isTextDialogOpen)
             {
                 isTextDialogOpen = true;
                 isAppActive = false; //for mouse hook
@@ -1318,15 +1321,18 @@ namespace FastScreener2
                 DrawFrameCurrent(e);
             }
 
+            //check in win
+            bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
+            
             //text
-            if (!string.IsNullOrEmpty(drawnTextString) && this.Bounds.Contains(this.PointToScreen(relativePoint)) && relativePoint != Point.Empty)
+            if (!string.IsNullOrEmpty(drawnTextString) && inWin && relativePoint != Point.Empty)
             {
                 previousValidPoint = relativePoint; // Save valid point
                 RenderText(e, drawnTextString, textPoint, textFont, textColor);
             }
             else
             {
-                    RenderText(e, drawnTextString, previousValidPoint, textFont, textColor);
+                RenderText(e, drawnTextString, previousValidPoint, textFont, textColor);
             }
 
             //numbers

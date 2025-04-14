@@ -58,6 +58,8 @@
             mitFixedFrame = new ToolStripMenuItem();
             chbNumbers = new CheckBox();
             chbText = new CheckBox();
+            cmenuText = new ContextMenuStrip(components);
+            mitClearText = new ToolStripMenuItem();
             chbWatermark = new CheckBox();
             cmenuWatermark = new ContextMenuStrip(components);
             mitTR = new ToolStripMenuItem();
@@ -97,18 +99,16 @@
             mitHelp = new ToolStripMenuItem();
             mitExit = new ToolStripMenuItem();
             toolTipFS = new ToolTip(components);
-            cmenuText = new ContextMenuStrip(components);
-            mitClearText = new ToolStripMenuItem();
             panelBottom.SuspendLayout();
             panelDragTop.SuspendLayout();
             panelDragLeft.SuspendLayout();
             cmenuArrow.SuspendLayout();
             cmenuFrame.SuspendLayout();
+            cmenuText.SuspendLayout();
             cmenuWatermark.SuspendLayout();
             panelRight.SuspendLayout();
             panelScreenArea.SuspendLayout();
             contextMenuMain.SuspendLayout();
-            cmenuText.SuspendLayout();
             SuspendLayout();
             // 
             // panelBottom
@@ -469,6 +469,19 @@
             toolTipFS.SetToolTip(chbText, "Add text");
             chbText.UseVisualStyleBackColor = false;
             chbText.Click += chbText_Click;
+            // 
+            // cmenuText
+            // 
+            cmenuText.Items.AddRange(new ToolStripItem[] { mitClearText });
+            cmenuText.Name = "cmenuText";
+            cmenuText.Size = new Size(125, 26);
+            // 
+            // mitClearText
+            // 
+            mitClearText.Name = "mitClearText";
+            mitClearText.Size = new Size(124, 22);
+            mitClearText.Text = "Clear text";
+            mitClearText.Click += mitClearText_Click;
             // 
             // chbWatermark
             // 
@@ -843,19 +856,6 @@
             mitExit.Text = "Exit";
             mitExit.Click += buttonCloseForm_Click;
             // 
-            // cmenuText
-            // 
-            cmenuText.Items.AddRange(new ToolStripItem[] { mitClearText });
-            cmenuText.Name = "cmenuText";
-            cmenuText.Size = new Size(181, 48);
-            // 
-            // mitClearText
-            // 
-            mitClearText.Name = "mitClearText";
-            mitClearText.Size = new Size(180, 22);
-            mitClearText.Text = "Clear text";
-            mitClearText.Click += mitClearText_Click;
-            // 
             // FS2MainForm
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -883,11 +883,11 @@
             panelDragLeft.ResumeLayout(false);
             cmenuArrow.ResumeLayout(false);
             cmenuFrame.ResumeLayout(false);
+            cmenuText.ResumeLayout(false);
             cmenuWatermark.ResumeLayout(false);
             panelRight.ResumeLayout(false);
             panelScreenArea.ResumeLayout(false);
             contextMenuMain.ResumeLayout(false);
-            cmenuText.ResumeLayout(false);
             ResumeLayout(false);
         }
 

@@ -83,6 +83,7 @@
             mitTakeScreen = new ToolStripMenuItem();
             mitFulscreen = new ToolStripMenuItem();
             mitClear = new ToolStripMenuItem();
+            mitUndo = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripSeparator();
             mitArrow = new ToolStripMenuItem();
             mitFrame = new ToolStripMenuItem();
@@ -647,9 +648,9 @@
             // contextMenuMain
             // 
             contextMenuMain.ImageScalingSize = new Size(24, 24);
-            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, mitWatermark, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
+            contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, mitUndo, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, mitWatermark, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(218, 551);
+            contextMenuMain.Size = new Size(218, 603);
             // 
             // mitSize01
             // 
@@ -731,6 +732,15 @@
             mitClear.Text = "Clear";
             mitClear.ToolTipText = "Clear screenshot area";
             mitClear.Click += mitClear_Click;
+            // 
+            // mitUndo
+            // 
+            mitUndo.Enabled = false;
+            mitUndo.Name = "mitUndo";
+            mitUndo.ShortcutKeys = Keys.Control | Keys.Z;
+            mitUndo.Size = new Size(217, 30);
+            mitUndo.Text = "Undo";
+            mitUndo.Click += mitUndo_Click;
             // 
             // toolStripMenuItem3
             // 
@@ -962,5 +972,6 @@
         private Label labelDebug;
         private ContextMenuStrip cmenuText;
         private ToolStripMenuItem mitClearText;
+        private ToolStripMenuItem mitUndo;
     }
 }

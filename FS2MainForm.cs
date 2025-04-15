@@ -5,9 +5,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static FastScreener2.MouseHook;
 
-
-
-
 namespace FastScreener2
 {
     public partial class FS2MainForm : Form
@@ -643,6 +640,12 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
+            if (keyData == (Keys.Control | Keys.Z))
+            {
+                UndoAction();
+                return true; // Mark as handled
+            }
+
             //cycle
             if (keyData == (Keys.Control | Keys.Right))
             {
@@ -1074,7 +1077,7 @@ namespace FastScreener2
         {
             if (drawText)
             {
-                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);                
+                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
             }
             else
             {
@@ -1087,7 +1090,7 @@ namespace FastScreener2
                 if (drawNumber)
                     DrawNumberStatus();
 
-                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);                
+                ToggleStatus(mitText, ref FS2SettingsManager.drawText, "Text turned ON", "Text turned OFF", "draw_text", chbText, false);
             }
         }
 
@@ -1143,7 +1146,7 @@ namespace FastScreener2
             }
 
             bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
-            if(drawText &&  inWin)
+            if (drawText && inWin)
             {
                 textPoint = usedPanel.PointToClient(Cursor.Position);
             }
@@ -1202,6 +1205,11 @@ namespace FastScreener2
             panelScreenArea.Invalidate();
 
             this.Activate();
+
+            if (drawnArrows.Count != 0 || drawnRectangles.Count != 0 || drawnTexts.Count != 0 || drawnTextString != string.Empty)
+            {
+                mitUndo.Enabled = true;
+            }
         }
 
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
@@ -1746,6 +1754,53 @@ namespace FastScreener2
         {
             drawnTextString = string.Empty;
             panelScreenArea.Invalidate();
+        }
+
+
+        private void UndoAction()
+        {
+
+            if (drawnArrows.Count > 0)
+            {
+                drawnArrows.RemoveAt(drawnArrows.Count - 1);
+            }
+
+            if (drawnRectangles.Count > 0)
+            {
+                drawnRectangles.RemoveAt(drawnRectangles.Count - 1);
+            }
+
+            if (drawnRectangles.Count == 0)
+            {
+                currentRectangle.Height = 0;
+            }
+
+            if (drawnTexts.Count > 0)
+            {
+                drawnTexts.RemoveAt(drawnTexts.Count - 1);
+                numbering--;
+            }
+
+            if (drawText == true && drawnTextString != string.Empty)
+            {
+                drawnTextString = string.Empty;
+            }
+
+            if (drawnArrows.Count == 0 && drawnRectangles.Count == 0 && drawnTexts.Count == 0 && drawnTextString == string.Empty)
+            {
+                mitUndo.Enabled = false;                
+            }
+            else
+            {
+                mitUndo.Enabled = true;
+            }
+
+            panelScreenArea.Invalidate();
+        }
+
+        private void mitUndo_Click(object sender, EventArgs e)
+        {
+            UndoAction();
         }
     }
 }

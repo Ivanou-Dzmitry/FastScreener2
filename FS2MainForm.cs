@@ -63,6 +63,23 @@ namespace FastScreener2
         [DllImport("user32.dll")]
         public static extern IntPtr GetActiveWindow();
 
+        //undo sys
+        private static Stack<UndoItem> undoStack = new Stack<UndoItem>();
+
+        public enum DrawType
+        {
+            Arrow,
+            Rectangle,
+            Text,
+            String
+        }
+
+        public class UndoItem
+        {
+            public DrawType Type;
+            public object Data;
+        }
+
         public FS2MainForm()
         {
             Instance = this;  // Store the reference when the form is created
@@ -365,6 +382,8 @@ namespace FastScreener2
 
             string saveFile = "";
 
+            string undoActions = undoStack.Count.ToString();
+
             if (FS2SettingsManager.saveToFile)
             {
                 saveFile = "to file (" + fileFormat + ") and clipboard";
@@ -376,7 +395,7 @@ namespace FastScreener2
 
             if (type == "drag")
             {
-                labelDebug.Text = leftTopPos + " | " + screenArea + " | " + scale;
+                labelDebug.Text = leftTopPos + " | " + screenArea + " | Elements: " + undoActions + " | " + scale;
             }
 
             if (type == "start")
@@ -486,11 +505,12 @@ namespace FastScreener2
             // Clear objects to free memory
             panelScreenArea.Invalidate();
             drawnRectangles.Clear();
-            currentRectangle = new Rectangle(startPoint, new Size(0, 0));
+            currentRectangle = new Rectangle(0, 0, 0, 0);
             drawnArrows.Clear();
             drawnTexts.Clear();
 
-            //drawnTextString = string.Empty;
+            undoStack.Clear();
+            UpdateUndoMenu(); // Optional: updates mitUndo.Enabled state
 
             ShowInfo("capture");
 
@@ -1135,6 +1155,9 @@ namespace FastScreener2
             {
                 SetArrow(relativePoint, FS2SettingsManager.arrowColor);
                 RenderArrows(paintRect);
+
+                //undo arrow
+                undoStack.Push(new UndoItem { Type = DrawType.Arrow, Data = drawnArrows[drawnArrows.Count - 1] });
             }
 
             //draw Number
@@ -1143,6 +1166,9 @@ namespace FastScreener2
                 AddNumber(numbering.ToString(), relativePoint);
                 RenderNumbers(paintRect);
                 numbering++;
+
+                //undo number
+                undoStack.Push(new UndoItem { Type = DrawType.Text, Data = drawnTexts[drawnTexts.Count - 1] });
             }
 
             bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
@@ -1163,6 +1189,10 @@ namespace FastScreener2
                 if (!string.IsNullOrWhiteSpace(userText))
                 {
                     drawnTextString = userText;
+
+                    //undo arrow
+                    undoStack.Push(new UndoItem { Type = DrawType.String, Data = drawnTextString });
+
                     usedPanel.Invalidate(); // Force redraw
                 }
 
@@ -1170,6 +1200,8 @@ namespace FastScreener2
                 isAppActive = true; //for mouse hook
             }
 
+            //undo sys
+            UpdateUndoMenu();
         }
 
         // Mouse Middle Button Up (End drawing)
@@ -1200,16 +1232,19 @@ namespace FastScreener2
             if (drawFrame)
             {
                 drawnRectangles.Add(newRectangle);
+
+                //undo
+                undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
             }
 
             panelScreenArea.Invalidate();
 
             this.Activate();
 
-            if (drawnArrows.Count != 0 || drawnRectangles.Count != 0 || drawnTexts.Count != 0 || drawnTextString != string.Empty)
-            {
-                mitUndo.Enabled = true;
-            }
+            //undo sys
+            UpdateUndoMenu();
+
+            ShowInfo("drag");
         }
 
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
@@ -1326,6 +1361,11 @@ namespace FastScreener2
             if (drawFrame || isDrawing || drawnRectangles.Count > 0)
             {
                 RenderFrame(e);
+                
+            }
+
+            if (isDrawing)
+            {
                 DrawFrameCurrent(e);
             }
 
@@ -1757,7 +1797,7 @@ namespace FastScreener2
         }
 
 
-        private void UndoAction()
+/*        private void UndoAction1()
         {
 
             if (drawnArrows.Count > 0)
@@ -1796,11 +1836,56 @@ namespace FastScreener2
             }
 
             panelScreenArea.Invalidate();
+        }*/
+
+        private void UndoAction()
+        {
+            if (undoStack.Count == 0)
+            {
+                return;
+            } 
+
+            UndoItem last = undoStack.Pop();
+
+            switch (last.Type)
+            {
+                case DrawType.Arrow:
+                    drawnArrows.Remove((Line)last.Data);
+                    break;
+
+                case DrawType.Rectangle:
+                    drawnRectangles.Remove((Rectangle)last.Data);                    
+                    if (drawnRectangles.Count == 0)
+                    {
+                        currentRectangle = new Rectangle(0, 0, 0, 0); // Or new Rectangle()
+                    }
+                    break;
+
+                case DrawType.Text:
+                    drawnTexts.Remove((TextItem)last.Data);
+                    numbering--;
+                    break;
+
+                case DrawType.String:
+                    drawnTextString = string.Empty;
+                    break;
+            }
+
+            panelScreenArea.Invalidate();
+
+            UpdateUndoMenu();
+
+            ShowInfo("drag");
         }
 
         private void mitUndo_Click(object sender, EventArgs e)
         {
             UndoAction();
+        }
+
+        private void UpdateUndoMenu()
+        {
+            mitUndo.Enabled = undoStack.Count > 0;
         }
     }
 }

@@ -270,16 +270,18 @@ namespace FastScreener2
         }
 
 
+        //temp frame
         public static void DrawFrameCurrent(PaintEventArgs e)
         {
-            var framePen = new Pen(frameColor, frameStrokeWidth);
+            if (FS2MainForm.currentRectangle.Width <= 0 || FS2MainForm.currentRectangle.Height <= 0)
+                return;
 
-            framePen.DashStyle = DashStyle.Dash;
-
-            if (FS2MainForm.currentRectangle.Width > 0 && FS2MainForm.currentRectangle.Height > 0)
+            using (var framePen = new Pen(frameColor, frameStrokeWidth) { DashStyle = DashStyle.Dash })
+            {
                 e.Graphics.DrawRectangle(framePen, FS2MainForm.currentRectangle);
+            }
 
-            framePen.Dispose();
+            Debug.WriteLine(FS2MainForm.currentRectangle.Width);
         }
 
 

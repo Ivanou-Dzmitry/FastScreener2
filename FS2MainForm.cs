@@ -66,6 +66,8 @@ namespace FastScreener2
         //undo sys
         private static Stack<UndoItem> undoStack = new Stack<UndoItem>();
 
+        private int arT, frT, guT, watP = 0; //for cycles
+
         public enum DrawType
         {
             Arrow,
@@ -213,13 +215,11 @@ namespace FastScreener2
             //frame
             if (frameType == 1)
             {
-                SetControlImage(chbFrame, "frame_unlocked_icon");
-                toolTipFS.SetToolTip(chbFrame, "Free frame");
+                SetFrameType(1, "frame_unlocked_icon", "Free frame");
             }
             else
             {
-                SetControlImage(chbFrame, "frame_locked_icon");
-                toolTipFS.SetToolTip(chbFrame, "Fixed frame");
+                SetFrameType(2, "frame_locked_icon", "Fixed frame");
             }
 
             ApplyArrowType(arrowType);
@@ -666,7 +666,7 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
-            //cycle
+            //size cycle
             if (keyData == (Keys.Control | Keys.Right))
             {
                 btnNextRes_Click(this, EventArgs.Empty);
@@ -674,6 +674,72 @@ namespace FastScreener2
                 lastPressedButton = btnNextRes; // Store button reference
                 return true; // Mark as handled
             }
+
+            arT = arrowType;
+
+            //arrow cycle
+            if (keyData == (Keys.Control | Keys.Up))
+            {
+                arT++;
+                if (arT > 4)
+                    arT = 1;
+                ApplyArrowType(arT);
+                return true; // Mark as handled
+            }
+
+            frT = frameType;
+
+            //frame cycle
+            if (keyData == (Keys.Control | Keys.Down))
+            {
+                frT++;
+                if (frT > 2)
+                    frT = 1;
+
+                if (frT == 1)
+                    SetFrameType(1, "frame_unlocked_icon", "Free frame");
+
+                if (frT == 2)
+                    SetFrameType(2, "frame_locked_icon", "Fixed frame");
+
+                return true; // Mark as handled
+            }
+
+            guT = guidlineType;
+
+            //guidlines cycle
+            if (keyData == (Keys.Control | Keys.Left))
+            {
+                guT++;
+                if (guT > 3)
+                    guT = 1;
+
+                guidlineType = guT;
+
+                SetSetting("guidline_type", guidlineType.ToString());
+
+                if (drawGuides == true)
+                {
+                    this.Refresh();
+                }
+
+                return true; // Mark as handled
+            }
+
+
+            //watermark pos cycle
+            if (keyData == (Keys.Control | Keys.Home))
+            {
+                watP++;
+                if (watP > 4)
+                    watP = 1;
+
+                UpdateWatermarkPosition(watP);
+
+                return true; // Mark as handled
+            }
+
+
 
             if (keyData == (Keys.Control | Keys.Shift | Keys.A))
             {
@@ -1133,7 +1199,7 @@ namespace FastScreener2
                 isDrawing = true;
             }
 
-            //fixed
+            //fixed frame
             if (drawFrame && frameType == 2)
             {
                 //scale fixed frame
@@ -1145,6 +1211,8 @@ namespace FastScreener2
                 isDrawing = true;
 
                 drawnRectangles.Add(currentRectangle);
+
+                undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
             }
 
             isLineDrawing = true;
@@ -1156,7 +1224,7 @@ namespace FastScreener2
                 SetArrow(relativePoint, FS2SettingsManager.arrowColor);
                 RenderArrows(paintRect);
 
-                //undo arrow
+                //add undo arrow
                 undoStack.Push(new UndoItem { Type = DrawType.Arrow, Data = drawnArrows[drawnArrows.Count - 1] });
             }
 
@@ -1167,18 +1235,20 @@ namespace FastScreener2
                 RenderNumbers(paintRect);
                 numbering++;
 
-                //undo number
+                //add undo number
                 undoStack.Push(new UndoItem { Type = DrawType.Text, Data = drawnTexts[drawnTexts.Count - 1] });
             }
 
+            //get point in window
             bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
+
             if (drawText && inWin)
             {
                 textPoint = usedPanel.PointToClient(Cursor.Position);
             }
 
             //draw TEXT
-            if (this.WindowState != FormWindowState.Minimized && drawText && !isTextDialogOpen)
+            if (this.WindowState != FormWindowState.Minimized && drawText && !isTextDialogOpen && inWin)
             {
                 isTextDialogOpen = true;
                 isAppActive = false; //for mouse hook
@@ -1190,15 +1260,20 @@ namespace FastScreener2
                 {
                     drawnTextString = userText;
 
-                    //undo arrow
+                    // Remove any existing text undo entries
+                    RemovePreviousTextFromUndo();
+
+                    // Add new text to undo stack
                     undoStack.Push(new UndoItem { Type = DrawType.String, Data = drawnTextString });
 
                     usedPanel.Invalidate(); // Force redraw
                 }
 
                 isTextDialogOpen = false;
-                isAppActive = true; //for mouse hook
+                isAppActive = true; //for mouse hook                
             }
+
+            ShowInfo("drag");
 
             //undo sys
             UpdateUndoMenu();
@@ -1229,12 +1304,13 @@ namespace FastScreener2
                 );
 
 
-            if (drawFrame)
+            //for free rect
+            if (drawFrame && frameType == 1)
             {
                 drawnRectangles.Add(newRectangle);
 
                 //undo
-                undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
+                undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = newRectangle });
             }
 
             panelScreenArea.Invalidate();
@@ -1247,6 +1323,7 @@ namespace FastScreener2
             ShowInfo("drag");
         }
 
+        //!Important
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
         {
 
@@ -1273,7 +1350,6 @@ namespace FastScreener2
                 {
                     relativePoint = Point.Empty;
                 }
-
 
                 int width = 0;
                 int height = 0;
@@ -1361,7 +1437,7 @@ namespace FastScreener2
             if (drawFrame || isDrawing || drawnRectangles.Count > 0)
             {
                 RenderFrame(e);
-                
+
             }
 
             if (isDrawing)
@@ -1490,6 +1566,12 @@ namespace FastScreener2
 
         private void FS2MainForm_Move(object sender, EventArgs e)
         {
+            CornerSnapper();
+            CenterLabelInPanel();
+        }
+
+        private void CornerSnapper()
+        {
             // Get the actual screen based on the panel's left edge
             Screen currentScreen = GetScreenByPanelPosition(this.Left + frameSize);
             Rectangle screenBounds = currentScreen.WorkingArea; // Get usable screen area
@@ -1530,8 +1612,6 @@ namespace FastScreener2
             {
                 this.Top = screenBounds.Bottom - panelScreenArea.Height - frameSize; // Snap to BOTTOM edge
             }
-
-            CenterLabelInPanel();
         }
 
 
@@ -1574,8 +1654,9 @@ namespace FastScreener2
 
         private void mitFulscreen_Click(object sender, EventArgs e)
         {
-            Bitmap captureBitmap = CaptureCurrentMonitorScreenshot(this);
+            Bitmap captureBitmap = CaptureCurrentMonitorScreenshot(this, panelScreenArea);
             Clipboard.SetImage(captureBitmap);
+            
 
             // Save file if needed
             if (saveToFile)
@@ -1605,6 +1686,7 @@ namespace FastScreener2
         private void mitMax_Click(object sender, EventArgs e)
         {
             ScreenHelper.MaximizeFormToCurrentMonitor(this);
+            SwapPanelsIfNeeded();
             // Refresh the form
             this.Refresh();
         }
@@ -1663,9 +1745,18 @@ namespace FastScreener2
             }
         }
         //"top-left", "top-right", "bottom-left", "bottom-right"
-        private void UpdateWatermarkPosition(string position)
+        private void UpdateWatermarkPosition(int position)
         {
-            watermarkPosition = position;
+            string posString = position switch
+            {
+                1 => "bottom-left",
+                2 => "top-left",
+                3 => "bottom-right",
+                4 => "top-right",
+                _ => "bottom-left" // default fallback
+            };
+
+            watermarkPosition = posString;
             panelScreenArea.Invalidate();
             FS2SettingsManager.SetSetting("watermark_position", watermarkPosition);
             FS2SettingsManager.Save();
@@ -1673,40 +1764,41 @@ namespace FastScreener2
 
         private void mitBL_Click(object sender, EventArgs e)
         {
-            UpdateWatermarkPosition("bottom-left");
+            UpdateWatermarkPosition(1); //bottom-left
         }
 
         private void mitTL_Click(object sender, EventArgs e)
         {
-            UpdateWatermarkPosition("top-left");
+            UpdateWatermarkPosition(2); //top-left
         }
 
         private void mitBR_Click(object sender, EventArgs e)
         {
-            UpdateWatermarkPosition("bottom-right");
+            UpdateWatermarkPosition(3); //top-right
         }
 
         private void mitTR_Click(object sender, EventArgs e)
         {
-            UpdateWatermarkPosition("top-right");
+            UpdateWatermarkPosition(4); //bottom-left
+        }
+
+        private void SetFrameType(int type, string iconName, string tooltipText)
+        {
+            frameType = type;
+            SetControlImage(chbFrame, iconName);
+            SetSetting("frame_type", type.ToString());
+            Save();
+            toolTipFS.SetToolTip(chbFrame, tooltipText + ". Change type: Ctrl+Down arrow");
         }
 
         private void mitFreeFrame_Click(object sender, EventArgs e)
         {
-            frameType = 1;
-            SetControlImage(chbFrame, "frame_unlocked_icon");
-            SetSetting("frame_type", "1");
-            Save();
-            toolTipFS.SetToolTip(chbFrame, "Free frame");
+            SetFrameType(1, "frame_unlocked_icon", "Free frame");
         }
 
         private void mitFixedFrame_Click(object sender, EventArgs e)
         {
-            frameType = 2;
-            SetControlImage(chbFrame, "frame_locked_icon");
-            SetSetting("frame_type", "2");
-            Save();
-            toolTipFS.SetToolTip(chbFrame, "Fixed frame");
+            SetFrameType(2, "frame_locked_icon", "Fixed frame");
         }
 
         private void ApplyArrowType(int type)
@@ -1796,54 +1888,12 @@ namespace FastScreener2
             panelScreenArea.Invalidate();
         }
 
-
-/*        private void UndoAction1()
-        {
-
-            if (drawnArrows.Count > 0)
-            {
-                drawnArrows.RemoveAt(drawnArrows.Count - 1);
-            }
-
-            if (drawnRectangles.Count > 0)
-            {
-                drawnRectangles.RemoveAt(drawnRectangles.Count - 1);
-            }
-
-            if (drawnRectangles.Count == 0)
-            {
-                currentRectangle.Height = 0;
-            }
-
-            if (drawnTexts.Count > 0)
-            {
-                drawnTexts.RemoveAt(drawnTexts.Count - 1);
-                numbering--;
-            }
-
-            if (drawText == true && drawnTextString != string.Empty)
-            {
-                drawnTextString = string.Empty;
-            }
-
-            if (drawnArrows.Count == 0 && drawnRectangles.Count == 0 && drawnTexts.Count == 0 && drawnTextString == string.Empty)
-            {
-                mitUndo.Enabled = false;                
-            }
-            else
-            {
-                mitUndo.Enabled = true;
-            }
-
-            panelScreenArea.Invalidate();
-        }*/
-
         private void UndoAction()
         {
             if (undoStack.Count == 0)
             {
                 return;
-            } 
+            }
 
             UndoItem last = undoStack.Pop();
 
@@ -1854,7 +1904,7 @@ namespace FastScreener2
                     break;
 
                 case DrawType.Rectangle:
-                    drawnRectangles.Remove((Rectangle)last.Data);                    
+                    drawnRectangles.Remove((Rectangle)last.Data);
                     if (drawnRectangles.Count == 0)
                     {
                         currentRectangle = new Rectangle(0, 0, 0, 0); // Or new Rectangle()
@@ -1886,6 +1936,31 @@ namespace FastScreener2
         private void UpdateUndoMenu()
         {
             mitUndo.Enabled = undoStack.Count > 0;
+        }
+
+
+        private void RemovePreviousTextFromUndo()
+        {
+            var tempStack = new Stack<UndoItem>();
+
+            // Move all non-text items to a temporary stack
+            while (undoStack.Count > 0)
+            {
+                var top = undoStack.Pop();
+                if (top.Type != DrawType.String)
+                    tempStack.Push(top);
+            }
+
+            // Move the non-text items back to the main undo stack
+            while (tempStack.Count > 0)
+            {
+                undoStack.Push(tempStack.Pop());
+            }
+        }
+
+        private void FS2MainForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            
         }
     }
 }

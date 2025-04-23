@@ -337,7 +337,7 @@
             chbArrow.Name = "chbArrow";
             chbArrow.Size = new Size(31, 35);
             chbArrow.TabIndex = 11;
-            toolTipFS.SetToolTip(chbArrow, "Arrow");
+            toolTipFS.SetToolTip(chbArrow, "Arrow. Change direction: Ctrl+Up arrow");
             chbArrow.UseVisualStyleBackColor = false;
             chbArrow.Click += chbArrow_Click;
             chbArrow.MouseUp += chbArrow_MouseUp;
@@ -406,7 +406,7 @@
             chbFrame.Name = "chbFrame";
             chbFrame.Size = new Size(31, 35);
             chbFrame.TabIndex = 10;
-            toolTipFS.SetToolTip(chbFrame, "Frame");
+            toolTipFS.SetToolTip(chbFrame, "Frame. Type: Ctrl+Down arrow");
             chbFrame.UseVisualStyleBackColor = false;
             chbFrame.Click += chbFrame_Click;
             chbFrame.MouseUp += chbFrame_MouseUp;
@@ -497,7 +497,7 @@
             chbWatermark.Name = "chbWatermark";
             chbWatermark.Size = new Size(31, 35);
             chbWatermark.TabIndex = 14;
-            toolTipFS.SetToolTip(chbWatermark, "Watermark");
+            toolTipFS.SetToolTip(chbWatermark, "Watermark. Change position: Ctrl+Home");
             chbWatermark.UseVisualStyleBackColor = false;
             chbWatermark.Click += chbWatermark_Click;
             chbWatermark.MouseUp += chbWatermark_MouseUp;
@@ -581,7 +581,7 @@
             chbGuides.Name = "chbGuides";
             chbGuides.Size = new Size(31, 35);
             chbGuides.TabIndex = 8;
-            toolTipFS.SetToolTip(chbGuides, "Guides");
+            toolTipFS.SetToolTip(chbGuides, "Guides. Change type: Ctrl+Left arrow");
             chbGuides.UseVisualStyleBackColor = false;
             chbGuides.Click += chbGuides_Click;
             // 
@@ -650,7 +650,7 @@
             contextMenuMain.ImageScalingSize = new Size(24, 24);
             contextMenuMain.Items.AddRange(new ToolStripItem[] { mitSize01, mitSize02, mitSize03, mitSize04, mitMax, toolStripMenuItem1, mitTakeScreen, mitFulscreen, mitClear, mitUndo, toolStripMenuItem3, mitArrow, mitFrame, mitNumber, mitText, mitWatermark, toolStripMenuItem2, mitGuidlines, mitSaveFile, mitOpenFolder, toolStripMenuItem4, mitShowInfo, mitSettings, mitHelp, mitExit });
             contextMenuMain.Name = "contextMenuMain";
-            contextMenuMain.Size = new Size(218, 603);
+            contextMenuMain.Size = new Size(218, 581);
             // 
             // mitSize01
             // 
@@ -884,6 +884,7 @@
             Text = "FastScreener 2";
             TopMost = true;
             Shown += FS2MainForm_Shown;
+            MouseUp += FS2MainForm_MouseUp;
             Move += FS2MainForm_Move;
             Resize += FS2MainForm_Resize;
             panelBottom.ResumeLayout(false);

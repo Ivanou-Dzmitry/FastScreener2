@@ -273,15 +273,30 @@ namespace FastScreener2
         //temp frame
         public static void DrawFrameCurrent(PaintEventArgs e)
         {
-            if (FS2MainForm.currentRectangle.Width <= 0 || FS2MainForm.currentRectangle.Height <= 0)
+            var rect = FS2MainForm.currentRectangle;
+
+            //Debug.WriteLine($"W: {rect.Width}, H: {rect.Height}");
+
+            if (rect.Width == 0 || rect.Height == 0)
                 return;
+
+            // Normalize the rectangle if width or height is negative
+            if (rect.Width < 0)
+            {
+                rect.X += rect.Width;
+                rect.Width = -rect.Width;
+            }
+            if (rect.Height < 0)
+            {
+                rect.Y += rect.Height;
+                rect.Height = -rect.Height;
+            }
 
             using (var framePen = new Pen(frameColor, frameStrokeWidth) { DashStyle = DashStyle.Dash })
             {
-                e.Graphics.DrawRectangle(framePen, FS2MainForm.currentRectangle);
+                e.Graphics.DrawRectangle(framePen, rect);
             }
 
-            Debug.WriteLine(FS2MainForm.currentRectangle.Width);
         }
 
 
@@ -528,22 +543,29 @@ namespace FastScreener2
         }
 
 
-        public static Bitmap CaptureCurrentMonitorScreenshot(Form form)
+        public static Bitmap CaptureCurrentMonitorScreenshot(Form form, Control panelScreenArea)
         {
-            if (form == null) return null;
+            if (form == null || panelScreenArea == null) return null;
 
             // Get the screen that contains the majority of the form
             Screen screen = Screen.FromControl(form);
-
-            // Use WorkingArea to exclude the taskbar
             Rectangle bounds = screen.WorkingArea;
             Bitmap screenshot = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
 
+            // Hide all controls except panelScreenArea
+            List<Control> hiddenControls = new List<Control>();
+            foreach (Control ctrl in form.Controls)
+            {
+                if (ctrl != panelScreenArea && ctrl.Visible)
+                {
+                    ctrl.Visible = false;
+                    hiddenControls.Add(ctrl);
+                }
+            }
+
             try
             {
-                // Hide the form before capturing
-                form.Hide();
-                Thread.Sleep(200); // Optional: slight delay to allow form to hide
+                Thread.Sleep(100); // Optional delay for hiding controls
 
                 using (Graphics g = Graphics.FromImage(screenshot))
                 {
@@ -552,13 +574,18 @@ namespace FastScreener2
             }
             finally
             {
-                // Restore the form
-                form.Show();
-                form.BringToFront(); // Optional: bring it back on top
+                // Restore visibility
+                foreach (Control ctrl in hiddenControls)
+                {
+                    ctrl.Visible = true;
+                }
+
+                form.BringToFront();
             }
 
             return screenshot;
         }
+
 
 
         public static string PromptForText(out Color textColor, out float textSize, out Font textFont)

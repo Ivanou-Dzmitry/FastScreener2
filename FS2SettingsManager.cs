@@ -26,9 +26,9 @@ namespace FastScreener2
 
         public static int[] customGuide = new int[] { 0, 0, 0, 0 };
 
-        public static int guidlineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType, frameStrokeWidth;
+        public static int guidelineType, arrowType, arrowLenght, numberFontSize, frameWidth, frameHeight, frameType, frameStrokeWidth;
 
-        public static int startResW, startResH, fileQuality, watermarkSize, watermarkPadding;
+        public static int startResW, startResH, fileQuality, watermarkSize, watermarkPadding, arrowWidth;
 
         public static float textSize;
 
@@ -83,7 +83,8 @@ namespace FastScreener2
             try
             {
                 arrowColor = ColorTranslator.FromHtml(settings["arrow_color"]); // Retrieve the value
-                arrowLenght = int.Parse(settings["arrow_lenght"]);
+                arrowLenght = int.Parse(settings["arrow_length"]);
+                arrowWidth = int.Parse(settings["arrow_width"]);
                 drawArrows = Convert.ToBoolean(settings["draw_arrows"]);
                 arrowType = int.Parse(settings["arrow_type"]);
             }
@@ -91,21 +92,23 @@ namespace FastScreener2
             {
                 arrowColor = Color.Cyan; // Retrieve the value
                 arrowLenght = 50;
+                arrowWidth = 1;
                 drawArrows = false;
                 arrowType = 1;
 
                 EnsureSettingExists("arrow_color", "#00FFFF");
-                EnsureSettingExists("arrow_lenght", "50");
+                EnsureSettingExists("arrow_length", "50");
+                EnsureSettingExists("arrow_width", "1");
                 EnsureSettingExists("draw_arrows", "false");
                 EnsureSettingExists("arrow_type", "1");
             }
 
-            //load guidlines
+            //load guidelines
             try
             {
-                guideColor = ColorTranslator.FromHtml(settings["guidlines_color"]);
-                drawGuides = Convert.ToBoolean(settings["draw_guidlines"]);
-                guidlineType = int.Parse(settings["guidline_type"]);
+                guideColor = ColorTranslator.FromHtml(settings["guidelines_color"]);
+                drawGuides = Convert.ToBoolean(settings["draw_guidelines"]);
+                guidelineType = int.Parse(settings["guideline_type"]);
                 customGuide[0] = int.Parse(settings["top_indent"]);
                 customGuide[1] = int.Parse(settings["bottom_indent"]);
                 customGuide[2] = int.Parse(settings["left_indent"]);
@@ -116,13 +119,13 @@ namespace FastScreener2
             catch
             {
                 guideColor = Color.DarkGray;
-                EnsureSettingExists("guidlines_color", "DarkGray");
+                EnsureSettingExists("guidelines_color", "DarkGray");
 
                 drawGuides = false;
-                EnsureSettingExists("draw_guidlines", "false");
+                EnsureSettingExists("draw_guidelines", "false");
 
-                guidlineType = 3;
-                EnsureSettingExists("guidline_type", "3");
+                guidelineType = 3;
+                EnsureSettingExists("guideline_type", "3");
 
                 customGuide[0] = 10;
                 customGuide[1] = 10;
@@ -439,14 +442,15 @@ namespace FastScreener2
         {
             settings = new Dictionary<string, string>
         {
-            { "guidlines_color", "#D3D3D3" },
+            { "guidelines_color", "#D3D3D3" },
             { "arrow_color", "#00FFFF" },
-            { "arrow_lenght", "50" },
+            { "arrow_length", "50" },
+            { "arrow_width", "1" },
             { "arrow_type", "1" },
             { "number_color", "#FFA500" },
             { "frame_color", "#FFA500" },
-            { "guidline_type", "3" },
-            { "draw_guidlines", "false" },
+            { "guideline_type", "3" },
+            { "draw_guidelines", "false" },
             { "draw_arrows", "false" },
             { "draw_number", "false" },
             { "number_size", "26" },
@@ -479,14 +483,15 @@ namespace FastScreener2
             { "watermark_position", "top-right" },
             { "watermark_path", "" },
             { "watermark_size", "50" },
-            {"watermark_padding", "10" }
+            {"watermark_padding", "10" },
+            {"last_names", "" }
         };
 
             Save(); // Create the XML file with default values
         }
 
 
-        private static void EnsureSettingExists(string key, string defaultValue)
+        public static void EnsureSettingExists(string key, string defaultValue)
         {
             if (!settings.ContainsKey(key))
             {

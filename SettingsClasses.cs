@@ -77,10 +77,11 @@ namespace FastScreener2
     public class Arrow : INotifyPropertyChanged
         {
             private int length;
+            private int width;
             private Color color;
 
             [Category("Arrow Settings")]
-            [Description("Set arrow length. The maximum length is equal to the hypotenuse of max resolution. Minimum - 8. Default - 50.")]
+            [Description("Set arrow length. The maximum length is equal to the hypotenuse of max resolution. Minimum - 8. Default: 50px.")]
             [DisplayName("Arrow Length")]
             [TypeConverter(typeof(Int32OnlyConverter))]
             public int Length
@@ -106,6 +107,34 @@ namespace FastScreener2
                     OnPropertyChanged(nameof(Length));
                 }
             }
+
+            //width
+            [Category("Arrow Settings")]
+            [Description("Set arrow width. Minimum - 1, max - 5. Default: 1px.")]
+            [DisplayName("Arrow Width")]
+            [TypeConverter(typeof(Int32OnlyConverter))]
+            public int Width
+            {
+                get => width;
+                set
+                {
+
+                    if (value < 1 || value > 5)
+                    {
+                        // Show the error message on top of the form
+                        MessageBox.Show(
+                            $"Length must be between 1 and 5.\n(Current input: {value})",
+                            "Invalid Value",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return; // Don't set the value if it's invalid
+                    }
+                    width = value;
+                    OnPropertyChanged(nameof(Width));
+                }
+            }
+
 
             [Category("Arrow Settings")]
             [Description("Set arrow color.")]

@@ -3,6 +3,7 @@ using static FastScreener2.FS2SettingsManager;
 using System.Numerics;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using static FastScreener2.FSUtils;
 
 namespace FastScreener2
 {
@@ -168,34 +169,59 @@ namespace FastScreener2
             AddArrow(startPoint, endPoint, color);
         }
 
+        private static Color DarkenColor(Color color, float factor = 0.5f)
+        {
+            // Clamp factor between 0 and 1
+            factor = Math.Max(0, Math.Min(1, factor));
+
+            return Color.FromArgb(
+                color.A,
+                (int)(color.R * factor),
+                (int)(color.G * factor),
+                (int)(color.B * factor)
+            );
+        }
+
         public static void RenderArrows(PaintEventArgs e)
         {
             int aSize = ARROW_SIZE;
+            int offset = 1; // simple outline shift            
+
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
             foreach (var line in drawnArrows)
             {
-                using (Pen linePen = new Pen(line.lineColor, line.lineWidth))
+                // Calculate a shadow/dark version of the arrow color
+                Color shadowColor = Color.Black;
+
+                // Draw "shadow" behind the arrow
+                using (Pen shadowPen = new Pen(shadowColor, line.lineWidth))
                 {
-                    linePen.CustomEndCap = new AdjustableArrowCap(aSize, aSize);
+                    shadowPen.CustomEndCap = new AdjustableArrowCap(aSize, aSize);
+                    e.Graphics.DrawLine(
+                        shadowPen,
+                        new Point(line.startPoint.X + offset, line.startPoint.Y + offset),
+                        new Point(line.endPoint.X + offset, line.endPoint.Y + offset)
+                    );
+                }
 
-                    // for outline
-                    var arrowPenOutline = new Pen(Color.Black, 2);
-                    // for outline
-                    arrowPenOutline.CustomEndCap = new AdjustableArrowCap(aSize, aSize + 1);
-                    e.Graphics.DrawLine(arrowPenOutline, line.startPoint, line.endPoint);
-
-                    e.Graphics.DrawLine(linePen, line.startPoint, line.endPoint);
+                // Draw actual arrow
+                using (Pen arrowPen = new Pen(line.lineColor, line.lineWidth))
+                {
+                    arrowPen.CustomEndCap = new AdjustableArrowCap(aSize, aSize);
+                    e.Graphics.DrawLine(arrowPen, line.startPoint, line.endPoint);
                 }
             }
         }
 
         public static void AddArrow(Point startPoint, Point endPoint, Color color)
         {
+            
             Line newLine = new Line(
                 startPoint,
                 endPoint,
                 color,
-                1.0f // Example line width
+                arrowWidth // line width
             );
 
             // Add the line to the list
@@ -414,10 +440,10 @@ namespace FastScreener2
 
                 int initialPointVertical, initialPointHorizontal;
 
-                if (guidlineType == 1 || guidlineType == 2)
+                if (guidelineType == 1 || guidelineType == 2)
                 {
                     // Determine the grid size based on the type
-                    int divisions = (guidlineType == 1) ? 3 : 4;
+                    int divisions = (guidelineType == 1) ? 3 : 4;
                     initialPointVertical = panel.Width / divisions;
                     initialPointHorizontal = panel.Height / divisions;
 
@@ -435,7 +461,7 @@ namespace FastScreener2
                         e.Graphics.DrawLine(guidePen, 0, y, FS2MainForm.Instance.ClientSize.Width, y);
                     }
                 }
-                else if (guidlineType == 3)
+                else if (guidelineType == 3)
                 {
                     // Custom grid dimensions
                     int topIndent = Convert.ToInt32(customGuide[0]);
@@ -542,17 +568,26 @@ namespace FastScreener2
             return new Vector2(reducedWidth, reducedHeight);
         }
 
+        //CaptureCurrentMonitorScreenshot
 
-        public static Bitmap CaptureCurrentMonitorScreenshot(Form form, Control panelScreenArea)
+        public static Bitmap CaptureCurrentMonitorScreenshot(Form form, Panel panelScreenArea)
         {
             if (form == null || panelScreenArea == null) return null;
 
-            // Get the screen that contains the majority of the form
             Screen screen = Screen.FromControl(form);
             Rectangle bounds = screen.WorkingArea;
             Bitmap screenshot = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
 
-            // Hide all controls except panelScreenArea
+            // Save and remove border + background temporarily
+            var originalBorderStyle = panelScreenArea.BorderStyle;
+            var originalBackColor = panelScreenArea.BackColor;
+
+            // Set transparent-like background
+            Color alphaColor = Color.FromArgb(255, 1, 0, 1); // same as your ALPHA_KEY_COLOR
+            panelScreenArea.BorderStyle = BorderStyle.None;
+            panelScreenArea.BackColor = alphaColor;
+
+            // Hide all other controls
             List<Control> hiddenControls = new List<Control>();
             foreach (Control ctrl in form.Controls)
             {
@@ -565,27 +600,43 @@ namespace FastScreener2
 
             try
             {
-                Thread.Sleep(100); // Optional delay for hiding controls
+                Thread.Sleep(100); // Let UI update
 
                 using (Graphics g = Graphics.FromImage(screenshot))
                 {
+                    // Capture screen
                     g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size, CopyPixelOperation.SourceCopy);
+
+                    // Draw the panel contents with transparent background
+                    using (Bitmap panelBitmap = new Bitmap(panelScreenArea.Width, panelScreenArea.Height))
+                    {
+                        panelScreenArea.DrawToBitmap(panelBitmap, new Rectangle(Point.Empty, panelScreenArea.Size));
+
+                        // Apply transparency key to replace alpha color
+                        panelBitmap.MakeTransparent(alphaColor);
+
+                        // Calculate screen-relative panel position
+                        Point panelOnScreen = panelScreenArea.PointToScreen(Point.Empty);
+                        Point offset = new Point(panelOnScreen.X - bounds.X, panelOnScreen.Y - bounds.Y);
+
+                        g.DrawImage(panelBitmap, offset);
+                    }
                 }
             }
             finally
             {
-                // Restore visibility
+                // Restore UI state
+                panelScreenArea.BorderStyle = originalBorderStyle;
+                panelScreenArea.BackColor = originalBackColor;
+
                 foreach (Control ctrl in hiddenControls)
-                {
                     ctrl.Visible = true;
-                }
 
                 form.BringToFront();
             }
 
             return screenshot;
         }
-
 
 
         public static string PromptForText(out Color textColor, out float textSize, out Font textFont)
@@ -744,6 +795,28 @@ namespace FastScreener2
                     e.Graphics.DrawImage(_customCheckImage, e.ImageRectangle);
                 }
             }
+        }
+
+
+        public static void SaveFileNameToHistory(string name)
+        {
+            // Load existing names from settings
+            string saved = FS2SettingsManager.GetSetting("last_names");
+            List<string> names = saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                      .Select(n => n.Trim())
+                                      .ToList();
+
+            // Add new name to the front if not duplicate
+            names.Remove(name);
+            names.Insert(0, name);
+
+            // Keep only the last 10 names
+            if (names.Count > 10)
+                names = names.Take(10).ToList();
+
+            // Save updated list
+            FS2SettingsManager.SetSetting("last_names", string.Join(", ", names));
+            FS2SettingsManager.Save();
         }
 
     }

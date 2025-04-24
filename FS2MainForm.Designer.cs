@@ -804,7 +804,7 @@
             mitGuidlines.Name = "mitGuidlines";
             mitGuidlines.ShortcutKeys = Keys.Control | Keys.Shift | Keys.G;
             mitGuidlines.Size = new Size(205, 26);
-            mitGuidlines.Text = "Guidlines";
+            mitGuidlines.Text = "Guidelines";
             mitGuidlines.Click += mitGuidlines_Click;
             // 
             // mitSaveFile
@@ -884,7 +884,6 @@
             Text = "FastScreener 2";
             TopMost = true;
             Shown += FS2MainForm_Shown;
-            MouseUp += FS2MainForm_MouseUp;
             Move += FS2MainForm_Move;
             Resize += FS2MainForm_Resize;
             panelBottom.ResumeLayout(false);

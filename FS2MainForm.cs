@@ -239,6 +239,8 @@ namespace FastScreener2
             contextMenuMain.Renderer = new CustomCheckRenderer(checkmarkImage);
 
             CenterLabelInPanel();
+
+            LoadFileNameHistory();
         }
 
         private void SetControlImage(Control control, string resourceName)
@@ -466,18 +468,26 @@ namespace FastScreener2
             fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.{fileFormat}" : $"{currentTime}_screenshot.{fileFormat}";
         }
 
+        //!important
         private void CaptureScreen()
         {
             int bitmapWidth = panelScreenArea.Width;
             int bitmapHeight = panelScreenArea.Height;
 
             panelScreenArea.BorderStyle = BorderStyle.None;
-            bool guideIsOn = drawGuides;
 
+            bool guideIsOn = drawGuides;
             if (guideIsOn)
             {
-                RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, ALPHA_KEY_COLOR);
+                DrawGuideStatus();
             }
+
+                
+            /*            bool guideIsOn = drawGuides;
+                        if (guideIsOn)
+                        {
+                            RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, ALPHA_KEY_COLOR);
+                        }*/
 
             SetFileName();
 
@@ -502,6 +512,25 @@ namespace FastScreener2
 
             panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
 
+            AfterScreenRoutine();
+
+            ShowInfo("capture");
+
+            if (guideIsOn)
+            {
+                DrawGuideStatus();
+            }
+
+            LogScreenshot(DateTime.Now.ToString("yyyy-MM-dd"), bitmapWidth, bitmapHeight, fileName);
+
+            if (txtbName.Text != string.Empty)
+            {
+                SaveFileNameToHistory(txtbName.Text);
+            }
+        }
+
+        private void AfterScreenRoutine()
+        {
             // Clear objects to free memory
             panelScreenArea.Invalidate();
             drawnRectangles.Clear();
@@ -512,17 +541,7 @@ namespace FastScreener2
             undoStack.Clear();
             UpdateUndoMenu(); // Optional: updates mitUndo.Enabled state
 
-            ShowInfo("capture");
-
             numbering = 1; // Reset numbering
-
-            if (guideIsOn)
-            {
-                this.Refresh();
-                RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, guideColor);
-            }
-
-            LogScreenshot(DateTime.Now.ToString("yyyy-MM-dd"), bitmapWidth, bitmapHeight, fileName);
         }
 
         private void SaveToFile(Bitmap captureBitmap)
@@ -705,7 +724,7 @@ namespace FastScreener2
                 return true; // Mark as handled
             }
 
-            guT = guidlineType;
+            guT = guidelineType;
 
             //guidlines cycle
             if (keyData == (Keys.Control | Keys.Left))
@@ -714,9 +733,9 @@ namespace FastScreener2
                 if (guT > 3)
                     guT = 1;
 
-                guidlineType = guT;
+                guidelineType = guT;
 
-                SetSetting("guidline_type", guidlineType.ToString());
+                SetSetting("guideline_type", guidelineType.ToString());
 
                 if (drawGuides == true)
                 {
@@ -1086,7 +1105,7 @@ namespace FastScreener2
             //paint rect
             PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
 
-            ToggleStatus(mitGuidlines, ref FS2SettingsManager.drawGuides, "Guides turned ON", "Guides turned OFF", "draw_guidlines", chbGuides, false);
+            ToggleStatus(mitGuidlines, ref FS2SettingsManager.drawGuides, "Guides turned ON", "Guides turned OFF", "draw_guidelines", chbGuides, false);
 
             //Debug.WriteLine("DG" + drawGuides);
 
@@ -1652,11 +1671,27 @@ namespace FastScreener2
             ShowInfo("clear");
         }
 
+        //full screen
         private void mitFulscreen_Click(object sender, EventArgs e)
         {
+
+            bool guideIsOn = drawGuides;
+            if (guideIsOn)
+            {
+                DrawGuideStatus();
+            }
+
+            labelDebug.Visible = false;
+
             Bitmap captureBitmap = CaptureCurrentMonitorScreenshot(this, panelScreenArea);
             Clipboard.SetImage(captureBitmap);
-            
+
+            if (guideIsOn)
+            {
+                DrawGuideStatus();
+            }
+
+            labelDebug.Visible = true;
 
             // Save file if needed
             if (saveToFile)
@@ -1667,6 +1702,7 @@ namespace FastScreener2
                 ShowInfo("fullscreen");
             }
 
+            AfterScreenRoutine();
         }
 
         private void mitShowInfo_Click(object sender, EventArgs e)
@@ -1958,9 +1994,32 @@ namespace FastScreener2
             }
         }
 
-        private void FS2MainForm_MouseUp(object sender, MouseEventArgs e)
+        private void LoadFileNameHistory()
         {
+            string saved = string.Empty;
+
+            try
+            {
+                saved = FS2SettingsManager.GetSetting("last_names");
+            }
+            catch
+            {
+                saved = string.Empty;
+                EnsureSettingExists("last_names", "");
+            }
+
             
+            var names = saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                             .Select(n => n.Trim())
+                             .ToArray();
+
+            var autoSource = new AutoCompleteStringCollection();
+            autoSource.AddRange(names);
+
+            txtbName.AutoCompleteCustomSource = autoSource;
+            txtbName.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            txtbName.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
+
     }
 }

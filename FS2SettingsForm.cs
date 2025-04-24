@@ -96,7 +96,8 @@ namespace FastScreener2
             arrowSettings = new Arrow
             {
                 Color = FS2SettingsManager.arrowColor,
-                Length = FS2SettingsManager.arrowLenght
+                Length = FS2SettingsManager.arrowLenght,
+                Width = FS2SettingsManager.arrowWidth               
             };
 
             pgSettings.SelectedObject = arrowSettings;
@@ -107,7 +108,7 @@ namespace FastScreener2
         private Guide guideSettings;
         private void GuideSettings()
         {
-            int tempTypeInt = FS2SettingsManager.guidlineType;
+            int tempTypeInt = FS2SettingsManager.guidelineType;
             string tempTypeStr = "";
 
             switch (tempTypeInt)
@@ -269,7 +270,13 @@ namespace FastScreener2
             if (e.ChangedItem.Label == "Arrow Length")
             {
                 FS2SettingsManager.arrowLenght = arrowSettings.Length;
-                FS2SettingsManager.SetSetting("arrow_lenght", arrowSettings.Length.ToString());
+                FS2SettingsManager.SetSetting("arrow_length", arrowSettings.Length.ToString());
+            }
+
+            if (e.ChangedItem.Label == "Arrow Width")
+            {
+                FS2SettingsManager.arrowWidth = arrowSettings.Width;
+                FS2SettingsManager.SetSetting("arrow_width", arrowSettings.Width.ToString());
             }
 
             if (e.ChangedItem.Label == "Arrow Color")
@@ -324,7 +331,7 @@ namespace FastScreener2
             if (e.ChangedItem.Label == "Guides Color")
             {
                 FS2SettingsManager.guideColor = guideSettings.Color;
-                FS2SettingsManager.SetSetting("guidlines_color", ColorTranslator.ToHtml(guideSettings.Color));
+                FS2SettingsManager.SetSetting("guidelines_color", ColorTranslator.ToHtml(guideSettings.Color));
             }
 
             if (e.ChangedItem.Label == "Lock Indent")
@@ -353,7 +360,7 @@ namespace FastScreener2
                         break;
                 }
 
-                FS2SettingsManager.guidlineType = tempTypeInt;
+                FS2SettingsManager.guidelineType = tempTypeInt;
                 FS2SettingsManager.SetSetting("guidline_type", tempTypeInt.ToString());
             }
 

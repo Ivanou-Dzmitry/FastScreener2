@@ -169,46 +169,40 @@ namespace FastScreener2
             AddArrow(startPoint, endPoint, color);
         }
 
-        private static Color DarkenColor(Color color, float factor = 0.5f)
-        {
-            // Clamp factor between 0 and 1
-            factor = Math.Max(0, Math.Min(1, factor));
-
-            return Color.FromArgb(
-                color.A,
-                (int)(color.R * factor),
-                (int)(color.G * factor),
-                (int)(color.B * factor)
-            );
-        }
-
         public static void RenderArrows(PaintEventArgs e)
         {
             int aSize = ARROW_SIZE;
-            int offset = 1; // simple outline shift            
-
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            int offset = 2; // simple outline shift
+            float lineExtraWidth = 1f;                //             
+            Color shadowColor = Color.Black;
 
             foreach (var line in drawnArrows)
-            {
-                // Calculate a shadow/dark version of the arrow color
-                Color shadowColor = Color.Black;
+            {            
+                //set extra width
+                if(line.lineWidth == 1 || line.lineWidth > 3)
+                    lineExtraWidth = 1.75f;
+                
+                if (line.lineWidth == 2 || line.lineWidth == 3)                
+                    lineExtraWidth = 1.15f;
+
+                if (line.lineWidth == 3)
+                    lineExtraWidth = 1.5f;
 
                 // Draw "shadow" behind the arrow
-                using (Pen shadowPen = new Pen(shadowColor, line.lineWidth))
+                using (Pen outlinePen = new Pen(shadowColor, line.lineWidth + lineExtraWidth)) // Outline width
                 {
-                    shadowPen.CustomEndCap = new AdjustableArrowCap(aSize, aSize);
-                    e.Graphics.DrawLine(
-                        shadowPen,
-                        new Point(line.startPoint.X + offset, line.startPoint.Y + offset),
-                        new Point(line.endPoint.X + offset, line.endPoint.Y + offset)
-                    );
+                    outlinePen.CustomEndCap = new AdjustableArrowCap(aSize-1, aSize-1);
+                    Point shiftedStart = new Point(line.startPoint.X, line.startPoint.Y + offset);
+                    Point shiftedEnd = new Point(line.endPoint.X, line.endPoint.Y + offset);
+
+                    e.Graphics.DrawLine(outlinePen, shiftedStart, shiftedEnd);
                 }
 
                 // Draw actual arrow
                 using (Pen arrowPen = new Pen(line.lineColor, line.lineWidth))
                 {
                     arrowPen.CustomEndCap = new AdjustableArrowCap(aSize, aSize);
+
                     e.Graphics.DrawLine(arrowPen, line.startPoint, line.endPoint);
                 }
             }
@@ -227,6 +221,70 @@ namespace FastScreener2
             // Add the line to the list
             drawnArrows.Add(newLine);
         }
+
+        //draw temp line
+        public static int DrawCurrentLine(PaintEventArgs e, Point relativePoint, Point currentPoint)
+        {
+            int aSize = ARROW_SIZE;
+            Color tempArrowColor = Color.LightGray;
+
+            if (relativePoint == currentPoint)
+                return 0; // No movement
+
+            int dx = currentPoint.X - relativePoint.X;
+            int dy = currentPoint.Y - relativePoint.Y;
+
+            double angle = Math.Atan2(dy, dx) * (180 / Math.PI);
+            if (angle < 0) angle += 360;
+
+            double[] allowedAngles = { 45, 135, 225, 315 };
+            int[] directions = { 4, 1, 2, 3 };
+
+            // Find closest angle
+            int index = 0;
+            double minDiff = double.MaxValue;
+            for (int i = 0; i < allowedAngles.Length; i++)
+            {
+                double diff = Math.Abs(allowedAngles[i] - angle);
+                if (diff < minDiff)
+                {
+                    minDiff = diff;
+                    index = i;
+                }
+            }
+
+            double snappedAngle = allowedAngles[index];
+            
+            double actualDistance = Math.Sqrt(dx * dx + dy * dy);
+            double limitedDistance = Math.Min(actualDistance, arrowLenght*1.5);
+
+            int currentDirection = 0;
+
+            //avoid bug on fast click
+            if (limitedDistance > 10)
+            {
+                currentDirection = directions[index];
+            }
+            else
+            {
+                currentDirection = 0;
+            }
+               
+            double rad = snappedAngle * Math.PI / 180.0;
+            Point snappedPoint = new Point(
+                relativePoint.X + (int)(Math.Cos(rad) * limitedDistance),
+                relativePoint.Y + (int)(Math.Sin(rad) * limitedDistance)
+            );
+
+            using (var linePen = new Pen(tempArrowColor, arrowWidth) { DashStyle = DashStyle.Dot })
+            {
+                linePen.CustomStartCap = new AdjustableArrowCap(aSize, aSize);
+                e.Graphics.DrawLine(linePen, relativePoint, snappedPoint);
+            }
+
+            return currentDirection;
+        }
+
 
         //TEXT
         public static void RenderText(PaintEventArgs e, string text, PointF relativePoint, Font textFont, Color textColor)
@@ -322,7 +380,6 @@ namespace FastScreener2
             {
                 e.Graphics.DrawRectangle(framePen, rect);
             }
-
         }
 
 

@@ -4,6 +4,9 @@ using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static FastScreener2.MouseHook;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.Drawing;
+using System.Net;
 
 namespace FastScreener2
 {
@@ -30,9 +33,16 @@ namespace FastScreener2
 
         static Point relativePoint; //first click point
         public static Rectangle currentRectangle;
+        Line currentLine = new Line();
         private Point startPoint;
-        private bool isDrawing;
+        private Point currentPoint;
+
+        private bool isFrameDrawing;
         private bool isLineDrawing;
+        private int lineDirection = 0;
+
+        private int dynamicArrowType;
+
         public static int numbering = 1; //for numbers
 
         private Button lastPressedButton; // Store the last pressed button
@@ -372,7 +382,7 @@ namespace FastScreener2
                 screenArea = $"Size W: {panelW} ({panelWS}), H: {panelH} ({panelHS})";
             }
 
-            string name = "FastScreener 2.0";
+            string name = "FastScreener 2.0.3";
             string scale = "Scale: " + scalingFactor;
 
             string frameSize = "";
@@ -1202,24 +1212,34 @@ namespace FastScreener2
         //hook mouse MMB !Important
         private void mouseHook_MMB(MouseHook.MSLLHOOKSTRUCT mouse)
         {
+            //used panel
             Panel usedPanel = panelScreenArea;
+
+            //get point in window
+            bool inWin = usedPanel.ClientRectangle.Contains(usedPanel.PointToClient(Cursor.Position));
+
+            isFrameDrawing = false;
+            isLineDrawing = false;
+
+            Debug.WriteLine(inWin);
 
             //paint rect
             PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
 
             // important point
-            relativePoint = usedPanel.PointToClient(Cursor.Position);
+            if(inWin)
+                relativePoint = usedPanel.PointToClient(Cursor.Position);
 
             //draw free Frame
-            if (FS2SettingsManager.drawFrame && FS2SettingsManager.frameType == 1)
+            if (drawFrame && frameType == 1 && inWin)
             {
                 startPoint = new Point(relativePoint.X, relativePoint.Y);
                 currentRectangle = new Rectangle(startPoint, new Size(0, 0));
-                isDrawing = true;
+                isFrameDrawing = true;
             }
 
             //fixed frame
-            if (drawFrame && frameType == 2)
+            if (drawFrame && frameType == 2 && inWin)
             {
                 //scale fixed frame
                 int width = (int)(frameWidth * scalingFactor);
@@ -1227,19 +1247,24 @@ namespace FastScreener2
 
                 startPoint = new Point(relativePoint.X - width / 2, relativePoint.Y - height / 2);
                 currentRectangle = new Rectangle(startPoint, new Size(width, height));
-                isDrawing = true;
+                isFrameDrawing = true;
 
                 drawnRectangles.Add(currentRectangle);
 
+                //add fixed
                 undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
             }
 
-            isLineDrawing = true;
-
-
+            
             //draw Arrow
-            if (FS2SettingsManager.drawArrows && isLineDrawing)
+            if (FS2SettingsManager.drawArrows && inWin)
             {
+                isLineDrawing = true; //turn on line draw
+
+                startPoint = new Point(relativePoint.X, relativePoint.Y);
+
+                dynamicArrowType = 0;
+
                 SetArrow(relativePoint, FS2SettingsManager.arrowColor);
                 RenderArrows(paintRect);
 
@@ -1248,7 +1273,7 @@ namespace FastScreener2
             }
 
             //draw Number
-            if (FS2SettingsManager.drawNumber)
+            if (FS2SettingsManager.drawNumber && inWin)
             {
                 AddNumber(numbering.ToString(), relativePoint);
                 RenderNumbers(paintRect);
@@ -1258,8 +1283,6 @@ namespace FastScreener2
                 undoStack.Push(new UndoItem { Type = DrawType.Text, Data = drawnTexts[drawnTexts.Count - 1] });
             }
 
-            //get point in window
-            bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
 
             if (drawText && inWin)
             {
@@ -1301,30 +1324,42 @@ namespace FastScreener2
         // Mouse Middle Button Up (End drawing)
         private void mouseHook_MouseUp(MouseHook.MSLLHOOKSTRUCT mouse)
         {
-            isDrawing = false;
+            //get point in window
+            bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
+
+            isFrameDrawing = false;
             isLineDrawing = false;
 
-            int width = 0;
-            int height = 0;
+            int finalWidth = 0;
+            int finalHeight = 0;
 
             // Calculate the final rectangle - Free type
             if (FS2SettingsManager.frameType == 1)
             {
-                width = relativePoint.X - startPoint.X;
-                height = relativePoint.Y - startPoint.Y;
+                finalWidth = relativePoint.X - startPoint.X;
+                finalHeight = relativePoint.Y - startPoint.Y;
             }
 
             // Create and add the rectangle
             Rectangle newRectangle = new Rectangle(
                     Math.Min(startPoint.X, relativePoint.X),
                     Math.Min(startPoint.Y, relativePoint.Y),
-                    Math.Abs(width),
-                    Math.Abs(height)
+                    Math.Abs(finalWidth),
+                    Math.Abs(finalHeight)
                 );
 
+            //set dynamic arrow value
+            if(dynamicArrowType != 0 && FS2SettingsManager.drawArrows)
+            {
+                ApplyArrowType(dynamicArrowType);
+                UndoAction();
+                SetArrow(relativePoint, FS2SettingsManager.arrowColor);
+                //add undo arrow
+                undoStack.Push(new UndoItem { Type = DrawType.Arrow, Data = drawnArrows[drawnArrows.Count - 1] });
+            }
 
             //for free rect
-            if (drawFrame && frameType == 1)
+            if (drawFrame && frameType == 1 && inWin)
             {
                 drawnRectangles.Add(newRectangle);
 
@@ -1356,33 +1391,75 @@ namespace FastScreener2
                 isAppActive = false;
             }
 
-            isLineDrawing = false;
 
-            if (isDrawing)
+            //get point in window
+            bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
+
+            if (isFrameDrawing)
+            {
+                // important point
+                if (inWin)
+                {
+                    relativePoint = panelScreenArea.PointToClient(Cursor.Position);
+
+                    int width = 0;
+                    int height = 0;
+
+                    if (frameType == 1 && relativePoint != Point.Empty)
+                    {
+                        width = relativePoint.X - startPoint.X;
+                        height = relativePoint.Y - startPoint.Y;
+
+                        currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
+                    }
+
+                    panelScreenArea.Invalidate();
+                }
+
+            }
+
+            //isLineDrawing = false;
+
+            //used panel
+            Panel usedPanel = panelScreenArea;            
+
+            if (isLineDrawing)
             {
                 // important point
                 if (panelScreenArea.Bounds.Contains(panelScreenArea.PointToClient(Cursor.Position)))
                 {
-                    relativePoint = panelScreenArea.PointToClient(Cursor.Position);
+                    currentPoint = usedPanel.PointToClient(Cursor.Position);
+                    
+
+                    int deltaX = currentPoint.X - relativePoint.X;
+                    int deltaY = currentPoint.Y - relativePoint.Y;
+
+                    if (deltaX == 0 && deltaY == 0)
+                        return; // no movement
+
+                    panelScreenArea.Invalidate();
+
+                    double angle = Math.Atan2(deltaY, deltaX) * (180.0 / Math.PI); // radians to degrees
+
+                    if (angle < 0)
+                        angle += 360; // normalize to 0-360
+
+                    lineDirection = 0;
+
+                    if (angle >= 0 && angle < 90)
+                        lineDirection = 4; // 45°
+                    else if (angle >= 90 && angle < 180)
+                        lineDirection = 1; // 135°
+                    else if (angle >= 180 && angle < 270)
+                        lineDirection = 2; // 225°
+                    else if (angle >= 270 && angle < 360)
+                        lineDirection = 3; // 315°
                 }
                 else
                 {
-                    relativePoint = Point.Empty;
+                    currentPoint = Point.Empty;
                 }
-
-                int width = 0;
-                int height = 0;
-
-                if (frameType == 1 && relativePoint != Point.Empty)
-                {
-                    width = relativePoint.X - startPoint.X;
-                    height = relativePoint.Y - startPoint.Y;
-
-                    currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
-                }
-
-                panelScreenArea.Invalidate();
-            }
+            }                     
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
@@ -1446,20 +1523,27 @@ namespace FastScreener2
                 RenderGuides(e, panelScreenArea, guideColor);
             }
 
+            //temp line for arrow
+            if (isLineDrawing)
+            {                
+                dynamicArrowType = DrawCurrentLine(e, startPoint, currentPoint);
+                Debug.WriteLine(dynamicArrowType);
+            }
+
             //arrow
             if (FS2SettingsManager.drawArrows || drawnArrows.Count > 0)
             {
                 RenderArrows(e);
-            }
+            }                
 
             //frame
-            if (drawFrame || isDrawing || drawnRectangles.Count > 0)
+            if (drawFrame || drawnRectangles.Count > 0)
             {
                 RenderFrame(e);
 
             }
 
-            if (isDrawing)
+            if (isFrameDrawing)
             {
                 DrawFrameCurrent(e);
             }
@@ -1653,6 +1737,7 @@ namespace FastScreener2
             drawnRectangles.Clear();
             drawnArrows.Clear();
             drawnTexts.Clear();
+            undoStack.Clear();  
 
             drawnTextString = string.Empty;
 

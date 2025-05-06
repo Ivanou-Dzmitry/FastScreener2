@@ -53,7 +53,7 @@ namespace FastScreener2
         private static string settingsFilePath = "fs2_settings.xml";
         private static Dictionary<string, string> settings = new Dictionary<string, string>();
 
-        public const int ARROW_SIZE = 6;
+        public const int ARROW_SIZE = 7;
 
         public const int MIN_DRAWN_SIZE_FRAME = 3;
 

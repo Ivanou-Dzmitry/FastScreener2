@@ -73,14 +73,16 @@ namespace FastScreener2
             Close();
         }
 
-
+        // --- Setting Property Grid ---
+        //Appearance
         private AppAppearance appearanceSettings;
 
         private void AppearanceSettings()
         {
             appearanceSettings = new AppAppearance
             {
-                PanelColor = FS2SettingsManager.panelColor
+                PanelColor = FS2SettingsManager.panelColor,
+                ClearElements = FS2SettingsManager.clearAfterScreen
             };
 
             pgSettings.SelectedObject = appearanceSettings;
@@ -88,7 +90,7 @@ namespace FastScreener2
         }
 
 
-        // --- Setting Property Grid ---
+        
         //ARROW
         private Arrow arrowSettings;
         private void ArrowSettings()
@@ -264,6 +266,12 @@ namespace FastScreener2
             {
                 FS2SettingsManager.panelColor = appearanceSettings.PanelColor;
                 FS2SettingsManager.SetSetting("panel_color", ColorTranslator.ToHtml(appearanceSettings.PanelColor));
+            }
+
+            if (e.ChangedItem.Label == "Clear Elements")
+            {
+                FS2SettingsManager.clearAfterScreen = appearanceSettings.ClearElements;
+                FS2SettingsManager.SetSetting("clear_after_screen", appearanceSettings.ClearElements.ToString().ToLower());
             }
 
             //ARROW

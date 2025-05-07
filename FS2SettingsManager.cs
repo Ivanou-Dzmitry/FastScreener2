@@ -19,7 +19,7 @@ namespace FastScreener2
         public static int[,] resWorked = new int[2, 4];
 
         //Min size
-        public const int MIN_WIDTH = 550, MIN_HEIGHT = 240;
+        public const int MIN_WIDTH = 550, MIN_HEIGHT = 240, MIN_FIXED_FRAME_W = 32, MIN_FIXED_FRAME_H = 32;
 
         //all monitors
         public static int virtScreenWidth = 0, virtScreenHeight = 0;
@@ -33,7 +33,7 @@ namespace FastScreener2
         public static float textSize;
 
         //for guidlines
-        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel, drawWatermark;
+        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel, drawWatermark, clearAfterScreen;
 
         public static Font textFont;
         public static string textFontFam = "";
@@ -54,8 +54,6 @@ namespace FastScreener2
         private static Dictionary<string, string> settings = new Dictionary<string, string>();
 
         public const int ARROW_SIZE = 7;
-
-        public const int MIN_DRAWN_SIZE_FRAME = 3;
 
         public const string SUBPATH = "screenshots";
 
@@ -409,6 +407,17 @@ namespace FastScreener2
                 EnsureSettingExists("watermark_padding", "10");
             }
 
+            try
+            {
+                clearAfterScreen = Convert.ToBoolean(settings["clear_after_screen"]);
+            }
+            catch
+            {
+                clearAfterScreen = true;
+                EnsureSettingExists("clear_after_screen", "true");
+            }
+            
+
             EnsureSingleTrueParam();
 
             SetCurResBasedOnResOnClose();
@@ -484,7 +493,8 @@ namespace FastScreener2
             { "watermark_path", "" },
             { "watermark_size", "50" },
             {"watermark_padding", "10" },
-            {"last_names", "" }
+            {"last_names", "" },
+            {"clear_after_screen", "true" }
         };
 
             Save(); // Create the XML file with default values

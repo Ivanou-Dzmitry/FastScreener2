@@ -37,11 +37,16 @@ namespace FastScreener2
         private Point startPoint;
         private Point currentPoint;
 
+        //fix parasit move
+        private Point? _lastStableMousePoint = null;
+        private const int movementThreshold = 10; // pixels
+
         private bool isFrameDrawing;
         private bool isLineDrawing;
         private int lineDirection = 0;
 
         private int dynamicArrowType;
+        private int dynamicFrameType;
 
         public static int numbering = 1; //for numbers
 
@@ -225,11 +230,11 @@ namespace FastScreener2
             //frame
             if (frameType == 1)
             {
-                SetFrameType(1, "frame_unlocked_icon", "Free frame");
+                SetFrameType(1);
             }
             else
             {
-                SetFrameType(2, "frame_locked_icon", "Fixed frame");
+                SetFrameType(2);
             }
 
             ApplyArrowType(arrowType);
@@ -444,6 +449,13 @@ namespace FastScreener2
 
             }
 
+            if(type == "frame_size")
+            {
+                int width = relativePoint.X - startPoint.X;
+                int height = relativePoint.Y - startPoint.Y;
+                labelDebug.Text = $"Frame (WxH): {width}x{height}";
+            }
+
             CenterLabelInPanel();
         }
 
@@ -478,7 +490,7 @@ namespace FastScreener2
             fileName = !string.IsNullOrEmpty(txtbName.Text) ? $"{txtbName.Text}.{fileFormat}" : $"{currentTime}_screenshot.{fileFormat}";
         }
 
-        //!important
+        //!important Main Screen
         private void CaptureScreen()
         {
             int bitmapWidth = panelScreenArea.Width;
@@ -489,15 +501,8 @@ namespace FastScreener2
             bool guideIsOn = drawGuides;
             if (guideIsOn)
             {
-                DrawGuideStatus();
-            }
-
-                
-            /*            bool guideIsOn = drawGuides;
-                        if (guideIsOn)
-                        {
-                            RenderGuides(new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle), panelScreenArea, ALPHA_KEY_COLOR);
-                        }*/
+                DrawGuideStatus(); //off
+            }              
 
             SetFileName();
 
@@ -522,13 +527,12 @@ namespace FastScreener2
 
             panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
 
-            AfterScreenRoutine();
-
-            ShowInfo("capture");
+            if(clearAfterScreen)
+                AfterScreenRoutine();            
 
             if (guideIsOn)
             {
-                DrawGuideStatus();
+                DrawGuideStatus(); //on
             }
 
             LogScreenshot(DateTime.Now.ToString("yyyy-MM-dd"), bitmapWidth, bitmapHeight, fileName);
@@ -537,6 +541,8 @@ namespace FastScreener2
             {
                 SaveFileNameToHistory(txtbName.Text);
             }
+
+            ShowInfo("capture");
         }
 
         private void AfterScreenRoutine()
@@ -726,10 +732,10 @@ namespace FastScreener2
                     frT = 1;
 
                 if (frT == 1)
-                    SetFrameType(1, "frame_unlocked_icon", "Free frame");
+                    SetFrameType(1);
 
                 if (frT == 2)
-                    SetFrameType(2, "frame_locked_icon", "Fixed frame");
+                    SetFrameType(2);
 
                 return true; // Mark as handled
             }
@@ -1102,12 +1108,12 @@ namespace FastScreener2
         //GUIDES
         private void mitGuidlines_Click(object sender, EventArgs e)
         {
-            DrawGuideStatus();
+            DrawGuideStatus(); //1 click
         }
 
         private void chbGuides_Click(object sender, EventArgs e)
         {
-            DrawGuideStatus();
+            DrawGuideStatus(); //2 click
         }
 
         private void DrawGuideStatus()
@@ -1221,7 +1227,7 @@ namespace FastScreener2
             isFrameDrawing = false;
             isLineDrawing = false;
 
-            Debug.WriteLine(inWin);
+            //Debug.WriteLine(inWin);
 
             //paint rect
             PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
@@ -1230,31 +1236,24 @@ namespace FastScreener2
             if(inWin)
                 relativePoint = usedPanel.PointToClient(Cursor.Position);
 
-            //draw free Frame
+            dynamicFrameType = 0;
+
+            //draw free Frame t1
             if (drawFrame && frameType == 1 && inWin)
             {
                 startPoint = new Point(relativePoint.X, relativePoint.Y);
                 currentRectangle = new Rectangle(startPoint, new Size(0, 0));
                 isFrameDrawing = true;
+                dynamicFrameType = 1;
             }
-
-            //fixed frame
+             
+            //fixed frame t2
             if (drawFrame && frameType == 2 && inWin)
             {
-                //scale fixed frame
-                int width = (int)(frameWidth * scalingFactor);
-                int height = (int)(frameHeight * scalingFactor);
-
-                startPoint = new Point(relativePoint.X - width / 2, relativePoint.Y - height / 2);
-                currentRectangle = new Rectangle(startPoint, new Size(width, height));
-                isFrameDrawing = true;
-
-                drawnRectangles.Add(currentRectangle);
-
-                //add fixed
-                undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
+                AddFixedFrame();                
             }
 
+//Debug.WriteLine($"DOWN: DT {dynamicFrameType} /FT {frameType}");
             
             //draw Arrow
             if (FS2SettingsManager.drawArrows && inWin)
@@ -1265,6 +1264,7 @@ namespace FastScreener2
 
                 dynamicArrowType = 0;
 
+                //set arrow on click
                 SetArrow(relativePoint, FS2SettingsManager.arrowColor);
                 RenderArrows(paintRect);
 
@@ -1358,13 +1358,38 @@ namespace FastScreener2
                 undoStack.Push(new UndoItem { Type = DrawType.Arrow, Data = drawnArrows[drawnArrows.Count - 1] });
             }
 
-            //for free rect
-            if (drawFrame && frameType == 1 && inWin)
-            {
-                drawnRectangles.Add(newRectangle);
+            //Debug.WriteLine($"UP: DT {dynamicFrameType} /FT {frameType}");
+            //Debug.WriteLine($"SIZE: W {newRectangle.Width} /H {newRectangle.Height}");
 
-                //undo
-                undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = newRectangle });
+            bool smallRect = newRectangle.Width < MIN_FIXED_FRAME_W && newRectangle.Height < MIN_FIXED_FRAME_H;
+
+            //Debug.WriteLine(smallRect);
+
+            //for free rect
+            if (drawFrame && inWin)
+            {
+                //switch from 2 to 1
+                if(dynamicFrameType != frameType)
+                {
+                    UndoAction();
+                    SetFrameType(frameType); //set type
+                }
+
+                if (smallRect && dynamicFrameType!=2)
+                {
+                    SetFrameType(2);
+                    AddFixedFrame();
+                    isFrameDrawing = false;
+                }
+                
+                if(frameType == 1 && !smallRect)
+                {
+                    drawnRectangles.Add(newRectangle);
+                    //undo
+                    undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = newRectangle });
+                    //RenderFrame(paintRect);
+                }                
+
             }
 
             panelScreenArea.Invalidate();
@@ -1376,8 +1401,8 @@ namespace FastScreener2
 
             ShowInfo("drag");
         }
-
-        //!Important
+         
+        //!Important MOVE
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
         {
 
@@ -1391,75 +1416,94 @@ namespace FastScreener2
                 isAppActive = false;
             }
 
-
             //get point in window
             bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
 
             if (isFrameDrawing)
-            {
+            {               
                 // important point
                 if (inWin)
                 {
+
                     relativePoint = panelScreenArea.PointToClient(Cursor.Position);
+
+                    if (_lastStableMousePoint.HasValue)
+                    {
+                        int deltaX = Math.Abs(relativePoint.X - _lastStableMousePoint.Value.X);
+                        int deltaY = Math.Abs(relativePoint.Y - _lastStableMousePoint.Value.Y);
+
+                        if (deltaX < movementThreshold && deltaY < movementThreshold)
+                        {
+                            return; // Ignore small, parasitic movement
+                        }
+                    }
+
+                    Debug.WriteLine($"{relativePoint} / {_lastStableMousePoint} ");
+
+                    // Significant movement detected
+                    _lastStableMousePoint = relativePoint;                    
 
                     int width = 0;
                     int height = 0;
 
+                    width = relativePoint.X - startPoint.X;
+                    height = relativePoint.Y - startPoint.Y;
+
+                    //Debug.WriteLine($"W{width} /H{height} / DT {dynamicFrameType}");
+
+                    //get small size
+                    bool smalRect = width > MIN_FIXED_FRAME_W && height > MIN_FIXED_FRAME_H;
+
+                    //switch to free
+                    if (smalRect && dynamicFrameType == 2)
+                    {
+                        frameType = 1;
+                    }
+
                     if (frameType == 1 && relativePoint != Point.Empty)
                     {
-                        width = relativePoint.X - startPoint.X;
-                        height = relativePoint.Y - startPoint.Y;
-
+                        ShowInfo("frame_size");
                         currentRectangle = new Rectangle(startPoint.X, startPoint.Y, width, height);
                     }
 
                     panelScreenArea.Invalidate();
                 }
-
             }
-
-            //isLineDrawing = false;
 
             //used panel
             Panel usedPanel = panelScreenArea;            
 
+            //line draw
             if (isLineDrawing)
             {
-                // important point
                 if (panelScreenArea.Bounds.Contains(panelScreenArea.PointToClient(Cursor.Position)))
                 {
                     currentPoint = usedPanel.PointToClient(Cursor.Position);
-                    
-
-                    int deltaX = currentPoint.X - relativePoint.X;
-                    int deltaY = currentPoint.Y - relativePoint.Y;
-
-                    if (deltaX == 0 && deltaY == 0)
-                        return; // no movement
-
-                    panelScreenArea.Invalidate();
-
-                    double angle = Math.Atan2(deltaY, deltaX) * (180.0 / Math.PI); // radians to degrees
-
-                    if (angle < 0)
-                        angle += 360; // normalize to 0-360
-
-                    lineDirection = 0;
-
-                    if (angle >= 0 && angle < 90)
-                        lineDirection = 4; // 45°
-                    else if (angle >= 90 && angle < 180)
-                        lineDirection = 1; // 135°
-                    else if (angle >= 180 && angle < 270)
-                        lineDirection = 2; // 225°
-                    else if (angle >= 270 && angle < 360)
-                        lineDirection = 3; // 315°
+                    panelScreenArea.Invalidate();                    
                 }
                 else
                 {
                     currentPoint = Point.Empty;
                 }
             }                     
+        }
+
+        private void AddFixedFrame()
+        {
+            //scale fixed frame
+            int width = (int)(frameWidth * scalingFactor);
+            int height = (int)(frameHeight * scalingFactor);
+
+            startPoint = new Point(relativePoint.X - width / 2, relativePoint.Y - height / 2);
+            currentRectangle = new Rectangle(startPoint, new Size(width, height));            
+
+            drawnRectangles.Add(currentRectangle);
+           
+            //add fixed
+            undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
+
+            dynamicFrameType = 2; //set dyn type
+            isFrameDrawing = true;
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
@@ -1527,14 +1571,16 @@ namespace FastScreener2
             if (isLineDrawing)
             {                
                 dynamicArrowType = DrawCurrentLine(e, startPoint, currentPoint);
-                Debug.WriteLine(dynamicArrowType);
+                //Debug.WriteLine(dynamicArrowType);
             }
 
             //arrow
             if (FS2SettingsManager.drawArrows || drawnArrows.Count > 0)
             {
                 RenderArrows(e);
-            }                
+            }
+
+            //Debug.WriteLine(drawnRectangles.Count);
 
             //frame
             if (drawFrame || drawnRectangles.Count > 0)
@@ -1543,6 +1589,7 @@ namespace FastScreener2
 
             }
 
+            //drawing frame
             if (isFrameDrawing)
             {
                 DrawFrameCurrent(e);
@@ -1761,9 +1808,10 @@ namespace FastScreener2
         {
 
             bool guideIsOn = drawGuides;
+
             if (guideIsOn)
             {
-                DrawGuideStatus();
+                DrawGuideStatus(); //off
             }
 
             labelDebug.Visible = false;
@@ -1773,7 +1821,7 @@ namespace FastScreener2
 
             if (guideIsOn)
             {
-                DrawGuideStatus();
+                DrawGuideStatus(); //on
             }
 
             labelDebug.Visible = true;
@@ -1787,7 +1835,8 @@ namespace FastScreener2
                 ShowInfo("fullscreen");
             }
 
-            AfterScreenRoutine();
+            if(clearAfterScreen)
+                AfterScreenRoutine();
         }
 
         private void mitShowInfo_Click(object sender, EventArgs e)
@@ -1903,8 +1952,22 @@ namespace FastScreener2
             UpdateWatermarkPosition(4); //bottom-left
         }
 
-        private void SetFrameType(int type, string iconName, string tooltipText)
+        private void SetFrameType(int type)
         {
+            string iconName;
+            string tooltipText;
+
+            if (type == 1)
+            {
+                iconName = "frame_unlocked_icon";
+                tooltipText = "Free frame";
+            }
+            else
+            {
+                iconName = "frame_locked_icon";
+                tooltipText = "Fixed frame";
+            }
+
             frameType = type;
             SetControlImage(chbFrame, iconName);
             SetSetting("frame_type", type.ToString());
@@ -1914,12 +1977,12 @@ namespace FastScreener2
 
         private void mitFreeFrame_Click(object sender, EventArgs e)
         {
-            SetFrameType(1, "frame_unlocked_icon", "Free frame");
+            SetFrameType(1);
         }
 
         private void mitFixedFrame_Click(object sender, EventArgs e)
         {
-            SetFrameType(2, "frame_locked_icon", "Fixed frame");
+            SetFrameType(2);
         }
 
         private void ApplyArrowType(int type)

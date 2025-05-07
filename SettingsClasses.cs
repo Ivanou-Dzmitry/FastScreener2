@@ -5,6 +5,7 @@ using static FastScreener2.FSUtils;
 using static FastScreener2.FS2SettingsManager;
 using System.Numerics;
 using System.Drawing;
+using System;
 
 namespace FastScreener2
 {
@@ -46,10 +47,11 @@ namespace FastScreener2
         }
     }
 
-
+    //APPEARANCE
     public class AppAppearance : INotifyPropertyChanged
     {
         private Color color;
+        private bool clearelements;
 
         [Category("Appearance")]
         [Description("Set panels color.")]
@@ -64,6 +66,21 @@ namespace FastScreener2
                 OnPropertyChanged(nameof(PanelColor));
             }
         }
+
+
+        [Category("Appearance")]
+        [Description("Clear elements after screenshot")]
+        [DisplayName("Clear Elements")]
+        public Boolean ClearElements
+        {
+            get => clearelements;
+            set
+            {
+                clearelements = value;
+                OnPropertyChanged(nameof(ClearElements));
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -532,7 +549,7 @@ namespace FastScreener2
         private string type;
 
         [Category("2. Fixed Frame Settings")]
-        [Description("Frame width (in px). Max - screenshot width/2, min - 16. Default 80.")]
+        [Description("Frame width (in px). Max - screenshot width/2, min - 32. Default 80.")]
         [DisplayName("Frame Width")]
         [TypeConverter(typeof(Int32OnlyConverter))]
         public int frameWidth
@@ -543,9 +560,9 @@ namespace FastScreener2
                 Vector2 halfResolution = GetHalfMaxScreenSize(resWorked);
 
                 // Validation for FrameWidth
-                if (value < 16 || value > halfResolution.X)
+                if (value < FS2SettingsManager.MIN_FIXED_FRAME_W || value > halfResolution.X)
                 {
-                    MessageBox.Show($"Frame width must be between 16 and {halfResolution.X}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Frame width must be between {MIN_FIXED_FRAME_W} and {halfResolution.X}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
                 framewidth = value;
@@ -554,7 +571,7 @@ namespace FastScreener2
         }
 
         [Category("2. Fixed Frame Settings")]
-        [Description("Frame height (in px). Max - screenshot height/2, min - 16. Default 80.")]
+        [Description("Frame height (in px). Max - screenshot height/2, min - 32. Default 80.")]
         [DisplayName("Frame Height")]
         [TypeConverter(typeof(Int32OnlyConverter))]
         public int frameHeight
@@ -564,9 +581,9 @@ namespace FastScreener2
             {
                 Vector2 halfResolution = GetHalfMaxScreenSize(resWorked);
                 // Validation for FrameHeight
-                if (value < 16 || value > halfResolution.Y)
+                if (value < FS2SettingsManager.MIN_FIXED_FRAME_H || value > halfResolution.Y)
                 {
-                    MessageBox.Show($"Frame height must be between 16 and {halfResolution.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Frame height must be between {FS2SettingsManager.MIN_FIXED_FRAME_W} and {halfResolution.Y}.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return; // Don't set the value if it's invalid
                 }
                 frameheight = value;

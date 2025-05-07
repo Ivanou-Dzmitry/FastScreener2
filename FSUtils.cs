@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using static FastScreener2.FSUtils;
+using System.Drawing;
 
 namespace FastScreener2
 {
@@ -357,6 +358,8 @@ namespace FastScreener2
         //temp frame
         public static void DrawFrameCurrent(PaintEventArgs e)
         {
+            Color tempFrameColor = Color.LightGray;
+
             var rect = FS2MainForm.currentRectangle;
 
             //Debug.WriteLine($"W: {rect.Width}, H: {rect.Height}");
@@ -376,7 +379,7 @@ namespace FastScreener2
                 rect.Height = -rect.Height;
             }
 
-            using (var framePen = new Pen(frameColor, frameStrokeWidth) { DashStyle = DashStyle.Dash })
+            using (var framePen = new Pen(tempFrameColor, frameStrokeWidth) { DashStyle = DashStyle.Dash })
             {
                 e.Graphics.DrawRectangle(framePen, rect);
             }
@@ -392,13 +395,10 @@ namespace FastScreener2
             int width = Math.Abs(FS2MainForm.currentRectangle.Width);
             int height = Math.Abs(FS2MainForm.currentRectangle.Height);
 
-            if (width > MIN_DRAWN_SIZE_FRAME && height > MIN_DRAWN_SIZE_FRAME)
+            foreach (var rectangle in drawnRectangles)
             {
-                foreach (var rectangle in drawnRectangles)
-                {
-                    e.Graphics.DrawRectangle(framePen, rectangle);
-                }
-            }            
+                e.Graphics.DrawRectangle(framePen, rectangle);
+            }         
         }
 
         //draw Watermark

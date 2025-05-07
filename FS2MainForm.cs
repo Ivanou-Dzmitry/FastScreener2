@@ -33,24 +33,25 @@ namespace FastScreener2
 
         static Point relativePoint; //first click point
         public static Rectangle currentRectangle;
-        Line currentLine = new Line();
+        //Line currentLine = new Line();
         private Point startPoint;
+        private bool startPointSet = false;
         private Point currentPoint;
 
         //fix parasit move
         private Point? _lastStableMousePoint = null;
-        private const int movementThreshold = 10; // pixels
+        private const int movementThreshold = 5; // pixels
 
         private bool isFrameDrawing;
         private bool isLineDrawing;
-        private int lineDirection = 0;
+        //private int lineDirection = 0;
 
         private int dynamicArrowType;
         private int dynamicFrameType;
 
         public static int numbering = 1; //for numbers
 
-        private Button lastPressedButton; // Store the last pressed button
+        private Button? lastPressedButton; // Allow null assignment - Store the last pressed button
 
         public static bool isReseted = false;
 
@@ -1236,6 +1237,9 @@ namespace FastScreener2
             if(inWin)
                 relativePoint = usedPanel.PointToClient(Cursor.Position);
 
+            //set zero start
+            startPoint = new Point(0, 0);
+
             dynamicFrameType = 0;
 
             //draw free Frame t1
@@ -1250,6 +1254,7 @@ namespace FastScreener2
             //fixed frame t2
             if (drawFrame && frameType == 2 && inWin)
             {
+                startPoint = new Point(relativePoint.X, relativePoint.Y);
                 AddFixedFrame();                
             }
 
@@ -1423,39 +1428,44 @@ namespace FastScreener2
             {               
                 // important point
                 if (inWin)
-                {
-
+                {                    
                     relativePoint = panelScreenArea.PointToClient(Cursor.Position);
 
                     if (_lastStableMousePoint.HasValue)
                     {
-                        int deltaX = Math.Abs(relativePoint.X - _lastStableMousePoint.Value.X);
-                        int deltaY = Math.Abs(relativePoint.Y - _lastStableMousePoint.Value.Y);
+                        int dx = relativePoint.X - _lastStableMousePoint.Value.X;
+                        int dy = relativePoint.Y - _lastStableMousePoint.Value.Y;
 
-                        if (deltaX < movementThreshold && deltaY < movementThreshold)
-                        {
-                            return; // Ignore small, parasitic movement
-                        }
+                        double distance = Math.Sqrt(dx * dx + dy * dy);
+
+                        if (distance < movementThreshold)
+                            return; // Ignore parasitic micro-movement
                     }
 
-                    Debug.WriteLine($"{relativePoint} / {_lastStableMousePoint} ");
+                    // Update stable point
+                    _lastStableMousePoint = relativePoint;
 
-                    // Significant movement detected
-                    _lastStableMousePoint = relativePoint;                    
+                    // Set start point once movement is stable
+                    if (!startPointSet)
+                    {
+                        startPoint = relativePoint;
+                        startPointSet = true;
+                        return; // Start tracking from next move
+                    }
 
-                    int width = 0;
-                    int height = 0;
-
-                    width = relativePoint.X - startPoint.X;
-                    height = relativePoint.Y - startPoint.Y;
+                    // Calculate width and height
+                    int width = (relativePoint.X - startPoint.X);
+                    int height = (relativePoint.Y - startPoint.Y);
 
                     //Debug.WriteLine($"W{width} /H{height} / DT {dynamicFrameType}");
 
+                    //Debug.WriteLine($"{width} / {height} ");
+
                     //get small size
-                    bool smalRect = width > MIN_FIXED_FRAME_W && height > MIN_FIXED_FRAME_H;
+                    bool smallRect = Math.Abs(width) > frameWidth || Math.Abs(height) > frameHeight;
 
                     //switch to free
-                    if (smalRect && dynamicFrameType == 2)
+                    if (smallRect && dynamicFrameType == 2)
                     {
                         frameType = 1;
                     }
@@ -1776,7 +1786,7 @@ namespace FastScreener2
                 }
             }
 
-            return Screen.PrimaryScreen; // Fallback to primary screen
+            return Screen.PrimaryScreen ?? Screen.AllScreens.First(); // Fallback to primary screen
         }
 
         private void mitClear_Click(object sender, EventArgs e)

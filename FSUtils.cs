@@ -720,9 +720,9 @@ namespace FastScreener2
 
             using (Form inputForm = new Form())
             {
-                inputForm.Text = "Enter Text (45 symbols)";
-                inputForm.Width = 400;
-                inputForm.Height = 200;
+                inputForm.Text = "Text (45 symbols)";
+                inputForm.Width = (int)(400 * FS2MainForm.scalingFactor);
+                inputForm.Height = (int)(200 * FS2MainForm.scalingFactor);
                 inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 inputForm.StartPosition = FormStartPosition.CenterParent;
                 inputForm.MinimizeBox = false;
@@ -730,11 +730,31 @@ namespace FastScreener2
                 inputForm.TopMost = true;
 
                 TextBox inputBox = new TextBox() { Left = 10, Top = 20, Width = 360 };
-                Label infoLabel = new Label() { Left=10, Top=90, Width=360, Height=16 };
-                Button fontButton = new Button() { Text = "Font", Left = 10, Top = 60, Width = 60 };
-                Button colorButton = new Button() { Text = "Color", Left = 80, Top = 60, Width = 60 };
-                Button okButton = new Button() { Text = "OK", Left = 220, Width = 70, Top = 110, DialogResult = DialogResult.OK };
-                Button cancelButton = new Button() { Text = "Cancel", Left = 300, Width = 70, Top = 110, DialogResult = DialogResult.Cancel };
+                Label infoLabel = new Label() { Left=10, Top=90, Height=16 };
+                Button fontButton = new Button() { Text = "Font", Left = 10, Top = 60, Width = 128, Height = 32 };
+                Button colorButton = new Button() { Text = "Color", Left = 80, Top = 60, Width = 128, Height = 32 };
+                Button okButton = new Button() { Text = "OK", Left = 220, Width = 90, Top = 110, DialogResult = DialogResult.OK, Height = 32 };
+                Button cancelButton = new Button() { Text = "Cancel", Left = 300, Width = 90, Top = 110, DialogResult = DialogResult.Cancel, Height = 32 };
+
+                Panel panelTop01 = new Panel() { Height = 48 };
+                panelTop01.Dock = DockStyle.Top;
+                panelTop01.Padding = new Padding(10);
+
+                inputBox.PlaceholderText = "Input text...";
+
+                //for buttons color size
+                Panel panelTop02 = new Panel() { Height = 64};
+                panelTop02.Dock = DockStyle.Top;
+                panelTop02.Padding = new Padding(10);
+
+                //for okcancel buttons
+                Panel panelTop03 = new Panel() { Height = 64 }; 
+                panelTop03.Dock = DockStyle.Top;
+                panelTop03.Padding = new Padding(10);
+
+                inputForm.Padding = new Padding(10);
+
+                infoLabel.Width = inputForm.Width/2;
 
                 //symbols count
                 inputBox.MaxLength = 45;
@@ -756,7 +776,7 @@ namespace FastScreener2
                             FS2SettingsManager.SetSetting("text_size", FS2SettingsManager.textSize.ToString());
                             FS2SettingsManager.Save();
                             textFontFam = fontDialog.Font.FontFamily.Name;
-                            infoLabel.Text = "Font size/family: " + FS2SettingsManager.textSize + ", " + textFontFam;
+                            infoLabel.Text = "Font (size, family): " + FS2SettingsManager.textSize + ", " + textFontFam;
                         }
                     }
                 };
@@ -778,18 +798,41 @@ namespace FastScreener2
                 };
 
 
-                infoLabel.Text = "Font size/family: " + textSize + ", " + textFontFam;
+                infoLabel.Text = "Font (size, family): " + textSize + ", " + textFontFam;
                 FS2SettingsManager.SetSetting("text_font", textFontFam);
                 FS2SettingsManager.Save();
 
                 // Invert the ForeColor and set it as the BackColor
 
-                inputForm.Controls.Add(inputBox);
-                inputForm.Controls.Add(fontButton);
-                inputForm.Controls.Add(colorButton);
-                inputForm.Controls.Add(okButton);
-                inputForm.Controls.Add(cancelButton);
-                inputForm.Controls.Add(infoLabel);
+                
+
+                inputBox.Dock = DockStyle.Fill;
+                panelTop01.Controls.Add(inputBox);
+
+                
+
+                fontButton.Dock = DockStyle.Left;
+                colorButton.Dock = DockStyle.Left;
+
+                //inputForm.Controls.Add();
+                panelTop02.Controls.Add(fontButton);
+                panelTop02.Controls.Add(colorButton);
+
+                
+
+                okButton.Dock = DockStyle.Right;
+                cancelButton.Dock = DockStyle.Right;
+                infoLabel.Dock = DockStyle.Left;
+
+                panelTop03.Controls.Add(okButton);
+                panelTop03.Controls.Add(cancelButton);
+                panelTop03.Controls.Add(infoLabel);
+
+
+                inputForm.Controls.Add(panelTop03);
+                inputForm.Controls.Add(panelTop02);
+                inputForm.Controls.Add(panelTop01);
+
                 inputForm.AcceptButton = okButton;
                 inputForm.CancelButton = cancelButton;
 

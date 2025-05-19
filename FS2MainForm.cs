@@ -4,9 +4,7 @@ using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static FastScreener2.MouseHook;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using System.Drawing;
-using System.Net;
+
 
 namespace FastScreener2
 {
@@ -516,7 +514,7 @@ namespace FastScreener2
                 {
                     captureGraphics.CopyFromScreen(captureRectangle.Location, Point.Empty, captureRectangle.Size);
                 }
-
+                
                 // Save file if needed
                 if (saveToFile)
                 {

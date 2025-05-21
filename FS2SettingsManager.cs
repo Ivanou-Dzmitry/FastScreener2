@@ -33,10 +33,12 @@ namespace FastScreener2
         public static float textSize;
 
         //for guidlines
-        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel, drawWatermark, clearAfterScreen;
+        public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel, drawWatermark, clearAfterScreen, dpiScaleMulti;
 
         public static Font textFont;
         public static string textFontFam = "";
+
+        public static string numberFontFamily;
 
         public static bool lockIndent = false;
 
@@ -145,16 +147,19 @@ namespace FastScreener2
                 numberColor = ColorTranslator.FromHtml(settings["number_color"]);
                 drawNumber = Convert.ToBoolean(settings["draw_number"]);
                 numberFontSize = int.Parse(settings["number_size"]);
+                numberFontFamily = (string)settings["number_font_family"];
             }
             catch
             {
                 numberColor = Color.Orange;
                 drawNumber = false;
                 numberFontSize = 26;
+                numberFontFamily = "";
 
                 EnsureSettingExists("number_color", "#FFBB00");
                 EnsureSettingExists("draw_number", "false");
                 EnsureSettingExists("number_size", "26");
+                EnsureSettingExists("number_font_family", "");
             }
 
             //frame
@@ -344,16 +349,7 @@ namespace FastScreener2
                 EnsureSettingExists("show_info_label", "false");
             }
 
-            //panel
-            try
-            {
-                panelColor = ColorTranslator.FromHtml(settings["panel_color"]);
-            }
-            catch
-            {
-                panelColor = Color.SlateGray;
-                EnsureSettingExists("panel_color", "#708090");
-            }
+
 
             //watermark
             try
@@ -407,6 +403,7 @@ namespace FastScreener2
                 EnsureSettingExists("watermark_padding", "10");
             }
 
+            // appearance
             try
             {
                 clearAfterScreen = Convert.ToBoolean(settings["clear_after_screen"]);
@@ -416,7 +413,31 @@ namespace FastScreener2
                 clearAfterScreen = true;
                 EnsureSettingExists("clear_after_screen", "true");
             }
-            
+
+            try
+            {
+                dpiScaleMulti = Convert.ToBoolean(settings["dpi_scale_multiplier"]);
+            }
+            catch
+            {
+                dpiScaleMulti = true;
+                EnsureSettingExists("dpi_scale_multiplier", "true");
+            }
+
+            //panel
+            try
+            {
+                panelColor = ColorTranslator.FromHtml(settings["panel_color"]);
+            }
+            catch
+            {
+                panelColor = Color.SlateGray;
+                EnsureSettingExists("panel_color", "#708090");
+            }
+
+
+
+
 
             EnsureSingleTrueParam();
 
@@ -494,7 +515,9 @@ namespace FastScreener2
             { "watermark_size", "50" },
             {"watermark_padding", "10" },
             {"last_names", "" },
-            {"clear_after_screen", "true" }
+            {"clear_after_screen", "true" },
+            {"dpi_scale_multiplier", "true" },
+            { "number_font_family", "" }
         };
 
             Save(); // Create the XML file with default values

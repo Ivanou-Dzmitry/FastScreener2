@@ -52,6 +52,7 @@ namespace FastScreener2
     {
         private Color color;
         private bool clearelements;
+        private bool dpiscale;
 
         [Category("Appearance")]
         [Description("Set panels color.")]
@@ -78,6 +79,20 @@ namespace FastScreener2
             {
                 clearelements = value;
                 OnPropertyChanged(nameof(ClearElements));
+            }
+        }
+
+
+        [Category("Appearance")]
+        [Description("The scaling of elements will depend on the screen's scale setting")]
+        [DisplayName("DPI Scale")]
+        public Boolean DPIScale
+        {
+            get => dpiscale;
+            set
+            {
+                dpiscale = value;
+                OnPropertyChanged(nameof(DPIScale));
             }
         }
 

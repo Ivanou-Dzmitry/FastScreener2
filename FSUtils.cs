@@ -5,6 +5,8 @@ using System.Drawing.Imaging;
 using System.Diagnostics;
 using static FastScreener2.FSUtils;
 using System.Drawing;
+using System.Drawing.Text;
+using System;
 
 namespace FastScreener2
 {
@@ -172,9 +174,12 @@ namespace FastScreener2
 
         public static void RenderArrows(PaintEventArgs e)
         {
-            int aSize = ARROW_SIZE;
+
+            float scale = FSUtils.GetScale(dpiScaleMulti);
+
+            float aSize = (ARROW_SIZE* scale);
             int offset = 2; // simple outline shift
-            float lineExtraWidth = 1f;                //             
+            float lineExtraWidth = 1f;             
             Color shadowColor = Color.Black;
 
             foreach (var line in drawnArrows)
@@ -199,8 +204,10 @@ namespace FastScreener2
                     e.Graphics.DrawLine(outlinePen, shiftedStart, shiftedEnd);
                 }
 
+
+                float scaledWidth = (line.lineWidth*scale);
                 // Draw actual arrow
-                using (Pen arrowPen = new Pen(line.lineColor, line.lineWidth))
+                using (Pen arrowPen = new Pen(line.lineColor, scaledWidth))
                 {
                     arrowPen.CustomEndCap = new AdjustableArrowCap(aSize, aSize);
 
@@ -226,7 +233,9 @@ namespace FastScreener2
         //draw temp line
         public static int DrawCurrentLine(PaintEventArgs e, Point relativePoint, Point currentPoint)
         {
-            int aSize = ARROW_SIZE;
+            float scale = FSUtils.GetScale(dpiScaleMulti);
+
+            float aSize = (ARROW_SIZE * scale);
             Color tempArrowColor = Color.LightGray;
 
             if (relativePoint == currentPoint)
@@ -257,7 +266,7 @@ namespace FastScreener2
             double snappedAngle = allowedAngles[index];
             
             double actualDistance = Math.Sqrt(dx * dx + dy * dy);
-            double limitedDistance = Math.Min(actualDistance, arrowLenght*1.5);
+            double limitedDistance = Math.Min(actualDistance, arrowLenght*1.5*scale);
 
             int currentDirection = 0;
 
@@ -277,7 +286,7 @@ namespace FastScreener2
                 relativePoint.Y + (int)(Math.Sin(rad) * limitedDistance)
             );
 
-            using (var linePen = new Pen(tempArrowColor, arrowWidth) { DashStyle = DashStyle.Dot })
+            using (var linePen = new Pen(tempArrowColor, arrowWidth * scale) { DashStyle = DashStyle.Dot })
             {
                 linePen.CustomStartCap = new AdjustableArrowCap(aSize, aSize);
                 e.Graphics.DrawLine(linePen, relativePoint, snappedPoint);
@@ -307,13 +316,28 @@ namespace FastScreener2
             }
         }
 
+        // Function to safely get a font
+        public static Font GetSafeFont(string preferredFont, float size, FontStyle style)
+        {
+            InstalledFontCollection installedFonts = new InstalledFontCollection();
+            string fallbackFont = "Segoe UI"; // Use a reliable fallback
+
+            bool hasPreferredFont = installedFonts.Families.Any(f => f.Name == preferredFont);
+            string fontName = hasPreferredFont ? preferredFont : fallbackFont;
+
+            return new Font(fontName, size, style);
+        }
+
+
         public static void RenderNumbers(PaintEventArgs e)
         {
-            //for outline
-            int outlineShift = 1;
+            float scale = FSUtils.GetScale(dpiScaleMulti);
 
-            Font drawFont = new Font("Arial", numberFontSize, FontStyle.Bold);
-            Font outlineFont = new Font("Arial", numberFontSize + outlineShift, FontStyle.Bold);
+            //for outline
+            float outlineShift = 1 * scale;
+
+            Font drawFont = GetSafeFont(numberFontFamily, numberFontSize * scale, FontStyle.Bold);
+            Font outlineFont = GetSafeFont(numberFontFamily, numberFontSize * scale + outlineShift, FontStyle.Bold);
 
             //font
             SolidBrush drawBrush = new SolidBrush(numberColor);
@@ -358,6 +382,8 @@ namespace FastScreener2
         //temp frame
         public static void DrawFrameCurrent(PaintEventArgs e)
         {
+            float scale = FSUtils.GetScale(dpiScaleMulti);
+
             Color tempFrameColor = Color.LightGray;
 
             var rect = FS2MainForm.currentRectangle;
@@ -379,7 +405,7 @@ namespace FastScreener2
                 rect.Height = -rect.Height;
             }
 
-            using (var framePen = new Pen(tempFrameColor, frameStrokeWidth) { DashStyle = DashStyle.Dash })
+            using (var framePen = new Pen(tempFrameColor, frameStrokeWidth*scale) { DashStyle = DashStyle.Dash })
             {
                 e.Graphics.DrawRectangle(framePen, rect);
             }
@@ -389,7 +415,9 @@ namespace FastScreener2
         //drawFrame
         public static void RenderFrame(PaintEventArgs e)
         {
-            var framePen = new Pen(frameColor, frameStrokeWidth);
+            float scale = FSUtils.GetScale(dpiScaleMulti);
+
+            var framePen = new Pen(frameColor, frameStrokeWidth*scale);
            
             //avoid -
             int width = Math.Abs(FS2MainForm.currentRectangle.Width);
@@ -917,6 +945,34 @@ namespace FastScreener2
             // Save updated list
             FS2SettingsManager.SetSetting("last_names", string.Join(", ", names));
             FS2SettingsManager.Save();
+        }
+
+
+        public static float GetScale(bool dpiScaleMulti)
+        {
+            return dpiScaleMulti ? FS2MainForm.scalingFactor : 1f;
+        }
+
+        public static void UpdateHelpFileVersion(string helpFilePath)
+        {
+            
+            string versionLine = $"Version: {FS2MainForm.version}";
+
+            if (!File.Exists(helpFilePath))
+                return;
+
+            var lines = File.ReadAllLines(helpFilePath).ToList();
+
+            if (lines.Count > 0)
+            {
+                lines[0] = versionLine; // Replace first line
+            }
+            else
+            {
+                lines.Add(versionLine); // File is empty
+            }
+
+            File.WriteAllLines(helpFilePath, lines);
         }
 
     }

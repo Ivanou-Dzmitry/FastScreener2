@@ -82,7 +82,9 @@ namespace FastScreener2
             appearanceSettings = new AppAppearance
             {
                 PanelColor = FS2SettingsManager.panelColor,
-                ClearElements = FS2SettingsManager.clearAfterScreen
+                ClearElements = FS2SettingsManager.clearAfterScreen,
+                DPIScale = FS2SettingsManager.dpiScaleMulti
+
             };
 
             pgSettings.SelectedObject = appearanceSettings;
@@ -272,6 +274,12 @@ namespace FastScreener2
             {
                 FS2SettingsManager.clearAfterScreen = appearanceSettings.ClearElements;
                 FS2SettingsManager.SetSetting("clear_after_screen", appearanceSettings.ClearElements.ToString().ToLower());
+            }
+
+            if (e.ChangedItem.Label == "DPI Scale")
+            {
+                FS2SettingsManager.dpiScaleMulti = appearanceSettings.DPIScale;
+                FS2SettingsManager.SetSetting("dpi_scale_multiplier", appearanceSettings.DPIScale.ToString().ToLower());
             }
 
             //ARROW

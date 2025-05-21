@@ -4,6 +4,7 @@ using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static FastScreener2.MouseHook;
+using System.Reflection;
 
 
 namespace FastScreener2
@@ -81,6 +82,9 @@ namespace FastScreener2
         private static Stack<UndoItem> undoStack = new Stack<UndoItem>();
 
         private int arT, frT, guT, watP = 0; //for cycles
+
+        string appName = "FastScreener";
+        public static string version;
 
         public enum DrawType
         {
@@ -207,7 +211,19 @@ namespace FastScreener2
 
             NameFieldPos();
 
+            string versionFull = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                    .InformationalVersion ?? "unknown";
+
+            version = versionFull.Split('+')[0];
+
             ShowInfo("start");
+
+            //upd version in file
+            string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+            string helpFilePath = Path.Combine(projectRoot, "fs2_help.txt");
+            Debug.WriteLine(helpFilePath);
+            UpdateHelpFileVersion(helpFilePath);
 
             MenuItemUpdate();
 
@@ -255,6 +271,10 @@ namespace FastScreener2
             CenterLabelInPanel();
 
             LoadFileNameHistory();
+
+            //hack lenght
+            string wideSpace = "\u2003\u2003\u2003\u2003\u2003\u2003";
+            mitWatermark.Text = "Watermark" + wideSpace;
         }
 
         private void SetControlImage(Control control, string resourceName)
@@ -377,7 +397,7 @@ namespace FastScreener2
             string panelWS = (panelScreenArea.Width / scalingFactor).ToString();
             string panelHS = (panelScreenArea.Height / scalingFactor).ToString();
 
-            if (scalingFactor == 1)
+            if (scalingFactor == 1 || !dpiScaleMulti)
             {
                 screenArea = "Size W:" + panelW + ", H:" + panelH;
             }
@@ -386,7 +406,7 @@ namespace FastScreener2
                 screenArea = $"Size W: {panelW} ({panelWS}), H: {panelH} ({panelHS})";
             }
 
-            string name = "FastScreener 2.0.3";
+            string fullName = $"{appName} {version}";
             string scale = "Scale: " + scalingFactor;
 
             string frameSize = "";
@@ -416,7 +436,7 @@ namespace FastScreener2
 
             if (type == "start")
             {
-                labelDebug.Text = name + " | " + screenArea + " | " + scale;
+                labelDebug.Text = fullName + " | " + screenArea + " | " + scale;
             }
 
             if (type == "capture")
@@ -448,7 +468,7 @@ namespace FastScreener2
 
             }
 
-            if(type == "frame_size")
+            if (type == "frame_size")
             {
                 int width = relativePoint.X - startPoint.X;
                 int height = relativePoint.Y - startPoint.Y;
@@ -492,6 +512,13 @@ namespace FastScreener2
         //!important Main Screen
         private void CaptureScreen()
         {
+
+            float scale = 1;
+            if (dpiScaleMulti == true)
+            {
+                scale = scalingFactor; //scaling factor
+            }
+
             int bitmapWidth = panelScreenArea.Width;
             int bitmapHeight = panelScreenArea.Height;
 
@@ -501,7 +528,7 @@ namespace FastScreener2
             if (guideIsOn)
             {
                 DrawGuideStatus(); //off
-            }              
+            }
 
             SetFileName();
 
@@ -514,20 +541,20 @@ namespace FastScreener2
                 {
                     captureGraphics.CopyFromScreen(captureRectangle.Location, Point.Empty, captureRectangle.Size);
                 }
-                
+
                 // Save file if needed
                 if (saveToFile)
                 {
                     SaveToFile(captureBitmap);
                 }
 
-                SetScaledBitmapToClipboard(captureBitmap, scalingFactor);
+                SetScaledBitmapToClipboard(captureBitmap, scale);
             }
 
             panelScreenArea.BorderStyle = BorderStyle.FixedSingle;
 
-            if(clearAfterScreen)
-                AfterScreenRoutine();            
+            if (clearAfterScreen)
+                AfterScreenRoutine();
 
             if (guideIsOn)
             {
@@ -561,6 +588,13 @@ namespace FastScreener2
 
         private void SaveToFile(Bitmap captureBitmap)
         {
+
+            float scale = 1;
+            if (dpiScaleMulti == true)
+            {
+                scale = scalingFactor; //scaling factor
+            }
+
             string appExeDir = Directory.GetCurrentDirectory();
             string directoryPath = Path.Combine(appExeDir, SUBPATH);
 
@@ -588,8 +622,8 @@ namespace FastScreener2
             try
             {
                 // Scale down the image
-                int newWidth = (int)(captureBitmap.Width / scalingFactor);
-                int newHeight = (int)(captureBitmap.Height / scalingFactor);
+                int newWidth = (int)(captureBitmap.Width / scale);
+                int newHeight = (int)(captureBitmap.Height / scale);
 
                 using (Bitmap scaledBitmap = new Bitmap(newWidth, newHeight))
                 using (Graphics g = Graphics.FromImage(scaledBitmap))
@@ -1232,7 +1266,7 @@ namespace FastScreener2
             PaintEventArgs paintRect = new PaintEventArgs(panelScreenArea.CreateGraphics(), panelScreenArea.ClientRectangle);
 
             // important point
-            if(inWin)
+            if (inWin)
                 relativePoint = usedPanel.PointToClient(Cursor.Position);
 
             //set zero start
@@ -1248,16 +1282,16 @@ namespace FastScreener2
                 isFrameDrawing = true;
                 dynamicFrameType = 1;
             }
-             
+
             //fixed frame t2
             if (drawFrame && frameType == 2 && inWin)
             {
                 startPoint = new Point(relativePoint.X, relativePoint.Y);
-                AddFixedFrame();                
+                AddFixedFrame();
             }
 
-//Debug.WriteLine($"DOWN: DT {dynamicFrameType} /FT {frameType}");
-            
+            //Debug.WriteLine($"DOWN: DT {dynamicFrameType} /FT {frameType}");
+
             //draw Arrow
             if (FS2SettingsManager.drawArrows && inWin)
             {
@@ -1352,7 +1386,7 @@ namespace FastScreener2
                 );
 
             //set dynamic arrow value
-            if(dynamicArrowType != 0 && FS2SettingsManager.drawArrows)
+            if (dynamicArrowType != 0 && FS2SettingsManager.drawArrows)
             {
                 ApplyArrowType(dynamicArrowType);
                 UndoAction();
@@ -1372,26 +1406,26 @@ namespace FastScreener2
             if (drawFrame && inWin)
             {
                 //switch from 2 to 1
-                if(dynamicFrameType != frameType)
+                if (dynamicFrameType != frameType)
                 {
                     UndoAction();
                     SetFrameType(frameType); //set type
                 }
 
-                if (smallRect && dynamicFrameType!=2)
+                if (smallRect && dynamicFrameType != 2)
                 {
                     SetFrameType(2);
                     AddFixedFrame();
                     isFrameDrawing = false;
                 }
-                
-                if(frameType == 1 && !smallRect)
+
+                if (frameType == 1 && !smallRect)
                 {
                     drawnRectangles.Add(newRectangle);
                     //undo
                     undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = newRectangle });
                     //RenderFrame(paintRect);
-                }                
+                }
 
             }
 
@@ -1404,7 +1438,7 @@ namespace FastScreener2
 
             ShowInfo("drag");
         }
-         
+
         //!Important MOVE
         private void mouseHook_MouseMove(MouseHook.MSLLHOOKSTRUCT mouse)
         {
@@ -1423,10 +1457,10 @@ namespace FastScreener2
             bool inWin = panelScreenArea.ClientRectangle.Contains(panelScreenArea.PointToClient(Cursor.Position));
 
             if (isFrameDrawing)
-            {               
+            {
                 // important point
                 if (inWin)
-                {                    
+                {
                     relativePoint = panelScreenArea.PointToClient(Cursor.Position);
 
                     if (_lastStableMousePoint.HasValue)
@@ -1479,7 +1513,7 @@ namespace FastScreener2
             }
 
             //used panel
-            Panel usedPanel = panelScreenArea;            
+            Panel usedPanel = panelScreenArea;
 
             //line draw
             if (isLineDrawing)
@@ -1487,13 +1521,13 @@ namespace FastScreener2
                 if (panelScreenArea.Bounds.Contains(panelScreenArea.PointToClient(Cursor.Position)))
                 {
                     currentPoint = usedPanel.PointToClient(Cursor.Position);
-                    panelScreenArea.Invalidate();                    
+                    panelScreenArea.Invalidate();
                 }
                 else
                 {
                     currentPoint = Point.Empty;
                 }
-            }                     
+            }
         }
 
         private void AddFixedFrame()
@@ -1503,10 +1537,10 @@ namespace FastScreener2
             int height = (int)(frameHeight * scalingFactor);
 
             startPoint = new Point(relativePoint.X - width / 2, relativePoint.Y - height / 2);
-            currentRectangle = new Rectangle(startPoint, new Size(width, height));            
+            currentRectangle = new Rectangle(startPoint, new Size(width, height));
 
             drawnRectangles.Add(currentRectangle);
-           
+
             //add fixed
             undoStack.Push(new UndoItem { Type = DrawType.Rectangle, Data = currentRectangle });
 
@@ -1577,7 +1611,7 @@ namespace FastScreener2
 
             //temp line for arrow
             if (isLineDrawing)
-            {                
+            {
                 dynamicArrowType = DrawCurrentLine(e, startPoint, currentPoint);
                 //Debug.WriteLine(dynamicArrowType);
             }
@@ -1792,7 +1826,7 @@ namespace FastScreener2
             drawnRectangles.Clear();
             drawnArrows.Clear();
             drawnTexts.Clear();
-            undoStack.Clear();  
+            undoStack.Clear();
 
             drawnTextString = string.Empty;
 
@@ -1843,7 +1877,7 @@ namespace FastScreener2
                 ShowInfo("fullscreen");
             }
 
-            if(clearAfterScreen)
+            if (clearAfterScreen)
                 AfterScreenRoutine();
         }
 
@@ -2050,6 +2084,43 @@ namespace FastScreener2
             }
         }
 
+        private void chbNumbers_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                using (FontDialog fontDialog = new FontDialog())
+                {
+                    // Try to get saved font family from settings
+                    //string savedFamily = numberFontFamily;
+                    if (string.IsNullOrWhiteSpace(numberFontFamily))
+                    {
+                        numberFontFamily = "Segoe UI"; // fallback
+                    }
+
+                    // Try to use saved font family, fallback if invalid
+                    try
+                    {
+                        fontDialog.Font = new Font(numberFontFamily, numberFontSize);
+                    }
+                    catch
+                    {
+                        fontDialog.Font = new Font("Segoe UI", numberFontSize);
+                    }
+
+                    // Show font dialog
+                    if (fontDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string selectedFamily = fontDialog.Font.FontFamily.Name;
+                        SetSetting("number_font_family", selectedFamily);
+                        numberFontFamily = selectedFamily;
+                        panelScreenArea.Invalidate();
+                    }
+                }
+            }
+        }
+
+
+
         private void CenterLabelInPanel()
         {
             // Calculate the center position of the panel
@@ -2164,7 +2235,7 @@ namespace FastScreener2
                 EnsureSettingExists("last_names", "");
             }
 
-            
+
             var names = saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                              .Select(n => n.Trim())
                              .ToArray();
@@ -2176,6 +2247,7 @@ namespace FastScreener2
             txtbName.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             txtbName.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
+
 
     }
 }

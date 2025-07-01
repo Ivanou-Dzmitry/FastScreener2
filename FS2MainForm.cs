@@ -61,6 +61,8 @@ namespace FastScreener2
 
         public static FS2MainForm Instance { get; private set; }
         private const int WM_DPICHANGED = 0x02E0;
+        private float currentDpi = 96f; // Default DPI
+        private Dictionary<Control, float> originalFontSizes = new();
 
         public static string drawnTextString = string.Empty;
         private bool isTextDialogOpen = false;
@@ -105,7 +107,6 @@ namespace FastScreener2
             Instance = this;  // Store the reference when the form is created
             InitializeComponent();
 
-
             this.AutoScaleMode = AutoScaleMode.Dpi;
 
             //set transparent form
@@ -124,7 +125,16 @@ namespace FastScreener2
             FS2SettingsManager.Load();
 
             //get scaling
-            scalingFactor = GetScalingFactor(this);
+            scalingFactor = GetScalingFactor(this);                       
+            //Debug.WriteLine(scalingFactor);
+
+            //this.PerformAutoScale();
+
+            //font resize
+            FixControlFont(labelDebug, scalingFactor);
+            FixControlFont(txtbName, scalingFactor);
+
+            //MessageBox.Show($"{buttonMainMenu.Width}");
 
             //frame upd
             frameSize = Convert.ToInt32(frameSize * scalingFactor);
@@ -209,7 +219,7 @@ namespace FastScreener2
 
             PanelSize();
 
-            NameFieldPos();
+            
 
             string versionFull = Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
@@ -222,42 +232,15 @@ namespace FastScreener2
             //upd version in file
             string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
             string helpFilePath = Path.Combine(projectRoot, "fs2_help.txt");
-            Debug.WriteLine(helpFilePath);
+            //Debug.WriteLine(helpFilePath);
             UpdateHelpFileVersion(helpFilePath);
 
             MenuItemUpdate();
 
             this.KeyPreview = true;
             contextMenuMain.Focus();
-
-            //buttons
-            SetControlImage(btnSettings, "settings_icon");
-            SetControlImage(buttonMinimizeForm, "minimize_icon");
-            SetControlImage(buttonCloseForm, "close_icon");
-            SetControlImage(btnNextRes, "res_cycle_icon");
-            SetControlImage(btnScreen, "screen_icon");
-            SetControlImage(buttonMainMenu, "menu_icon");
-
-            //checkboxes
-            SetControlImage(chbSave, "save_icon");
-            SetControlImage(chbNumbers, "number_icon");
-
-            //frame
-            if (frameType == 1)
-            {
-                SetFrameType(1);
-            }
-            else
-            {
-                SetFrameType(2);
-            }
-
-            ApplyArrowType(arrowType);
-
-            //SetControlImage(chbArrow, "arrow_icon");
-            SetControlImage(chbGuides, "guides_icon");
-            SetControlImage(chbText, "text_icon");
-            SetControlImage(chbWatermark, "watermark_icon");
+         
+            IconsSizeUpdate();
 
             //label
             labelDebug.Visible = showInfoLabel;
@@ -277,6 +260,49 @@ namespace FastScreener2
             mitWatermark.Text = "Watermark" + wideSpace;
         }
 
+
+        public void IconsSizeUpdate()
+        {
+            //buttons
+            SetControlImage(btnSettings, "settings_icon");
+            SetControlImage(buttonMinimizeForm, "minimize_icon");
+            SetControlImage(buttonCloseForm, "close_icon");
+            SetControlImage(btnNextRes, "res_cycle_icon");
+            SetControlImage(btnScreen, "screen_icon");
+            SetControlImage(buttonMainMenu, "menu_icon");
+            //SetControlImage(, "menu_icon");
+
+
+            //checkboxes
+            SetControlImage(chbSave, "save_icon");
+            SetControlImage(chbNumbers, "number_icon");
+
+            //SetControlImage(chbArrow, "arrow_icon");
+            ApplyArrowType(arrowType);
+
+            //frame
+            if (frameType == 1)
+            {
+                SetFrameType(1);
+            }
+            else
+            {
+                SetFrameType(2);
+            }
+            
+            SetControlImage(chbGuides, "guides_icon");
+            SetControlImage(chbText, "text_icon");
+            SetControlImage(chbWatermark, "watermark_icon");
+
+            SetControlImage(txtbName, "");
+
+            //Debug.WriteLine($"{txtbName.Width}");
+
+            //Debug.WriteLine("Icons updated");
+
+            NameFieldPos(); //call 1
+        }
+
         private void SetControlImage(Control control, string resourceName)
         {
             // Determine the size of the icon based on scaling factor
@@ -288,7 +314,42 @@ namespace FastScreener2
                 _ => 16 // Default to 16px if scalingFactor is unexpected
             };
 
+            int controlW = scalingFactor switch
+            {
+                1 => 31,
+                1.5f => 46,
+                2 => 61,
+                _ => 31 // Default to 16px if scalingFactor is unexpected
+            };
+
+            int controlH = scalingFactor switch
+            {
+                1 => 35,
+                1.5f => 52,
+                2 => 69,
+                _ => 31 // Default to 16px if scalingFactor is unexpected
+            };
+
+            
+            if( control.Name != "txtbName")
+            {
+                control.Width = controlW;
+                control.Height = controlH;
+            }
+
+            if (control.Name == "txtbName")
+            {
+                if (scalingFactor == 1)
+                    control.Width = 347;
+                else if (scalingFactor == 1.5)
+                    control.Width = 520;
+                else if (scalingFactor == 2)
+                    control.Width = 693;
+            }
+
             //Debug.WriteLine($"Icon size: {iconSize}"); // Debugging line to check size
+
+            //MessageBox.Show($"{iconSize}");
 
             byte[] svgData = (byte[])SVGres.ResourceManager.GetObject(resourceName);
 
@@ -361,22 +422,90 @@ namespace FastScreener2
             panelDragBottomR.Height = frameSize;
         }
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
 
-        //on dpi change
+            using (Graphics g = this.CreateGraphics())
+            {
+                currentDpi = g.DpiX;
+            }
+        }
+
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == WM_DPICHANGED)
             {
-                RestartApplication();
+                int newDpi = (int)(m.WParam.ToInt64() & 0xFFFF);
+                var suggestedRect = Marshal.PtrToStructure<RECT>(m.LParam);
+
+                // Move and resize the window to suggested bounds
+                this.Bounds = Rectangle.FromLTRB(
+                    suggestedRect.left,
+                    suggestedRect.top,
+                    suggestedRect.right,
+                    suggestedRect.bottom
+                );
+
+                // Scale the entire form based on DPI change
+                //float scaleFactor = newDpi / currentDpi;
+
+                //this.Scale(new SizeF(scaleFactor, scaleFactor)); //dubl
+                currentDpi = newDpi;
+                
+                scalingFactor = GetScalingFactor(this);
+                
+                //scale icons
+                IconsSizeUpdate();                
+                
+                //new frame size
+                frameSize = Convert.ToInt32(32 * scalingFactor);
+                
+                //resize panels
+                PanelSize();
+                
+                //font resize
+                float dpiScale = newDpi / 96f;
+                FixControlFont(labelDebug, dpiScale);
+                FixControlFont(txtbName, dpiScale);
+
+                this.PerformAutoScale();
+
+                //recalc position Call-2
+                NameFieldPos();
+
+                panelScreenArea.Invalidate();
             }
 
             base.WndProc(ref m);
         }
 
-        private void RestartApplication()
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
         {
-            Process.Start(Application.ExecutablePath); // Start a new instance
-            Application.Exit(); // Close the current instance
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+        }
+
+        private void FixControlFont(Control ctrl, float dpiScale)
+        {
+
+            if (ctrl == null || ctrl.Font == null) return;
+            
+            if(dpiScale == 1.0)
+            {
+                ctrl.Font = new Font(ctrl.Font.FontFamily, 5.5F, ctrl.Font.Style);
+            }
+            else if(dpiScale == 1.5)
+            {
+                ctrl.Font = new Font(ctrl.Font.FontFamily, 8.25F, ctrl.Font.Style);
+            }
+            else if (dpiScale == 2.0)
+            {
+                ctrl.Font = new Font(ctrl.Font.FontFamily, 11.0F, ctrl.Font.Style);
+            }
         }
 
         public float GetScalingFactor(Form form)
@@ -514,10 +643,14 @@ namespace FastScreener2
         {
 
             float scale = 1;
+
             if (dpiScaleMulti == true)
             {
                 scale = scalingFactor; //scaling factor
             }
+
+            //Debug.WriteLine($"Scale: {scale}, frameSize: {frameSize}");
+
 
             int bitmapWidth = panelScreenArea.Width;
             int bitmapHeight = panelScreenArea.Height;
@@ -525,6 +658,7 @@ namespace FastScreener2
             panelScreenArea.BorderStyle = BorderStyle.None;
 
             bool guideIsOn = drawGuides;
+            
             if (guideIsOn)
             {
                 DrawGuideStatus(); //off
@@ -928,6 +1062,8 @@ namespace FastScreener2
         private void buttonMainMenu_Click(object sender, EventArgs e)
         {
             contextMenuMain.Show(Cursor.Position.X, Cursor.Position.Y);
+
+            //tex
         }
 
         private void btnScreen_Click(object sender, EventArgs e)
@@ -1594,10 +1730,9 @@ namespace FastScreener2
             }
         }
 
-        //REPINT !Important
+        //REPAINT !Important
         private void panelScreenArea_Paint(object sender, PaintEventArgs e)
         {
-
             // Render watermark in top-left
             if (watermarkImage != null && drawWatermark)
             {
@@ -1695,6 +1830,8 @@ namespace FastScreener2
             // Apply scaling factor
             int scaledClientW = (int)(clientW * scalingFactor) + frameSize * 2;
             int scaledClientH = (int)(clientH * scalingFactor) + frameSize * 2;
+
+            //MessageBox.Show($"{scalingFactor}, Frame{frameSize}");
 
             // Set client size
             this.ClientSize = new Size(scaledClientW, scaledClientH);
@@ -1945,6 +2082,7 @@ namespace FastScreener2
                     {
                         //User canceled uncheck and don't draw watermark
                         chbWatermark.Checked = false;
+                        mitWatermark.Checked = false;
                         drawWatermark = false;
                     }
                 }
@@ -1956,6 +2094,7 @@ namespace FastScreener2
                 panelScreenArea.Invalidate(); // Refresh to remove watermark
             }
         }
+
         //"top-left", "top-right", "bottom-left", "bottom-right"
         private void UpdateWatermarkPosition(int position)
         {
@@ -2248,6 +2387,11 @@ namespace FastScreener2
             txtbName.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
 
+        private void rangeTrackBar_DoubleClick(object sender, EventArgs e)
+        {
+            rangeTrackBar.UpperValue = 100;
+            rangeTrackBar.LowerValue = 0;
+        }
 
     }
 }

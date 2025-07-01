@@ -1,4 +1,4 @@
-Version: 2.0.4.0
+Version: 2.0.4.1
 Author: Dzmitry Ivanou
 Contact: id.cgtalk@gmail.com
 ---------------------------------

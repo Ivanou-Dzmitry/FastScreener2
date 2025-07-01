@@ -654,7 +654,6 @@ namespace FastScreener2
         }
 
         //CaptureCurrentMonitorScreenshot
-
         public static Bitmap CaptureCurrentMonitorScreenshot(Form form, Panel panelScreenArea)
         {
             if (form == null || panelScreenArea == null) return null;
@@ -750,7 +749,7 @@ namespace FastScreener2
             {
                 inputForm.Text = "Text (45 symbols)";
                 inputForm.Width = (int)(400 * FS2MainForm.scalingFactor);
-                inputForm.Height = (int)(200 * FS2MainForm.scalingFactor);
+                inputForm.Height = (int)(230 * FS2MainForm.scalingFactor);
                 inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 inputForm.StartPosition = FormStartPosition.CenterParent;
                 inputForm.MinimizeBox = false;
@@ -829,10 +828,6 @@ namespace FastScreener2
                 infoLabel.Text = "Font (size, family): " + textSize + ", " + textFontFam;
                 FS2SettingsManager.SetSetting("text_font", textFontFam);
                 FS2SettingsManager.Save();
-
-                // Invert the ForeColor and set it as the BackColor
-
-                
 
                 inputBox.Dock = DockStyle.Fill;
                 panelTop01.Controls.Add(inputBox);
@@ -949,7 +944,7 @@ namespace FastScreener2
 
 
         public static float GetScale(bool dpiScaleMulti)
-        {
+        {            
             return dpiScaleMulti ? FS2MainForm.scalingFactor : 1f;
         }
 

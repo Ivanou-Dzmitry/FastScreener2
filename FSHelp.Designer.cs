@@ -128,6 +128,7 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Help";
             TopMost = true;
+            Shown += formFSHelp_Shown;
             pnlFSHelpHead.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picboxHelp).EndInit();
             panelMainHelp.ResumeLayout(false);

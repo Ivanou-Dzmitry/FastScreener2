@@ -92,7 +92,7 @@ namespace FastScreener2
         }
 
 
-        
+
         //ARROW
         private Arrow arrowSettings;
         private void ArrowSettings()
@@ -101,7 +101,7 @@ namespace FastScreener2
             {
                 Color = FS2SettingsManager.arrowColor,
                 Length = FS2SettingsManager.arrowLenght,
-                Width = FS2SettingsManager.arrowWidth               
+                Width = FS2SettingsManager.arrowWidth
             };
 
             pgSettings.SelectedObject = arrowSettings;
@@ -252,7 +252,7 @@ namespace FastScreener2
             {
                 Position = FS2SettingsManager.watermarkPosition,
                 Size = FS2SettingsManager.watermarkSize,
-                Padding = FS2SettingsManager.watermarkPadding                
+                Padding = FS2SettingsManager.watermarkPadding
             };
 
             pgSettings.SelectedObject = watermarkSettings;
@@ -310,7 +310,7 @@ namespace FastScreener2
 
             if (e.ChangedItem.Label == "Bottom Indent")
             {
-                if(guideSettings.lockIndent == false)
+                if (guideSettings.lockIndent == false)
                 {
                     FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
                     FS2SettingsManager.SetSetting("bottom_indent", guideSettings.bottomIndent.ToString());
@@ -523,13 +523,13 @@ namespace FastScreener2
                 FS2SettingsManager.watermarkSize = watermarkSettings.Size;
                 FS2SettingsManager.SetSetting("watermark_size", watermarkSettings.Size.ToString());
             }
-            
+
             if (e.ChangedItem.Label == "Watermark Padding")
             {
                 FS2SettingsManager.watermarkPadding = watermarkSettings.Padding;
                 FS2SettingsManager.SetSetting("watermark_padding", watermarkSettings.Padding.ToString());
             }
-            
+
             if (e.ChangedItem.Label == "Watermark Position")
             {
                 FS2SettingsManager.watermarkPosition = watermarkSettings.Position;
@@ -599,9 +599,23 @@ namespace FastScreener2
                 FS2SettingsManager.CreateDefaultSettings();
                 FS2SettingsManager.Load();
                 FS2MainForm.isReseted = true; //call reset text
-                Close();                
+                Close();
             }
 
+        }
+
+        private void formFS2Settings_Shown(object sender, EventArgs e)
+        {
+            //need for drag from 1.5 to 1 scale monitor
+            using (Graphics g = this.CreateGraphics())
+            {
+                float dpiScale = g.DpiX / 96f;
+
+                this.ClientSize = new Size(
+                    (int)(510 * dpiScale),
+                    (int)(444 * dpiScale)
+                );
+            }
         }
     }
 }

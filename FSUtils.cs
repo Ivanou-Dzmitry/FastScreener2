@@ -747,9 +747,19 @@ namespace FastScreener2
 
             using (Form inputForm = new Form())
             {
-                inputForm.Text = "Text (45 symbols)";
-                inputForm.Width = (int)(400 * FS2MainForm.scalingFactor);
-                inputForm.Height = (int)(230 * FS2MainForm.scalingFactor);
+                inputForm.Text = "Text (45 symbols)"+ FS2MainForm.scalingFactor;
+
+                // Use DPI-aware graphics object to get DPI
+                using (Graphics g = inputForm.CreateGraphics())
+                {
+                    float dpiScale = inputForm.DeviceDpi / 96f;
+
+                    inputForm.ClientSize = new Size(
+                        (int)(400 * dpiScale),
+                        (int)(230 * dpiScale)
+                    );
+                }
+
                 inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
                 inputForm.StartPosition = FormStartPosition.CenterParent;
                 inputForm.MinimizeBox = false;

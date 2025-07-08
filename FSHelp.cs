@@ -45,5 +45,18 @@ namespace FastScreener2
             }
         }
 
+        private void formFSHelp_Shown(object sender, EventArgs e)
+        {
+            //need for drag from 1.5 to 1 scale monitor
+            using (Graphics g = this.CreateGraphics())
+            {
+                float dpiScale = g.DpiX / 96f;
+
+                this.ClientSize = new Size(
+                    (int)(400 * dpiScale),
+                    (int)(500 * dpiScale)
+                );
+            }
+        }
     }
 }

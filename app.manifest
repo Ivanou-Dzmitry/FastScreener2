@@ -8,8 +8,7 @@
     </security>
   </trustInfo>
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
-    <windowsSettings>
-      <dpiAware>true/PM</dpiAware>
+    <windowsSettings>      
       <dpiAwareness>PerMonitorV2</dpiAwareness>
     </windowsSettings>
   </application>

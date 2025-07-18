@@ -1,10 +1,11 @@
-using System.Drawing.Imaging;
-using static FastScreener2.FSUtils;
-using static FastScreener2.FS2SettingsManager;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using static FastScreener2.MouseHook;
+using System.Drawing.Imaging;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
+using static FastScreener2.FS2SettingsManager;
+using static FastScreener2.FSUtils;
+using static FastScreener2.MouseHook;
 
 
 namespace FastScreener2
@@ -494,9 +495,10 @@ namespace FastScreener2
 
             if (ctrl == null || ctrl.Font == null) return;
             
+            //font size
             if(dpiScale == 1.0)
             {
-                ctrl.Font = new Font(ctrl.Font.FontFamily, 5.5F, ctrl.Font.Style);
+                ctrl.Font = new Font(ctrl.Font.FontFamily, 6.5F, ctrl.Font.Style);
             }
             else if(dpiScale == 1.5)
             {
@@ -609,7 +611,15 @@ namespace FastScreener2
 
         public void SwapPanelsIfNeeded()
         {
-            if (this.Left < 0)
+            var screen = Screen.FromControl(this);
+            var screenBounds = screen.Bounds;
+            var formBounds = this.Bounds;
+
+            bool isOutsideLeft = formBounds.Left < screenBounds.Left;
+            bool isOutsideTop = formBounds.Top < screenBounds.Top;
+
+            // Horizontal swap only if form is crossing the left screen edge
+            if (isOutsideLeft)
             {
                 panelDragLeft.Dock = DockStyle.Right;
                 panelRight.Dock = DockStyle.Left;
@@ -620,7 +630,8 @@ namespace FastScreener2
                 panelRight.Dock = DockStyle.Right;
             }
 
-            if (this.Top < 0)
+            // Vertical swap only if form is crossing the top screen edge
+            if (isOutsideTop)
             {
                 panelDragTop.Dock = DockStyle.Bottom;
                 panelBottom.Dock = DockStyle.Top;
@@ -631,6 +642,8 @@ namespace FastScreener2
                 panelBottom.Dock = DockStyle.Bottom;
             }
         }
+
+
 
         private void SetFileName()
         {

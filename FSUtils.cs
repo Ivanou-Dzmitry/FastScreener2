@@ -658,6 +658,10 @@ namespace FastScreener2
         {
             if (form == null || panelScreenArea == null) return null;
 
+            //Get panel position BEFORE hiding anything
+            Point panelOnScreen = panelScreenArea.PointToScreen(Point.Empty);
+            Size panelSize = panelScreenArea.Size;
+
             Screen screen = Screen.FromControl(form);
             Rectangle bounds = screen.WorkingArea;
             Bitmap screenshot = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
@@ -699,10 +703,8 @@ namespace FastScreener2
                         // Apply transparency key to replace alpha color
                         panelBitmap.MakeTransparent(alphaColor);
 
-                        // Calculate screen-relative panel position
-                        Point panelOnScreen = panelScreenArea.PointToScreen(Point.Empty);
+                        //Use pre-stored location
                         Point offset = new Point(panelOnScreen.X - bounds.X, panelOnScreen.Y - bounds.Y);
-
                         g.DrawImage(panelBitmap, offset);
                     }
                 }

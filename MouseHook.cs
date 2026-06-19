@@ -17,7 +17,7 @@ namespace FastScreener2
         /// Internal callback processing function
         /// </summary>
         private delegate IntPtr MouseHookHandler(int nCode, IntPtr wParam, IntPtr lParam);
-        private MouseHookHandler hookHandler;
+        private MouseHookHandler? hookHandler;
 
         /// <summary>
         /// Function to be called when defined even occurs
@@ -26,15 +26,15 @@ namespace FastScreener2
         public delegate void MouseHookCallback(MSLLHOOKSTRUCT mouseStruct);
 
         #region Events
-        public event MouseHookCallback LeftButtonDown;
-        public event MouseHookCallback LeftButtonUp;
-        public event MouseHookCallback RightButtonDown;
-        public event MouseHookCallback RightButtonUp;
-        public event MouseHookCallback MouseMove;
-        public event MouseHookCallback MouseWheel;
-        public event MouseHookCallback DoubleClick;
-        public event MouseHookCallback MiddleButtonDown;
-        public event MouseHookCallback MiddleButtonUp;
+        public event MouseHookCallback? LeftButtonDown;
+        public event MouseHookCallback? LeftButtonUp;
+        public event MouseHookCallback? RightButtonDown;
+        public event MouseHookCallback? RightButtonUp;
+        public event MouseHookCallback? MouseMove;
+        public event MouseHookCallback? MouseWheel;
+        public event MouseHookCallback? DoubleClick;
+        public event MouseHookCallback? MiddleButtonDown;
+        public event MouseHookCallback? MiddleButtonUp;
         #endregion
 
         /// <summary>
@@ -79,8 +79,13 @@ namespace FastScreener2
         /// <returns>Hook ID</returns>
         private IntPtr SetHook(MouseHookHandler proc)
         {
-            using (ProcessModule module = Process.GetCurrentProcess().MainModule)
+            using (ProcessModule? module = Process.GetCurrentProcess().MainModule)
+            {
+                if (module == null)
+                    throw new InvalidOperationException("Could not resolve the current process' main module.");
+
                 return SetWindowsHookEx(WH_MOUSE_LL, proc, GetModuleHandle(module.ModuleName), 0);
+            }
         }
 
         /// <summary>
@@ -126,7 +131,7 @@ namespace FastScreener2
         {
             if (nCode >= 0)
             {
-                var mouseStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
+                var mouseStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
                 MouseMessages message = (MouseMessages)wParam;
 
                 // Check if your app is in the foreground

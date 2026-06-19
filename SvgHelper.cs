@@ -1,6 +1,6 @@
 ﻿public static class SvgHelper
 {
-    public static Bitmap LoadSvgFromResources(byte[] svgData, int width, int height)
+    public static Bitmap? LoadSvgFromResources(byte[]? svgData, int width, int height)
     {
         if (svgData == null || svgData.Length == 0)
             return null;

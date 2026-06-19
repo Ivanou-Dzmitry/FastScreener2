@@ -35,10 +35,12 @@ namespace FastScreener2
         //for guidlines
         public static bool drawGuides, drawArrows, saveToFile, drawNumber, drawFrame, drawText, showInfoLabel, drawWatermark, clearAfterScreen, dpiScaleMulti;
 
-        public static Font textFont;
+        // These are always populated by Load(), called unconditionally at startup
+        // before anything reads them.
+        public static Font textFont = null!;
         public static string textFontFam = "";
 
-        public static string numberFontFamily;
+        public static string numberFontFamily = null!;
 
         public static bool lockIndent = false;
 
@@ -61,9 +63,10 @@ namespace FastScreener2
 
         public static int currentRes;
 
-        public static string fileFormat;
+        // Always populated by Load(), called unconditionally at startup before anything reads it.
+        public static string fileFormat = null!;
 
-        public static Image watermarkImage = null;
+        public static Image? watermarkImage = null;
         public static string watermarkPath = "";
         public static string watermarkPosition = "";
 
@@ -75,9 +78,31 @@ namespace FastScreener2
                 CreateDefaultSettings();
             }
 
-            XDocument doc = XDocument.Load(settingsFilePath);
-            settings = doc.Root.Elements("Setting")
-                              .ToDictionary(x => x.Attribute("Key").Value, x => x.Attribute("Value").Value);
+            XDocument doc;
+            try
+            {
+                doc = XDocument.Load(settingsFilePath);
+
+                if (doc.Root == null)
+                    throw new InvalidOperationException("Settings file has no root element.");
+            }
+            catch (Exception ex)
+            {
+                // Settings file is empty, truncated, or otherwise corrupted.
+                // Recreate it with defaults instead of crashing on startup.
+                Debug.WriteLine($"Settings file corrupted, recreating defaults: {ex.Message}");
+
+                CreateDefaultSettings();
+                doc = XDocument.Load(settingsFilePath);
+            }
+
+            // doc.Root is guaranteed non-null here: either the initial load already had
+            // one, or the catch block above replaced doc with a freshly created default
+            // document (which always has one). Skip any malformed entries instead of
+            // crashing on a missing Key/Value attribute.
+            settings = doc.Root!.Elements("Setting")
+                              .Where(x => x.Attribute("Key") != null && x.Attribute("Value") != null)
+                              .ToDictionary(x => x.Attribute("Key")!.Value, x => x.Attribute("Value")!.Value);
 
             //load arrow
             try
@@ -220,9 +245,10 @@ namespace FastScreener2
 
                 EnsureSettingExists(key, defaultValue);  // Ensure the setting is present
 
-                if (settings.TryGetValue(key, out string tempValueFromConfig))  // Get value from dictionary
+                if (settings.TryGetValue(key, out string? tempValueFromConfig))  // Get value from dictionary
                 {
-                    string[] tempStringArray = tempValueFromConfig.Split(',');
+                    // Values are never stored as null in this dictionary (see Load()/SetSetting()).
+                    string[] tempStringArray = tempValueFromConfig!.Split(',');
 
                     try
                     {
@@ -246,9 +272,9 @@ namespace FastScreener2
 
 
             //res on close
-            if (settings.TryGetValue("res_on_close", out string tempValueFromConfig2))
+            if (settings.TryGetValue("res_on_close", out string? tempValueFromConfig2))
             {
-                string[] tempStringArray = tempValueFromConfig2.Split(','); // Fix here
+                string[] tempStringArray = tempValueFromConfig2!.Split(','); // Fix here
 
                 // Set client size
                 try
@@ -452,7 +478,87 @@ namespace FastScreener2
                     new XAttribute("Key", kv.Key),
                     new XAttribute("Value", kv.Value)))));
 
-            doc.Save(settingsFilePath);
+            // Write to a temp file first, then swap it in atomically so a crash
+            // or interrupted write can never leave settingsFilePath empty/truncated.
+            string tempFilePath = settingsFilePath + ".tmp";
+            doc.Save(tempFilePath);
+
+            if (File.Exists(settingsFilePath))
+                File.Replace(tempFilePath, settingsFilePath, null);
+            else
+                File.Move(tempFilePath, settingsFilePath);
+        }
+
+        // --- Named profiles (different visual setups per project) ---
+
+        private static string ProfilesDirectory =>
+            Path.Combine(Path.GetDirectoryName(Path.GetFullPath(settingsFilePath)) ?? ".", "profiles");
+
+        private static string GetProfileFilePath(string profileName) =>
+            Path.Combine(ProfilesDirectory, profileName + ".xml");
+
+        // List available profile names (without extension), alphabetically
+        public static List<string> GetProfileNames()
+        {
+            if (!Directory.Exists(ProfilesDirectory))
+                return new List<string>();
+
+            // GetFileNameWithoutExtension is nullable only for a null/empty input path;
+            // GetFiles never returns those, so every result here is a real file name.
+            return Directory.GetFiles(ProfilesDirectory, "*.xml")
+                             .Select(Path.GetFileNameWithoutExtension)
+                             .Where(name => name != null)
+                             .Select(name => name!)
+                             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                             .ToList();
+        }
+
+        // Save the current in-memory settings as a named profile
+        public static void SaveProfile(string profileName)
+        {
+            Directory.CreateDirectory(ProfilesDirectory);
+
+            XDocument doc = new XDocument(new XElement("Settings",
+                settings.Select(kv => new XElement("Setting",
+                    new XAttribute("Key", kv.Key),
+                    new XAttribute("Value", kv.Value)))));
+
+            string profilePath = GetProfileFilePath(profileName);
+            string tempFilePath = profilePath + ".tmp";
+            doc.Save(tempFilePath);
+
+            if (File.Exists(profilePath))
+                File.Replace(tempFilePath, profilePath, null);
+            else
+                File.Move(tempFilePath, profilePath);
+        }
+
+        // Load a named profile and make it the active settings
+        public static void LoadProfile(string profileName)
+        {
+            string profilePath = GetProfileFilePath(profileName);
+
+            if (!File.Exists(profilePath))
+                throw new FileNotFoundException($"Profile '{profileName}' was not found.", profilePath);
+
+            string tempFilePath = settingsFilePath + ".tmp";
+            File.Copy(profilePath, tempFilePath, overwrite: true);
+
+            if (File.Exists(settingsFilePath))
+                File.Replace(tempFilePath, settingsFilePath, null);
+            else
+                File.Move(tempFilePath, settingsFilePath);
+
+            Load();
+        }
+
+        // Delete a named profile
+        public static void DeleteProfile(string profileName)
+        {
+            string profilePath = GetProfileFilePath(profileName);
+
+            if (File.Exists(profilePath))
+                File.Delete(profilePath);
         }
 
         // Update or add a setting value
@@ -464,7 +570,7 @@ namespace FastScreener2
         // Get a setting value
         public static string GetSetting(string key, string defaultValue = "")
         {
-            return settings.TryGetValue(key, out string value) ? value : defaultValue;
+            return settings.TryGetValue(key, out string? value) ? value! : defaultValue;
         }
 
         // Create default settings file if it does not exist
@@ -531,10 +637,13 @@ namespace FastScreener2
                 settings[key] = defaultValue; // Update in dictionary
 
                 XDocument doc = XDocument.Load(settingsFilePath);
-                XElement root = doc.Root;
+                XElement? root = doc.Root;
+
+                if (root == null)
+                    return;
 
                 // Check if the key exists in XML before adding
-                XElement existingSetting = root.Elements("Setting")
+                XElement? existingSetting = root.Elements("Setting")
                                                .FirstOrDefault(x => x.Attribute("Key")?.Value == key);
 
                 if (existingSetting == null)
@@ -559,14 +668,14 @@ namespace FastScreener2
         public static void SetCurResBasedOnResOnClose()
         {
             // Get the value of res_on_close from settings
-            if (settings.TryGetValue("res_on_close", out string resOnCloseValue))
+            if (settings.TryGetValue("res_on_close", out string? resOnCloseValue))
             {
                 // Loop through the resolutions (res1 to res4)
                 for (int i = 1; i <= 4; i++)
                 {
                     string key = "res" + i;
 
-                    if (settings.TryGetValue(key, out string resValue))
+                    if (settings.TryGetValue(key, out string? resValue))
                     {
                         // Check if the current resolution matches the res_on_close value
                         if (resValue == resOnCloseValue)

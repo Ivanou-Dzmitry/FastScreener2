@@ -15,7 +15,7 @@ namespace FastScreener2
         [ThreadStatic]
         private static bool _showingMessage;
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace FastScreener2
         }
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -182,7 +182,7 @@ namespace FastScreener2
                 }
             }
 
-            public event PropertyChangedEventHandler PropertyChanged;
+            public event PropertyChangedEventHandler? PropertyChanged;
 
             private void OnPropertyChanged(string propertyName)
             {
@@ -194,17 +194,17 @@ namespace FastScreener2
         {
             private readonly List<string> validValues = new List<string> { "png", "jpg" };
 
-            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context)
             {
                 return new StandardValuesCollection(validValues);
             }
 
-            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext? context)
             {
                 return true;
             }
 
-            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
             {
                 if (value is string str)
                 {
@@ -231,19 +231,19 @@ namespace FastScreener2
             private readonly List<string> validValues = new List<string> { "3x3", "4x4", "Custom" };
 
             // GetStandardValues will provide the list of allowed values
-            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context)
             {
                 return new StandardValuesCollection(validValues);
             }
 
             // Check if StandardValues are supported
-            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext? context)
             {
                 return true;
             }
 
             // ConvertFrom will ensure that only valid values are accepted
-            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
             {
                 if (value is string str)
                 {
@@ -271,19 +271,19 @@ namespace FastScreener2
         private readonly List<string> validValues = new List<string> { "Free", "Fixed"};
 
         // GetStandardValues will provide the list of allowed values
-        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context)
         {
             return new StandardValuesCollection(validValues);
         }
 
         // Check if StandardValues are supported
-        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext? context)
         {
             return true;
         }
 
         // ConvertFrom will ensure that only valid values are accepted
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
             if (value is string str)
             {
@@ -311,19 +311,19 @@ namespace FastScreener2
         private readonly List<string> validValues = new List<string> { "top-left", "top-right", "bottom-left", "bottom-right" };
 
         // GetStandardValues will provide the list of allowed values
-        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context)
         {
             return new StandardValuesCollection(validValues);
         }
 
         // Check if StandardValues are supported
-        public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext? context)
         {
             return true;
         }
 
         // ConvertFrom will ensure that only valid values are accepted
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
             if (value is string str)
             {
@@ -352,13 +352,13 @@ namespace FastScreener2
             private int topindent, bottomindent, leftindent, rightindent;
             private Color color;
             private bool lockind;
-            private string type;
+            private string type = "";
 
             [Category("1. General Settings")]
             [DisplayName("Guide Type")]
             [Description("Choose guides type. 3x3, 4x4 divides the area into equal parts, custom - set arbitrary indent from the edge")]
-            [TypeConverter(typeof(GuideTypeConverter))] // Apply the custom TypeConverter here    
-            public string Type
+            [TypeConverter(typeof(GuideTypeConverter))] // Apply the custom TypeConverter here
+            public required string Type
             {
                 get => type;
                 set
@@ -496,7 +496,7 @@ namespace FastScreener2
             }
 
 
-            public event PropertyChangedEventHandler PropertyChanged;
+            public event PropertyChangedEventHandler? PropertyChanged;
 
             private void OnPropertyChanged(string propertyName)
             {
@@ -509,14 +509,14 @@ namespace FastScreener2
     // FILE
     public class FileFormat
     {
-        private string filetype;
+        private string filetype = "";
         private int filecompess;
 
         [Category("File")]
         [Description("Chose file format. Default - png")]
         [DisplayName("Format")]
         [TypeConverter(typeof(FileFormatTypeConverter))]
-        public string fileType
+        public required string fileType
         {
             get => filetype;
             set
@@ -546,7 +546,7 @@ namespace FastScreener2
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -561,7 +561,7 @@ namespace FastScreener2
         private int frameheight;
         private int strokewidth;
         private Color color;
-        private string type;
+        private string type = "";
 
         [Category("2. Fixed Frame Settings")]
         [Description("Frame width (in px). Max - screenshot width/2, min - 32. Default 80.")]
@@ -645,7 +645,7 @@ namespace FastScreener2
         [DisplayName("Frame Type")]
         [Description("Choose frame type. Fixed (click and draw with fixed size)  or Free (drag draw). Set W and H for Fixed type.")]
         [TypeConverter(typeof(FrameTypeConverter))]
-        public string Type
+        public required string Type
         {
             get => type;
             set
@@ -656,7 +656,7 @@ namespace FastScreener2
         }
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -709,7 +709,7 @@ namespace FastScreener2
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -736,7 +736,7 @@ namespace FastScreener2
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -919,7 +919,7 @@ namespace FastScreener2
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -932,7 +932,7 @@ namespace FastScreener2
     {
         private int size;
         private int padding;
-        private string position;
+        private string position = "";
 
         [Category("Watermark Settings")]
         [Description("Set the watermark size (50–200 px). For rectangular images, the larger side is used. Default: 50. ")]
@@ -984,7 +984,7 @@ namespace FastScreener2
         [DisplayName("Watermark Position")]
         [Description("Choose watermark position")]
         [TypeConverter(typeof(WatermarkPositionConverter))]
-        public string Position
+        public required string Position
         {
             get => position;
             set
@@ -995,7 +995,7 @@ namespace FastScreener2
         }
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -1007,7 +1007,7 @@ namespace FastScreener2
     {
         private static bool messageBoxShown = false; // Static flag to track message box display
 
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
             if (sourceType == typeof(string))
             {
@@ -1016,7 +1016,7 @@ namespace FastScreener2
             return base.CanConvertFrom(context, sourceType);
         }
 
-        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object value)
         {
             if (value is string str)
             {
@@ -1041,16 +1041,16 @@ namespace FastScreener2
             return base.ConvertFrom(context, culture, value);
         }
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
         {
             return destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        public override object? ConvertTo(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object? value, Type destinationType)
         {
             if (destinationType == typeof(string))
             {
-                return value.ToString();
+                return value?.ToString() ?? "";
             }
             return base.ConvertTo(context, culture, value, destinationType);
         }

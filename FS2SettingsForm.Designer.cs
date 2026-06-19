@@ -33,6 +33,11 @@
             lboxSetCat = new ListBox();
             btnOK = new Button();
             pnlSetBottom = new Panel();
+            lblProfile = new Label();
+            cmbProfiles = new ComboBox();
+            btnLoadProfile = new Button();
+            btnSaveProfileAs = new Button();
+            btnDeleteProfile = new Button();
             btnReset = new Button();
             pnlSetHeader = new Panel();
             labelSetHeader = new Label();
@@ -48,7 +53,7 @@
             pgSettings.Location = new Point(180, 54);
             pgSettings.Margin = new Padding(4);
             pgSettings.Name = "pgSettings";
-            pgSettings.Size = new Size(564, 504);
+            pgSettings.Size = new Size(564, 490);
             pgSettings.TabIndex = 0;
             // 
             // lboxSetCat
@@ -70,7 +75,7 @@
             // 
             btnOK.BackColor = Color.WhiteSmoke;
             btnOK.FlatStyle = FlatStyle.Flat;
-            btnOK.Location = new Point(591, 27);
+            btnOK.Location = new Point(591, 70);
             btnOK.Margin = new Padding(4);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(153, 52);
@@ -82,20 +87,83 @@
             // pnlSetBottom
             // 
             pnlSetBottom.BackColor = SystemColors.Control;
+            pnlSetBottom.Controls.Add(lblProfile);
+            pnlSetBottom.Controls.Add(cmbProfiles);
+            pnlSetBottom.Controls.Add(btnLoadProfile);
+            pnlSetBottom.Controls.Add(btnSaveProfileAs);
+            pnlSetBottom.Controls.Add(btnDeleteProfile);
             pnlSetBottom.Controls.Add(btnReset);
             pnlSetBottom.Controls.Add(btnOK);
             pnlSetBottom.Dock = DockStyle.Bottom;
-            pnlSetBottom.Location = new Point(0, 558);
+            pnlSetBottom.Location = new Point(0, 552);
             pnlSetBottom.Margin = new Padding(4);
             pnlSetBottom.Name = "pnlSetBottom";
-            pnlSetBottom.Size = new Size(764, 108);
+            pnlSetBottom.Size = new Size(764, 164);
             pnlSetBottom.TabIndex = 3;
+            // 
+            // lblProfile
+            // 
+            lblProfile.AutoSize = true;
+            lblProfile.Location = new Point(232, 32);
+            lblProfile.Margin = new Padding(4);
+            lblProfile.Name = "lblProfile";
+            lblProfile.Size = new Size(66, 25);
+            lblProfile.TabIndex = 4;
+            lblProfile.Text = "Profile:";
+            // 
+            // cmbProfiles
+            // 
+            cmbProfiles.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbProfiles.Location = new Point(300, 29);
+            cmbProfiles.Margin = new Padding(4);
+            cmbProfiles.Name = "cmbProfiles";
+            cmbProfiles.Size = new Size(248, 33);
+            cmbProfiles.TabIndex = 5;
+            // 
+            // btnLoadProfile
+            // 
+            btnLoadProfile.BackColor = Color.WhiteSmoke;
+            btnLoadProfile.FlatStyle = FlatStyle.Flat;
+            btnLoadProfile.Location = new Point(232, 70);
+            btnLoadProfile.Margin = new Padding(4);
+            btnLoadProfile.Name = "btnLoadProfile";
+            btnLoadProfile.Size = new Size(100, 52);
+            btnLoadProfile.TabIndex = 6;
+            btnLoadProfile.Text = "Load";
+            btnLoadProfile.UseVisualStyleBackColor = false;
+            btnLoadProfile.Click += btnLoadProfile_Click;
+            // 
+            // btnSaveProfileAs
+            // 
+            btnSaveProfileAs.BackColor = Color.WhiteSmoke;
+            btnSaveProfileAs.FlatStyle = FlatStyle.Flat;
+            btnSaveProfileAs.Location = new Point(340, 70);
+            btnSaveProfileAs.Margin = new Padding(4);
+            btnSaveProfileAs.Name = "btnSaveProfileAs";
+            btnSaveProfileAs.Size = new Size(100, 52);
+            btnSaveProfileAs.TabIndex = 7;
+            btnSaveProfileAs.Text = "Save as...";
+            btnSaveProfileAs.UseVisualStyleBackColor = false;
+            btnSaveProfileAs.Click += btnSaveProfileAs_Click;
+            // 
+            // btnDeleteProfile
+            // 
+            btnDeleteProfile.BackColor = Color.WhiteSmoke;
+            btnDeleteProfile.FlatStyle = FlatStyle.Flat;
+            btnDeleteProfile.Location = new Point(448, 70);
+            btnDeleteProfile.Margin = new Padding(4);
+            btnDeleteProfile.Name = "btnDeleteProfile";
+            btnDeleteProfile.Size = new Size(100, 52);
+            btnDeleteProfile.TabIndex = 8;
+            btnDeleteProfile.Text = "Delete";
+            btnDeleteProfile.UseVisualStyleBackColor = false;
+            btnDeleteProfile.Click += btnDeleteProfile_Click;
             // 
             // btnReset
             // 
             btnReset.BackColor = Color.DimGray;
             btnReset.FlatStyle = FlatStyle.Flat;
-            btnReset.Location = new Point(20, 27);
+            btnReset.Location = new Point(20, 70);
             btnReset.Margin = new Padding(4);
             btnReset.Name = "btnReset";
             btnReset.Size = new Size(153, 52);
@@ -159,7 +227,7 @@
             // 
             AutoScaleDimensions = new SizeF(144F, 144F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            ClientSize = new Size(764, 666);
+            ClientSize = new Size(764, 716);
             Controls.Add(pnlSetHeader);
             Controls.Add(pnlSetBottom);
             Controls.Add(lboxSetCat);
@@ -173,6 +241,7 @@
             TopMost = true;
             Shown += formFS2Settings_Shown;
             pnlSetBottom.ResumeLayout(false);
+            pnlSetBottom.PerformLayout();
             pnlSetHeader.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
@@ -189,5 +258,10 @@
         private Label labelSetHeader;
         private PictureBox pictureBox1;
         private Button btnReset;
+        private Label lblProfile;
+        private ComboBox cmbProfiles;
+        private Button btnLoadProfile;
+        private Button btnSaveProfileAs;
+        private Button btnDeleteProfile;
     }
 }

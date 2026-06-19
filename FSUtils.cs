@@ -50,7 +50,7 @@ namespace FastScreener2
         public static List<TextItem> drawnTexts = new List<TextItem>();
 
         //for DPI
-        public static Image ScaleImage(Image originalImage, float scaleFactor)
+        public static Image? ScaleImage(Image? originalImage, float scaleFactor)
         {
             if (originalImage == null) return null;
 
@@ -97,15 +97,15 @@ namespace FastScreener2
         }
 
         // Mouse Down: Start dragging
-        private void Panel_MouseDown(object sender, MouseEventArgs e)
+        private void Panel_MouseDown(object? sender, MouseEventArgs e)
         {
             dragging = true;
             // Get the click position relative to the screen
-            startPoint = ((Control)sender).PointToScreen(e.Location);
+            startPoint = ((Control)sender!).PointToScreen(e.Location);
         }
 
         // Mouse Move: Move the Form
-        private void Panel_MouseMove(object sender, MouseEventArgs e)
+        private void Panel_MouseMove(object? sender, MouseEventArgs e)
         {
             if (dragging)
             {
@@ -113,7 +113,7 @@ namespace FastScreener2
                 if (sender is Control control)
                 {
                     // Get the form that contains the control
-                    Form form = control.FindForm();
+                    Form? form = control.FindForm();
 
                     if (form != null)
                     {
@@ -138,7 +138,7 @@ namespace FastScreener2
 
 
         // Mouse Up: Stop dragging
-        private void Panel_MouseUp(object sender, MouseEventArgs e)
+        private void Panel_MouseUp(object? sender, MouseEventArgs e)
         {
             dragging = false;
             FS2MainForm.Instance?.SwapPanelsIfNeeded();
@@ -362,8 +362,10 @@ namespace FastScreener2
             }
 
             drawBrush.Dispose();
+            outlineBrush.Dispose();
             drawFont.Dispose();
-            e.Graphics.Dispose();
+            outlineFont.Dispose();
+            drawFormat.Dispose();
         }
 
 
@@ -417,16 +419,13 @@ namespace FastScreener2
         {
             float scale = FSUtils.GetScale(dpiScaleMulti);
 
-            var framePen = new Pen(frameColor, frameStrokeWidth*scale);
-           
-            //avoid -
-            int width = Math.Abs(FS2MainForm.currentRectangle.Width);
-            int height = Math.Abs(FS2MainForm.currentRectangle.Height);
-
-            foreach (var rectangle in drawnRectangles)
+            using (var framePen = new Pen(frameColor, frameStrokeWidth*scale))
             {
-                e.Graphics.DrawRectangle(framePen, rectangle);
-            }         
+                foreach (var rectangle in drawnRectangles)
+                {
+                    e.Graphics.DrawRectangle(framePen, rectangle);
+                }
+            }
         }
 
         //draw Watermark
@@ -654,7 +653,7 @@ namespace FastScreener2
         }
 
         //CaptureCurrentMonitorScreenshot
-        public static Bitmap CaptureCurrentMonitorScreenshot(Form form, Panel panelScreenArea)
+        public static Bitmap? CaptureCurrentMonitorScreenshot(Form? form, Panel? panelScreenArea)
         {
             if (form == null || panelScreenArea == null) return null;
 
@@ -671,7 +670,7 @@ namespace FastScreener2
             var originalBackColor = panelScreenArea.BackColor;
 
             // Set transparent-like background
-            Color alphaColor = Color.FromArgb(255, 1, 0, 1); // same as your ALPHA_KEY_COLOR
+            Color alphaColor = Color.FromArgb(255, 1, 0, 1); // same as ALPHA_KEY_COLOR
             panelScreenArea.BorderStyle = BorderStyle.None;
             panelScreenArea.BackColor = alphaColor;
 
@@ -725,7 +724,7 @@ namespace FastScreener2
         }
 
 
-        public static string PromptForText(out Color textColor, out float textSize, out Font textFont)
+        public static string? PromptForText(out Color textColor, out float textSize, out Font textFont)
         {
             //set input values
             textColor = FS2SettingsManager.textColor;
@@ -838,7 +837,7 @@ namespace FastScreener2
 
 
                 infoLabel.Text = "Font (size, family): " + textSize + ", " + textFontFam;
-                FS2SettingsManager.SetSetting("text_font", textFontFam);
+                FS2SettingsManager.SetSetting("text_font", textFontFam ?? "");
                 FS2SettingsManager.Save();
 
                 inputBox.Dock = DockStyle.Fill;
@@ -871,10 +870,7 @@ namespace FastScreener2
                 inputForm.AcceptButton = okButton;
                 inputForm.CancelButton = cancelButton;
 
-                if(drawText != null)
-                {
-                    inputBox.Text = FS2MainForm.drawnTextString;
-                }
+                inputBox.Text = FS2MainForm.drawnTextString;
 
                 return inputForm.ShowDialog() == DialogResult.OK ? inputBox.Text : null;
             }

@@ -12,7 +12,7 @@ namespace FastScreener2
 {
     public partial class FS2MainForm : Form
     {
-        //alpha color to remove 
+        //alpha color to remove
         private Color ALPHA_KEY_COLOR = Color.FromArgb(255, 1, 0, 1);
 
         //for scaling
@@ -60,7 +60,9 @@ namespace FastScreener2
 
         private string fileName = "";
 
-        public static FS2MainForm Instance { get; private set; }
+        // Set unconditionally in the constructor below, before anything else runs;
+        // there is only ever one instance (enforced by the startup mutex in Program.cs).
+        public static FS2MainForm Instance { get; private set; } = null!;
         private const int WM_DPICHANGED = 0x02E0;
         private float currentDpi = 96f; // Default DPI
         private Dictionary<Control, float> originalFontSizes = new();
@@ -87,7 +89,8 @@ namespace FastScreener2
         private int arT, frT, guT, watP = 0; //for cycles
 
         string appName = "FastScreener";
-        public static string version;
+        // Set unconditionally in the constructor below, before anything reads it.
+        public static string version = null!;
 
         public enum DrawType
         {
@@ -99,8 +102,8 @@ namespace FastScreener2
 
         public class UndoItem
         {
-            public DrawType Type;
-            public object Data;
+            public required DrawType Type;
+            public required object Data;
         }
 
         public FS2MainForm()
@@ -231,10 +234,14 @@ namespace FastScreener2
             ShowInfo("start");
 
             //upd version in file
-            string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-            string helpFilePath = Path.Combine(projectRoot, "fs2_help.txt");
-            //Debug.WriteLine(helpFilePath);
-            UpdateHelpFileVersion(helpFilePath);
+            string? projectRoot = Directory.GetParent(AppContext.BaseDirectory)?.Parent?.Parent?.FullName;
+
+            if (projectRoot != null)
+            {
+                string helpFilePath = Path.Combine(projectRoot, "fs2_help.txt");
+                //Debug.WriteLine(helpFilePath);
+                UpdateHelpFileVersion(helpFilePath);
+            }
 
             MenuItemUpdate();
 
@@ -352,13 +359,13 @@ namespace FastScreener2
 
             //MessageBox.Show($"{iconSize}");
 
-            byte[] svgData = (byte[])SVGres.ResourceManager.GetObject(resourceName);
+            byte[]? svgData = (byte[]?)SVGres.ResourceManager.GetObject(resourceName);
 
             if (svgData == null)
                 return;
 
             // Load and render the SVG into a Bitmap
-            Bitmap finalImage = SvgHelper.LoadSvgFromResources(svgData, iconSize, iconSize);
+            Bitmap? finalImage = SvgHelper.LoadSvgFromResources(svgData, iconSize, iconSize);
 
             if (finalImage != null)
             {
@@ -372,6 +379,10 @@ namespace FastScreener2
                 {
                     checkBox.Image = finalImage;
                     checkBox.ImageAlign = ContentAlignment.MiddleCenter;
+                }
+                else
+                {
+                    finalImage.Dispose();
                 }
             }
         }
@@ -750,7 +761,7 @@ namespace FastScreener2
 
 
             // Set file extension and ImageCodecInfo
-            ImageCodecInfo codec = null;
+            ImageCodecInfo? codec = null;
             ImageFormat imageFormat = ImageFormat.Png; // default
 
             //select format
@@ -1011,7 +1022,7 @@ namespace FastScreener2
             }
         }
 
-        private void OnApplicationExit(object sender, EventArgs e)
+        private void OnApplicationExit(object? sender, EventArgs e)
         {
             keyboardHook.KeyDown -= new KeyboardHook.KeyboardHookCallback(keyboardHook_KeyDown);
             keyboardHook.Uninstall();
@@ -1192,7 +1203,7 @@ namespace FastScreener2
         string onMessage,
         string offMessage,
         string settingsKey,
-        Control targetControl = null,
+        Control? targetControl = null,
         bool? controlState = null)
         {
             if (menuItem.CheckState == CheckState.Checked)
@@ -1482,7 +1493,7 @@ namespace FastScreener2
                 isAppActive = false; //for mouse hook
 
                 //call text diallog
-                string userText = PromptForText(out textColor, out textSize, out textFont);
+                string? userText = PromptForText(out textColor, out textSize, out textFont);
 
                 if (!string.IsNullOrWhiteSpace(userText))
                 {
@@ -1746,6 +1757,14 @@ namespace FastScreener2
         //REPAINT !Important
         private void panelScreenArea_Paint(object sender, PaintEventArgs e)
         {
+            // Overlay sits on a TransparencyKey background, which has no real alpha blending:
+            // anti-aliased strokes blend their edge pixels toward the key color, which then shows
+            // as a visible colored fringe (regardless of which color is chosen) since that blended
+            // pixel never matches the key exactly. Keep strokes (arrows/frames/guides) hard-edged
+            // here; methods that need readable anti-aliased text (numbers/text) set their own
+            // SmoothingMode and are unaffected by this baseline.
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+
             // Render watermark in top-left
             if (watermarkImage != null && drawWatermark)
             {
@@ -2008,7 +2027,11 @@ namespace FastScreener2
 
             labelDebug.Visible = false;
 
-            Bitmap captureBitmap = CaptureCurrentMonitorScreenshot(this, panelScreenArea);
+            Bitmap? captureBitmap = CaptureCurrentMonitorScreenshot(this, panelScreenArea);
+
+            if (captureBitmap == null)
+                return;
+
             Clipboard.SetImage(captureBitmap);
 
             if (guideIsOn)

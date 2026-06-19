@@ -17,7 +17,7 @@ namespace FastScreener2
         private bool isDragging = false;
         private int thumbY;  // Y position of the thumb
 
-        public event EventHandler ThumbMoved;
+        public event EventHandler? ThumbMoved;
 
         // Customizable colors
         public Color TrackColor { get; set; } = Color.LightGray;

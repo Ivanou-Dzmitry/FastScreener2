@@ -37,11 +37,19 @@ namespace FastScreener2
             // Specify the path of the embedded resource (namespace + filename)
             string resourceName = "FastScreener2.fs2_help.txt"; // Adjust namespace accordingly
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
+            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
             {
-                // Read the content and set it to the RichTextBox
-                richTextBoxHelp.Text = reader.ReadToEnd();
+                if (stream == null)
+                {
+                    richTextBoxHelp.Text = $"Help text resource '{resourceName}' was not found.";
+                    return;
+                }
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    // Read the content and set it to the RichTextBox
+                    richTextBoxHelp.Text = reader.ReadToEnd();
+                }
             }
         }
 

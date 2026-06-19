@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,6 +26,139 @@ namespace FastScreener2
             FSUtils utils = new FSUtils();
             utils.AttachDragEvents(pnlSetHeader);
             utils.AttachDragEvents(pnlSetBottom);
+
+            RefreshProfileList();
+        }
+
+        // --- Settings profiles (different visual setups per project) ---
+
+        private void RefreshProfileList(string? selectName = null)
+        {
+            cmbProfiles.Items.Clear();
+            cmbProfiles.Items.AddRange(FS2SettingsManager.GetProfileNames().ToArray());
+
+            if (selectName != null && cmbProfiles.Items.Contains(selectName))
+                cmbProfiles.SelectedItem = selectName;
+            else if (cmbProfiles.Items.Count > 0)
+                cmbProfiles.SelectedIndex = 0;
+        }
+
+        private void RefreshCurrentCategoryView()
+        {
+            // Re-bind the PropertyGrid to the freshly loaded settings for the currently visible category
+            lboxSetCat_Click(lboxSetCat, EventArgs.Empty);
+        }
+
+        private void btnLoadProfile_Click(object sender, EventArgs e)
+        {
+            if (cmbProfiles.SelectedItem is not string profileName)
+                return;
+
+            try
+            {
+                FS2SettingsManager.LoadProfile(profileName);
+                RefreshCurrentCategoryView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to load profile '{profileName}':\n{ex.Message}", "Load Profile",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnSaveProfileAs_Click(object sender, EventArgs e)
+        {
+            string? profileName = PromptForProfileName(this, "Save Profile As", "Profile name:");
+
+            if (string.IsNullOrWhiteSpace(profileName))
+                return;
+
+            if (profileName.Any(c => Path.GetInvalidFileNameChars().Contains(c)))
+            {
+                MessageBox.Show("Profile name contains invalid characters.", "Save Profile As",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (FS2SettingsManager.GetProfileNames().Contains(profileName))
+            {
+                var overwrite = MessageBox.Show(
+                    $"Profile '{profileName}' already exists. Overwrite it?",
+                    "Save Profile As", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                if (overwrite != DialogResult.OK)
+                    return;
+            }
+
+            FS2SettingsManager.Save();
+            FS2SettingsManager.SaveProfile(profileName);
+            RefreshProfileList(profileName);
+        }
+
+        private void btnDeleteProfile_Click(object sender, EventArgs e)
+        {
+            if (cmbProfiles.SelectedItem is not string profileName)
+                return;
+
+            var result = MessageBox.Show(
+                $"Delete profile '{profileName}'? This cannot be undone.",
+                "Delete Profile", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+            if (result != DialogResult.OK)
+                return;
+
+            FS2SettingsManager.DeleteProfile(profileName);
+            RefreshProfileList();
+        }
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
+
+        private static string? PromptForProfileName(Form owner, string title, string prompt)
+        {
+            using Form inputForm = new Form();
+            inputForm.Text = title;
+            inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            inputForm.StartPosition = FormStartPosition.CenterParent;
+            inputForm.MinimizeBox = false;
+            inputForm.MaximizeBox = false;
+            inputForm.TopMost = true;
+            inputForm.Owner = owner;
+
+            // AutoScaleMode.Dpi kept fighting us across this whole dialog (see git
+            // history) — simpler and more predictable to hardcode two fixed layouts
+            // and pick one based on the owner's DPI tier, with no auto-rescale at all.
+            inputForm.AutoScaleMode = AutoScaleMode.None;
+
+            // owner.DeviceDpi is a cached .NET value that doesn't reliably update when
+            // the window is dragged to a different-DPI monitor under this app's current
+            // Per-Monitor V1 awareness. GetDpiForWindow asks Windows directly, right now,
+            // for the DPI of whichever monitor the owner window currently sits on.
+            uint currentDpi = GetDpiForWindow(owner.Handle);
+            bool isHighDpi = currentDpi > 96;
+
+            Label label = new Label() { Left = 16, Top = 20, Width = 388, Height = 24, Text = prompt };
+            TextBox inputBox = new TextBox() { Left = 16, Top = 52, Width = 388 };
+            Button okButton, cancelButton;
+
+            if (isHighDpi)
+            {
+                inputForm.ClientSize = new Size(420, 220);
+                okButton = new Button() { Text = "OK", Left = 116, Width = 90, Top = 140, Height = 32, DialogResult = DialogResult.OK };
+                cancelButton = new Button() { Text = "Cancel", Left = 214, Width = 90, Top = 140, Height = 32, DialogResult = DialogResult.Cancel };
+            }
+            else
+            {
+                inputForm.ClientSize = new Size(620, 320);
+                okButton = new Button() { Text = "OK", Left = 156, Width = 110, Top = 140, Height = 40, DialogResult = DialogResult.OK };
+                cancelButton = new Button() { Text = "Cancel", Left = 280, Width = 110, Top = 140, Height = 40, DialogResult = DialogResult.Cancel };
+            }
+
+            inputForm.Controls.AddRange(new Control[] { label, inputBox, okButton, cancelButton });
+            inputForm.AcceptButton = okButton;
+            inputForm.CancelButton = cancelButton;
+
+            return inputForm.ShowDialog() == DialogResult.OK ? inputBox.Text.Trim() : null;
         }
 
         private void lboxSetCat_Click(object sender, EventArgs e)
@@ -75,7 +209,7 @@ namespace FastScreener2
 
         // --- Setting Property Grid ---
         //Appearance
-        private AppAppearance appearanceSettings;
+        private AppAppearance? appearanceSettings;
 
         private void AppearanceSettings()
         {
@@ -94,7 +228,7 @@ namespace FastScreener2
 
 
         //ARROW
-        private Arrow arrowSettings;
+        private Arrow? arrowSettings;
         private void ArrowSettings()
         {
             arrowSettings = new Arrow
@@ -109,7 +243,7 @@ namespace FastScreener2
         }
 
         //GUIDES
-        private Guide guideSettings;
+        private Guide? guideSettings;
         private void GuideSettings()
         {
             int tempTypeInt = FS2SettingsManager.guidelineType;
@@ -146,7 +280,7 @@ namespace FastScreener2
         }
 
         //FILE
-        private FileFormat fileFormat;
+        private FileFormat? fileFormat;
         private void FileSettings()
         {
             fileFormat = new FileFormat()
@@ -160,7 +294,7 @@ namespace FastScreener2
         }
 
         //Frame
-        private Frame frameSettings;
+        private Frame? frameSettings;
         private void FrameSettings()
         {
 
@@ -192,7 +326,7 @@ namespace FastScreener2
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
-        private Numbers numberSettings;
+        private Numbers? numberSettings;
 
         private void NumberSettings()
         {
@@ -207,7 +341,7 @@ namespace FastScreener2
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
-        private Resolutions resSettings;
+        private Resolutions? resSettings;
 
         private void ResSettings()
         {
@@ -231,7 +365,7 @@ namespace FastScreener2
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
-        private Bars barsSettings;
+        private Bars? barsSettings;
 
         private void BarSettings()
         {
@@ -244,7 +378,7 @@ namespace FastScreener2
             pgSettings.PropertyValueChanged += PgSettings_PropertyValueChanged;
         }
 
-        private Watermark watermarkSettings;
+        private Watermark? watermarkSettings;
 
         private void WatermarkSettings()
         {
@@ -261,104 +395,107 @@ namespace FastScreener2
 
 
         // --- Save Changes Automatically ---
-        private void PgSettings_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        private void PgSettings_PropertyValueChanged(object? s, PropertyValueChangedEventArgs e)
         {
+            if (e.ChangedItem == null)
+                return;
+
             //App Appearnce
             if (e.ChangedItem.Label == "Panel Color")
             {
-                FS2SettingsManager.panelColor = appearanceSettings.PanelColor;
-                FS2SettingsManager.SetSetting("panel_color", ColorTranslator.ToHtml(appearanceSettings.PanelColor));
+                FS2SettingsManager.panelColor = appearanceSettings!.PanelColor;
+                FS2SettingsManager.SetSetting("panel_color", ColorTranslator.ToHtml(appearanceSettings!.PanelColor));
             }
 
             if (e.ChangedItem.Label == "Clear Elements")
             {
-                FS2SettingsManager.clearAfterScreen = appearanceSettings.ClearElements;
-                FS2SettingsManager.SetSetting("clear_after_screen", appearanceSettings.ClearElements.ToString().ToLower());
+                FS2SettingsManager.clearAfterScreen = appearanceSettings!.ClearElements;
+                FS2SettingsManager.SetSetting("clear_after_screen", appearanceSettings!.ClearElements.ToString().ToLower());
             }
 
             if (e.ChangedItem.Label == "DPI Scale")
             {
-                FS2SettingsManager.dpiScaleMulti = appearanceSettings.DPIScale;
-                FS2SettingsManager.SetSetting("dpi_scale_multiplier", appearanceSettings.DPIScale.ToString().ToLower());
+                FS2SettingsManager.dpiScaleMulti = appearanceSettings!.DPIScale;
+                FS2SettingsManager.SetSetting("dpi_scale_multiplier", appearanceSettings!.DPIScale.ToString().ToLower());
             }
 
             //ARROW
             if (e.ChangedItem.Label == "Arrow Length")
             {
-                FS2SettingsManager.arrowLenght = arrowSettings.Length;
-                FS2SettingsManager.SetSetting("arrow_length", arrowSettings.Length.ToString());
+                FS2SettingsManager.arrowLenght = arrowSettings!.Length;
+                FS2SettingsManager.SetSetting("arrow_length", arrowSettings!.Length.ToString());
             }
 
             if (e.ChangedItem.Label == "Arrow Width")
             {
-                FS2SettingsManager.arrowWidth = arrowSettings.Width;
-                FS2SettingsManager.SetSetting("arrow_width", arrowSettings.Width.ToString());
+                FS2SettingsManager.arrowWidth = arrowSettings!.Width;
+                FS2SettingsManager.SetSetting("arrow_width", arrowSettings!.Width.ToString());
             }
 
             if (e.ChangedItem.Label == "Arrow Color")
             {
-                FS2SettingsManager.arrowColor = arrowSettings.Color;
-                FS2SettingsManager.SetSetting("arrow_color", ColorTranslator.ToHtml(arrowSettings.Color));
+                FS2SettingsManager.arrowColor = arrowSettings!.Color;
+                FS2SettingsManager.SetSetting("arrow_color", ColorTranslator.ToHtml(arrowSettings!.Color));
             }
 
             //GUIDES 
             if (e.ChangedItem.Label == "Top Indent")
             {
-                FS2SettingsManager.customGuide[0] = guideSettings.topIndent;
-                FS2SettingsManager.SetSetting("top_indent", guideSettings.topIndent.ToString());
+                FS2SettingsManager.customGuide[0] = guideSettings!.topIndent;
+                FS2SettingsManager.SetSetting("top_indent", guideSettings!.topIndent.ToString());
             }
 
             if (e.ChangedItem.Label == "Bottom Indent")
             {
-                if (guideSettings.lockIndent == false)
+                if (guideSettings!.lockIndent == false)
                 {
-                    FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
-                    FS2SettingsManager.SetSetting("bottom_indent", guideSettings.bottomIndent.ToString());
+                    FS2SettingsManager.customGuide[1] = guideSettings!.bottomIndent;
+                    FS2SettingsManager.SetSetting("bottom_indent", guideSettings!.bottomIndent.ToString());
                 }
                 else
                 {
-                    FS2SettingsManager.customGuide[1] = guideSettings.bottomIndent;
-                    FS2SettingsManager.SetSetting("bottom_indent", guideSettings.bottomIndent.ToString());
+                    FS2SettingsManager.customGuide[1] = guideSettings!.bottomIndent;
+                    FS2SettingsManager.SetSetting("bottom_indent", guideSettings!.bottomIndent.ToString());
 
-                    FS2SettingsManager.customGuide[2] = guideSettings.bottomIndent;
-                    FS2SettingsManager.SetSetting("left_indent", guideSettings.bottomIndent.ToString());
+                    FS2SettingsManager.customGuide[2] = guideSettings!.bottomIndent;
+                    FS2SettingsManager.SetSetting("left_indent", guideSettings!.bottomIndent.ToString());
 
-                    FS2SettingsManager.customGuide[3] = guideSettings.bottomIndent;
-                    FS2SettingsManager.SetSetting("right_indent", guideSettings.bottomIndent.ToString());
+                    FS2SettingsManager.customGuide[3] = guideSettings!.bottomIndent;
+                    FS2SettingsManager.SetSetting("right_indent", guideSettings!.bottomIndent.ToString());
 
-                    FS2SettingsManager.customGuide[0] = guideSettings.bottomIndent;
-                    FS2SettingsManager.SetSetting("top_indent", guideSettings.bottomIndent.ToString());
+                    FS2SettingsManager.customGuide[0] = guideSettings!.bottomIndent;
+                    FS2SettingsManager.SetSetting("top_indent", guideSettings!.bottomIndent.ToString());
                 }
             }
 
             if (e.ChangedItem.Label == "Left Indent")
             {
-                FS2SettingsManager.customGuide[2] = guideSettings.leftIndent;
-                FS2SettingsManager.SetSetting("left_indent", guideSettings.leftIndent.ToString());
+                FS2SettingsManager.customGuide[2] = guideSettings!.leftIndent;
+                FS2SettingsManager.SetSetting("left_indent", guideSettings!.leftIndent.ToString());
             }
 
             if (e.ChangedItem.Label == "Right Indent")
             {
-                FS2SettingsManager.customGuide[3] = guideSettings.rightIndent;
-                FS2SettingsManager.SetSetting("right_indent", guideSettings.rightIndent.ToString());
+                FS2SettingsManager.customGuide[3] = guideSettings!.rightIndent;
+                FS2SettingsManager.SetSetting("right_indent", guideSettings!.rightIndent.ToString());
             }
 
 
             if (e.ChangedItem.Label == "Guides Color")
             {
-                FS2SettingsManager.guideColor = guideSettings.Color;
-                FS2SettingsManager.SetSetting("guidelines_color", ColorTranslator.ToHtml(guideSettings.Color));
+                FS2SettingsManager.guideColor = guideSettings!.Color;
+                FS2SettingsManager.SetSetting("guidelines_color", ColorTranslator.ToHtml(guideSettings!.Color));
             }
 
             if (e.ChangedItem.Label == "Lock Indent")
             {
-                FS2SettingsManager.lockIndent = guideSettings.lockIndent;
-                FS2SettingsManager.SetSetting("lock_indent", guideSettings.lockIndent.ToString().ToLower());
+                FS2SettingsManager.lockIndent = guideSettings!.lockIndent;
+                FS2SettingsManager.SetSetting("lock_indent", guideSettings!.lockIndent.ToString().ToLower());
             }
 
             if (e.ChangedItem.Label == "Guide Type")
             {
-                string tempTypeStr = guideSettings.Type;
+                string tempTypeStr = guideSettings!.Type;
                 int tempTypeInt = 0;
 
                 switch (tempTypeStr)
@@ -383,47 +520,47 @@ namespace FastScreener2
             //FILE
             if (e.ChangedItem.Label == "Format")
             {
-                FS2SettingsManager.fileFormat = fileFormat.fileType;
-                FS2SettingsManager.SetSetting("picture_format", fileFormat.fileType.ToString());
+                FS2SettingsManager.fileFormat = fileFormat!.fileType;
+                FS2SettingsManager.SetSetting("picture_format", fileFormat!.fileType.ToString());
             }
 
             if (e.ChangedItem.Label == "Compression")
             {
-                FS2SettingsManager.fileQuality = fileFormat.fileCompress;
-                FS2SettingsManager.SetSetting("picture_quality", fileFormat.fileCompress.ToString());
+                FS2SettingsManager.fileQuality = fileFormat!.fileCompress;
+                FS2SettingsManager.SetSetting("picture_quality", fileFormat!.fileCompress.ToString());
             }
 
 
             //FRAME
             if (e.ChangedItem.Label == "Frame Color")
             {
-                FS2SettingsManager.frameColor = frameSettings.Color;
-                FS2SettingsManager.SetSetting("frame_color", ColorTranslator.ToHtml(frameSettings.Color));
+                FS2SettingsManager.frameColor = frameSettings!.Color;
+                FS2SettingsManager.SetSetting("frame_color", ColorTranslator.ToHtml(frameSettings!.Color));
             }
 
 
             if (e.ChangedItem.Label == "Frame Width")
             {
-                FS2SettingsManager.frameWidth = frameSettings.frameWidth;
-                FS2SettingsManager.SetSetting("frame_width", frameSettings.frameWidth.ToString());
+                FS2SettingsManager.frameWidth = frameSettings!.frameWidth;
+                FS2SettingsManager.SetSetting("frame_width", frameSettings!.frameWidth.ToString());
             }
 
             if (e.ChangedItem.Label == "Frame Height")
             {
-                FS2SettingsManager.frameHeight = frameSettings.frameHeight;
-                FS2SettingsManager.SetSetting("frame_height", frameSettings.frameHeight.ToString());
+                FS2SettingsManager.frameHeight = frameSettings!.frameHeight;
+                FS2SettingsManager.SetSetting("frame_height", frameSettings!.frameHeight.ToString());
             }
 
             if (e.ChangedItem.Label == "Frame Stroke Width")
             {
-                FS2SettingsManager.frameStrokeWidth = frameSettings.strokeWidth;
-                FS2SettingsManager.SetSetting("frame_stroke_width", frameSettings.strokeWidth.ToString());
+                FS2SettingsManager.frameStrokeWidth = frameSettings!.strokeWidth;
+                FS2SettingsManager.SetSetting("frame_stroke_width", frameSettings!.strokeWidth.ToString());
             }
 
 
             if (e.ChangedItem.Label == "Frame Type")
             {
-                string tempTypeStr = frameSettings.Type;
+                string tempTypeStr = frameSettings!.Type;
                 int tempTypeInt = 0;
 
                 switch (tempTypeStr)
@@ -446,94 +583,94 @@ namespace FastScreener2
             //NUMBER
             if (e.ChangedItem.Label == "Number Font Size")
             {
-                FS2SettingsManager.numberFontSize = numberSettings.Size;
-                FS2SettingsManager.SetSetting("number_size", numberSettings.Size.ToString());
+                FS2SettingsManager.numberFontSize = numberSettings!.Size;
+                FS2SettingsManager.SetSetting("number_size", numberSettings!.Size.ToString());
             }
 
             if (e.ChangedItem.Label == "Number Color")
             {
-                FS2SettingsManager.numberColor = numberSettings.Color;
-                FS2SettingsManager.SetSetting("number_color", ColorTranslator.ToHtml(numberSettings.Color));
+                FS2SettingsManager.numberColor = numberSettings!.Color;
+                FS2SettingsManager.SetSetting("number_color", ColorTranslator.ToHtml(numberSettings!.Color));
             }
 
             //BAR
             if (e.ChangedItem.Label == "Bar Color")
             {
-                FS2SettingsManager.barColor = barsSettings.Color;
-                FS2SettingsManager.SetSetting("bar_color", ColorTranslator.ToHtml(barsSettings.Color));
+                FS2SettingsManager.barColor = barsSettings!.Color;
+                FS2SettingsManager.SetSetting("bar_color", ColorTranslator.ToHtml(barsSettings!.Color));
             }
 
             // Update Width for res1
             if (e.ChangedItem.Label == "1.1 Width")
             {
-                FS2SettingsManager.resWorked[0, 0] = resSettings.res1Width;
-                UpdateResolutionSetting("res1", "Width", resSettings.res1Width);
+                FS2SettingsManager.resWorked[0, 0] = resSettings!.res1Width;
+                UpdateResolutionSetting("res1", "Width", resSettings!.res1Width);
             }
 
             // Update Height for res1
             if (e.ChangedItem.Label == "1.2 Height")
             {
-                FS2SettingsManager.resWorked[1, 0] = resSettings.res1Height;
-                UpdateResolutionSetting("res1", "Height", resSettings.res1Height);
+                FS2SettingsManager.resWorked[1, 0] = resSettings!.res1Height;
+                UpdateResolutionSetting("res1", "Height", resSettings!.res1Height);
             }
 
             // res2
             if (e.ChangedItem.Label == "2.1 Width")
             {
-                FS2SettingsManager.resWorked[0, 1] = resSettings.res2Width;
-                UpdateResolutionSetting("res2", "Width", resSettings.res2Width);
+                FS2SettingsManager.resWorked[0, 1] = resSettings!.res2Width;
+                UpdateResolutionSetting("res2", "Width", resSettings!.res2Width);
             }
 
             if (e.ChangedItem.Label == "2.2 Height")
             {
-                FS2SettingsManager.resWorked[1, 1] = resSettings.res2Height;
-                UpdateResolutionSetting("res2", "Height", resSettings.res2Height);
+                FS2SettingsManager.resWorked[1, 1] = resSettings!.res2Height;
+                UpdateResolutionSetting("res2", "Height", resSettings!.res2Height);
             }
 
             // res3
             if (e.ChangedItem.Label == "3.1 Width")
             {
-                FS2SettingsManager.resWorked[0, 2] = resSettings.res3Width;
-                UpdateResolutionSetting("res3", "Width", resSettings.res3Width);
+                FS2SettingsManager.resWorked[0, 2] = resSettings!.res3Width;
+                UpdateResolutionSetting("res3", "Width", resSettings!.res3Width);
             }
 
             if (e.ChangedItem.Label == "3.2 Height")
             {
-                FS2SettingsManager.resWorked[1, 2] = resSettings.res3Height;
-                UpdateResolutionSetting("res3", "Height", resSettings.res3Height);
+                FS2SettingsManager.resWorked[1, 2] = resSettings!.res3Height;
+                UpdateResolutionSetting("res3", "Height", resSettings!.res3Height);
             }
 
 
             // res4
             if (e.ChangedItem.Label == "4.1 Width")
             {
-                FS2SettingsManager.resWorked[0, 3] = resSettings.res4Width;
-                UpdateResolutionSetting("res4", "Width", resSettings.res4Width);
+                FS2SettingsManager.resWorked[0, 3] = resSettings!.res4Width;
+                UpdateResolutionSetting("res4", "Width", resSettings!.res4Width);
             }
 
             if (e.ChangedItem.Label == "4.2 Height")
             {
-                FS2SettingsManager.resWorked[1, 3] = resSettings.res4Height;
-                UpdateResolutionSetting("res4", "Height", resSettings.res4Height);
+                FS2SettingsManager.resWorked[1, 3] = resSettings!.res4Height;
+                UpdateResolutionSetting("res4", "Height", resSettings!.res4Height);
             }
 
             //WATERMARK
             if (e.ChangedItem.Label == "Watermark Size")
             {
-                FS2SettingsManager.watermarkSize = watermarkSettings.Size;
-                FS2SettingsManager.SetSetting("watermark_size", watermarkSettings.Size.ToString());
+                FS2SettingsManager.watermarkSize = watermarkSettings!.Size;
+                FS2SettingsManager.SetSetting("watermark_size", watermarkSettings!.Size.ToString());
             }
 
             if (e.ChangedItem.Label == "Watermark Padding")
             {
-                FS2SettingsManager.watermarkPadding = watermarkSettings.Padding;
-                FS2SettingsManager.SetSetting("watermark_padding", watermarkSettings.Padding.ToString());
+                FS2SettingsManager.watermarkPadding = watermarkSettings!.Padding;
+                FS2SettingsManager.SetSetting("watermark_padding", watermarkSettings!.Padding.ToString());
             }
 
             if (e.ChangedItem.Label == "Watermark Position")
             {
-                FS2SettingsManager.watermarkPosition = watermarkSettings.Position;
-                FS2SettingsManager.SetSetting("watermark_position", watermarkSettings.Position.ToString());
+                FS2SettingsManager.watermarkPosition = watermarkSettings!.Position;
+                FS2SettingsManager.SetSetting("watermark_position", watermarkSettings!.Position.ToString());
             }
 
             FS2SettingsManager.Save();
@@ -609,13 +746,48 @@ namespace FastScreener2
             //need for drag from 1.5 to 1 scale monitor
             using (Graphics g = this.CreateGraphics())
             {
-                float dpiScale = g.DpiX / 96f;
-
-                this.ClientSize = new Size(
-                    (int)(510 * dpiScale),
-                    (int)(444 * dpiScale)
-                );
+                ApplyDpiClientSize(g.DpiX);
             }
+        }
+
+        // Recomputes ClientSize from the same design-time baseline (510x477 at 96 DPI)
+        // used both on first show and on a later monitor DPI change, so the two paths
+        // never disagree about the form's size.
+        private void ApplyDpiClientSize(float dpi)
+        {
+            float dpiScale = dpi / 96f;
+
+            this.ClientSize = new Size(
+                (int)(510 * dpiScale),
+                (int)(477 * dpiScale)
+            );
+        }
+
+        private const int WM_DPICHANGED = 0x02E0;
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_DPICHANGED)
+            {
+                var suggestedRect = Marshal.PtrToStructure<FS2MainForm.RECT>(m.LParam);
+
+                // Move/resize to what Windows recommends for the new monitor's DPI...
+                this.Bounds = Rectangle.FromLTRB(
+                    suggestedRect.left,
+                    suggestedRect.top,
+                    suggestedRect.right,
+                    suggestedRect.bottom
+                );
+
+                // ...then explicitly force WinForms to rescale every child control.
+                // For a borderless form (FormBorderStyle.None, same as FS2MainForm),
+                // the framework does not reliably cascade the AutoScaleMode.Dpi rescale
+                // to children on its own when WM_DPICHANGED arrives — PerformAutoScale()
+                // must be called explicitly, exactly like FS2MainForm.WndProc does.
+                this.PerformAutoScale();
+            }
+
+            base.WndProc(ref m);
         }
     }
 }

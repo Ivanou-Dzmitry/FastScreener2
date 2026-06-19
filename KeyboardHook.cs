@@ -221,7 +221,7 @@ namespace FastScreener2
         /// Internal callback processing function
         /// </summary>
         private delegate IntPtr KeyboardHookHandler(int nCode, IntPtr wParam, IntPtr lParam);
-        private KeyboardHookHandler hookHandler;
+        private KeyboardHookHandler? hookHandler;
 
         /// <summary>
         /// Function that will be called when defined events occur
@@ -230,8 +230,8 @@ namespace FastScreener2
         public delegate void KeyboardHookCallback(VKeys key);
 
         #region Events
-        public event KeyboardHookCallback KeyDown;
-        public event KeyboardHookCallback KeyUp;
+        public event KeyboardHookCallback? KeyDown;
+        public event KeyboardHookCallback? KeyUp;
         #endregion
 
         /// <summary>
@@ -263,8 +263,13 @@ namespace FastScreener2
         /// <returns>Hook ID</returns>
         private IntPtr SetHook(KeyboardHookHandler proc)
         {
-            using (ProcessModule module = Process.GetCurrentProcess().MainModule)
+            using (ProcessModule? module = Process.GetCurrentProcess().MainModule)
+            {
+                if (module == null)
+                    throw new InvalidOperationException("Could not resolve the current process' main module.");
+
                 return SetWindowsHookEx(13, proc, GetModuleHandle(module.ModuleName), 0);
+            }
         }
 
         /// <summary>

@@ -65,6 +65,7 @@ namespace FastScreener2
 
         // Always populated by Load(), called unconditionally at startup before anything reads it.
         public static string fileFormat = null!;
+        public static string pngDepth = "32bpp";
 
         public static Image? watermarkImage = null;
         public static string watermarkPath = "";
@@ -322,6 +323,15 @@ namespace FastScreener2
             {
                 fileQuality = 75;
                 EnsureSettingExists("picture_quality", "75");
+            }
+
+            //png depth
+            if (settings.TryGetValue("png_depth", out string? depthVal) && depthVal != null)
+                pngDepth = depthVal;
+            else
+            {
+                pngDepth = "32bpp";
+                EnsureSettingExists("png_depth", "32bpp");
             }
 
             //text

@@ -803,8 +803,18 @@ namespace FastScreener2
                     }
                     else
                     {
-                        // Save normally (PNG, BMP, GIF)
-                        scaledBitmap.Save(stringURL, imageFormat);
+                        Bitmap saveTarget = scaledBitmap;
+                        string pngDepth = FS2SettingsManager.pngDepth;
+                        if (imageFormat == ImageFormat.Png && pngDepth != "32bpp")
+                        {
+                            PixelFormat pf = pngDepth == "8bpp"
+                                ? PixelFormat.Format8bppIndexed
+                                : PixelFormat.Format24bppRgb;
+                            saveTarget = scaledBitmap.Clone(new Rectangle(0, 0, scaledBitmap.Width, scaledBitmap.Height), pf);
+                        }
+                        saveTarget.Save(stringURL, imageFormat);
+                        if (!ReferenceEquals(saveTarget, scaledBitmap))
+                            saveTarget.Dispose();
                     }
                 }
             }

@@ -286,7 +286,8 @@ namespace FastScreener2
             fileFormat = new FileFormat()
             {
                 fileType = FS2SettingsManager.fileFormat,
-                fileCompress = FS2SettingsManager.fileQuality
+                fileCompress = FS2SettingsManager.fileQuality,
+                pngDepth = FS2SettingsManager.pngDepth
             };
 
             pgSettings.SelectedObject = fileFormat;
@@ -530,6 +531,11 @@ namespace FastScreener2
                 FS2SettingsManager.SetSetting("picture_quality", fileFormat!.fileCompress.ToString());
             }
 
+            if (e.ChangedItem.Label == "PNG Depth")
+            {
+                FS2SettingsManager.pngDepth = fileFormat!.pngDepth;
+                FS2SettingsManager.SetSetting("png_depth", fileFormat!.pngDepth);
+            }
 
             //FRAME
             if (e.ChangedItem.Label == "Frame Color")

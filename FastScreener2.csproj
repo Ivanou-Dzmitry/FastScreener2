@@ -9,9 +9,9 @@
     <ApplicationIcon>fs_icon.ico</ApplicationIcon>
 	<DebugType>none</DebugType>
 	<Optimize>true</Optimize>
-	<Version>2.0.4.4</Version>
-	<AssemblyVersion>2.0.4.4</AssemblyVersion>
-	<FileVersion>2.0.4.4</FileVersion>
+	<Version>2.0.4.5</Version>
+	<AssemblyVersion>2.0.4.5</AssemblyVersion>
+	<FileVersion>2.0.4.5</FileVersion>
 	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 

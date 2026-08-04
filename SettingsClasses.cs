@@ -190,6 +190,24 @@ namespace FastScreener2
             }
         }
 
+        public class PngDepthTypeConverter : StringConverter
+        {
+            private readonly List<string> validValues = new List<string> { "32bpp", "24bpp", "8bpp" };
+
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context)
+                => new StandardValuesCollection(validValues);
+
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext? context) => true;
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext? context) => true;
+
+            public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+            {
+                if (value is string str && validValues.Contains(str))
+                    return str;
+                return "32bpp";
+            }
+        }
+
         public class FileFormatTypeConverter : StringConverter
         {
             private readonly List<string> validValues = new List<string> { "png", "jpg" };
@@ -511,6 +529,7 @@ namespace FastScreener2
     {
         private string filetype = "";
         private int filecompess;
+        private string pngdepth = "32bpp";
 
         [Category("File")]
         [Description("Chose file format. Default - png")]
@@ -523,6 +542,20 @@ namespace FastScreener2
             {
                 filetype = value;
                 OnPropertyChanged(nameof(Type));
+            }
+        }
+
+        [Category("File")]
+        [Description("PNG color depth. 32bpp=default, 24bpp=smaller (no alpha), 8bpp=smallest (256 colors)")]
+        [DisplayName("PNG Depth")]
+        [TypeConverter(typeof(PngDepthTypeConverter))]
+        public string pngDepth
+        {
+            get => pngdepth;
+            set
+            {
+                pngdepth = value;
+                OnPropertyChanged(nameof(pngDepth));
             }
         }
 

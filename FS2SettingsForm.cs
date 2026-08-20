@@ -27,7 +27,7 @@ namespace FastScreener2
             utils.AttachDragEvents(pnlSetHeader);
             utils.AttachDragEvents(pnlSetBottom);
 
-            RefreshProfileList();
+            RefreshProfileList(FS2SettingsManager.currentProfile);
         }
 
         // --- Settings profiles (different visual setups per project) ---
@@ -287,7 +287,8 @@ namespace FastScreener2
             {
                 fileType = FS2SettingsManager.fileFormat,
                 fileCompress = FS2SettingsManager.fileQuality,
-                pngDepth = FS2SettingsManager.pngDepth
+                pngDepth = FS2SettingsManager.pngDepth,
+                savePath = FS2SettingsManager.savePath
             };
 
             pgSettings.SelectedObject = fileFormat;
@@ -535,6 +536,12 @@ namespace FastScreener2
             {
                 FS2SettingsManager.pngDepth = fileFormat!.pngDepth;
                 FS2SettingsManager.SetSetting("png_depth", fileFormat!.pngDepth);
+            }
+
+            if (e.ChangedItem.Label == "Save Folder")
+            {
+                FS2SettingsManager.savePath = fileFormat!.savePath;
+                FS2SettingsManager.SetSetting("save_path", fileFormat!.savePath);
             }
 
             //FRAME

@@ -66,6 +66,8 @@ namespace FastScreener2
         // Always populated by Load(), called unconditionally at startup before anything reads it.
         public static string fileFormat = null!;
         public static string pngDepth = "32bpp";
+        public static string savePath = "";
+        public static string currentProfile = "";
 
         public static Image? watermarkImage = null;
         public static string watermarkPath = "";
@@ -334,6 +336,15 @@ namespace FastScreener2
                 EnsureSettingExists("png_depth", "32bpp");
             }
 
+            //save path
+            if (settings.TryGetValue("save_path", out string? pathVal) && pathVal != null)
+                savePath = pathVal;
+            else
+            {
+                savePath = "";
+                EnsureSettingExists("save_path", "");
+            }
+
             //text
             try
             {
@@ -541,6 +552,8 @@ namespace FastScreener2
                 File.Replace(tempFilePath, profilePath, null);
             else
                 File.Move(tempFilePath, profilePath);
+
+            currentProfile = profileName;
         }
 
         // Load a named profile and make it the active settings
@@ -560,6 +573,7 @@ namespace FastScreener2
                 File.Move(tempFilePath, settingsFilePath);
 
             Load();
+            currentProfile = profileName;
         }
 
         // Delete a named profile

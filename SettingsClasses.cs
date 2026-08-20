@@ -6,6 +6,8 @@ using static FastScreener2.FS2SettingsManager;
 using System.Numerics;
 using System.Drawing;
 using System;
+using System.Drawing.Design;
+using System.Windows.Forms.Design;
 
 namespace FastScreener2
 {
@@ -187,6 +189,28 @@ namespace FastScreener2
             private void OnPropertyChanged(string propertyName)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public class FolderPathEditor : UITypeEditor
+        {
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext? context)
+                => UITypeEditorEditStyle.Modal;
+
+            public override object? EditValue(ITypeDescriptorContext? context, IServiceProvider provider, object? value)
+            {
+                using var dlg = new FolderBrowserDialog();
+                dlg.Description = "Select folder to save screenshots";
+                dlg.UseDescriptionForTitle = true;
+
+                string current = value as string ?? "";
+                if (Directory.Exists(current))
+                    dlg.InitialDirectory = current;
+
+                if (dlg.ShowDialog() == DialogResult.OK)
+                    return dlg.SelectedPath;
+
+                return value;
             }
         }
 
@@ -530,6 +554,7 @@ namespace FastScreener2
         private string filetype = "";
         private int filecompess;
         private string pngdepth = "32bpp";
+        private string savepath = "";
 
         [Category("File")]
         [Description("Chose file format. Default - png")]
@@ -556,6 +581,20 @@ namespace FastScreener2
             {
                 pngdepth = value;
                 OnPropertyChanged(nameof(pngDepth));
+            }
+        }
+
+        [Category("File")]
+        [Description("Folder where screenshots are saved. Leave empty to use the default 'screenshots' folder next to the app.")]
+        [DisplayName("Save Folder")]
+        [Editor(typeof(FolderPathEditor), typeof(UITypeEditor))]
+        public string savePath
+        {
+            get => savepath;
+            set
+            {
+                savepath = value;
+                OnPropertyChanged(nameof(savePath));
             }
         }
 

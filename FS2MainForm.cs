@@ -754,7 +754,10 @@ namespace FastScreener2
             }
 
             string appExeDir = Directory.GetCurrentDirectory();
-            string directoryPath = Path.Combine(appExeDir, SUBPATH);
+            string customPath = FS2SettingsManager.savePath;
+            string directoryPath = !string.IsNullOrWhiteSpace(customPath)
+                ? customPath
+                : Path.Combine(appExeDir, SUBPATH);
 
             if (!Directory.Exists(directoryPath))
                 Directory.CreateDirectory(directoryPath);

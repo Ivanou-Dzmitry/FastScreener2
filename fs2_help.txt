@@ -1,39 +1,108 @@
-Version: 2.0.4.5
+Version: 2.0.4.6
 Author: Dzmitry Ivanou
 Contact: id.cgtalk@gmail.com
 ---------------------------------
-You can add graphic elements using the middle mouse button (MMB).
 
-Available Graphic Elements:
-* Arrow: Can point in different directions.
-* Frame: You can choose between a fixed or free frame.
-* Number: Add a number to your screenshot.
-* Text (One Short Line): Add a line of text (up to 45 characters).
-* Watermark: Add a watermark to your screenshot.
+ANNOTATION TOOLS
+----------------
+Add graphic elements using the Middle Mouse Button (MMB).
 
-Use the context menu (Right Mouse Button) for options related to the Arrow, Frame, and Watermark.
+* Arrow - Click MMB to place an arrow. Right-click an arrow to rotate it.
 
-Customize Graphic Elements:
-Set visual options for the graphic elements and bars in the Settings (e.g., color, size, etc.).
+* Frame - Draw a highlight rectangle.
+  Free mode: drag with MMB.
+  Fixed mode: click MMB to place at preset size.
 
-Frame Types:
-1. Free Frame: Drawn by holding the MMB and moving the mouse.
-2. Fixed Frame: Added by clicking the MMB.
+* Number - Place sequential numbers on the screenshot.
+  Counter resets on each new capture.
+  Right-click the Number button to change the font family.
 
-The bars at the top and bottom of the screenshot can mask unwanted areas. You can also set the color of these bars.
+* Text - Add a single line of text (up to 45 characters).
 
-Saving and Settings:
-* Your settings are saved in the fs2_settings.xml file (located in the root folder).
-* The screenshot area automatically snaps to the corners of the screen.
+* Watermark - Overlay a logo or image on every saved screenshot.
+  Right-click the Watermark button to select the image file.
 
-File Handling:
-* If the Save to File option is enabled and a file name is specified, the file will be overwritten each time you take a new screenshot.
-* If the file name is not specified, the screenshot will be saved with a unique, automatically generated name.
+Use the right-click context menu on Arrow, Frame, and Watermark elements for additional options.
 
-DPI Settings:
-* If the DPI changes while using the program (e.g., 150%, 200%), the program will restart with the original screenshot size.
-* For monitors with a resolution higher than Full HD, if the screen scale is set to anything other than 100%, both the scaled and original screenshot sizes will be displayed.
-* The original size will be saved to the buffer and to the file.
+Undo the last placed element with Ctrl+Z.
 
-Screen Size and Multi-Monitor Setup:
-The screenshot size cannot exceed the size of the smallest monitor in a multi-monitor setup.
+
+BARS
+----
+The dark bars at the top and bottom of the capture window mask unwanted areas of the screen.
+Bar color can be changed in Settings > Bar.
+
+
+GUIDE LINES
+-----------
+Guide lines are drawn over the capture area to help with composition.
+They are NOT saved to the screenshot.
+
+Three modes (Settings > Guides):
+* 3x3 - divides the area into equal thirds (rule of thirds)
+* 4x4 - divides the area into equal quarters
+* Custom - set arbitrary pixel offsets from each edge independently.
+  Enable Lock Indent to set all four sides at once.
+
+
+SETTINGS & PROFILES
+-------------------
+Open Settings from the toolbar to configure all visual options.
+
+Profiles let you save and load named setting presets. Useful when different
+projects need different annotation styles or save folders.
+
+Use the Profile dropdown at the bottom of the Settings window:
+* Load - apply a saved profile
+* Save as... - save current settings under a new name
+* Delete - remove a profile
+
+Settings are stored in fs2_settings.xml in the application folder.
+Profile files are stored in the profiles/ subfolder.
+
+
+FILE SETTINGS
+-------------
+Configure output format in Settings > File:
+
+* Format - png (default) or jpg
+
+* PNG Depth - color depth for PNG output:
+  32bpp - full RGBA, default
+  24bpp - no alpha channel, ~25% smaller file, same visual quality
+  8bpp - 256-color palette, smallest file, may show artifacts on gradients
+
+* Compression - JPEG quality from 1 to 100 (default 75).
+  Only applies to jpg format.
+
+* Save Folder - folder where screenshots are saved.
+  Leave empty to use the default 'screenshots' folder next to the application.
+  Each profile can have its own save folder.
+
+File naming:
+* If a file name is set in the toolbar, the file is overwritten on each new capture.
+* If no name is set, a unique timestamped name is generated automatically.
+
+
+WINDOW SIZES
+------------
+Select from 4 preset capture window sizes using the size buttons in the toolbar.
+Customize each preset in Settings > Sizes.
+The maximum size is limited by the smallest connected monitor's resolution.
+
+
+DPI & MULTI-MONITOR
+-------------------
+* The capture window snaps to screen corners automatically.
+* DPI Scale (Settings > Appearance): when enabled, annotation elements scale
+  with the monitor's DPI factor so they appear consistent across displays.
+* On monitors with scale above 100%, the original resolution is saved to file
+  and clipboard.
+* If you drag the window between monitors with different DPI, the Settings
+  window adjusts automatically.
+
+
+TROUBLESHOOTING
+---------------
+If the application fails to start, try deleting fs2_settings.xml from the
+application folder. A fresh settings file will be created on next launch.
